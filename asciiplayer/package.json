@@ -1,0 +1,27 @@
+{
+  "name": "wp-asciiplayer-adapter",
+  "version": "0.1.0",
+  "description": "asciinema-player for wordpress.",
+  "main": "dist/bundle.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "bundle": "npx webpack"
+  },
+  "keywords": [
+    "wordpress",
+    "asciicast",
+    "asciicast-player"
+  ],
+  "author": "LamGC",
+  "license": "GPL-3.0-only",
+  "dependencies": {
+    "asciinema-player": "^3.4.0"
+  },
+  "devDependencies": {
+    "css-loader": "^6.8.1",
+    "mini-css-extract-plugin": "^2.7.6",
+    "webpack": "^5.85.0",
+    "webpack-cli": "^5.1.3"
+  }
+}
