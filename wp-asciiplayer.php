@@ -10,8 +10,9 @@ Author URI: https://blog.lamgc.moe
 License: GNU GENERAL PUBLIC LICENSE Version 3.0
 */
 
+const PLUGIN_VERSION = "0.1.0";
+
 const ASCIIPLAYER_TAG = "asciiplayer";
-const ASCIIPLAYER_VERSION = '3.4.0';
 
 // 是否使用本地资源, 如果可以的话, 建议使用 CDN.
 add_option("ap_use_local_resources", false);
@@ -71,10 +72,14 @@ function load_scripts()
         wp_enqueue_script(
             'asciiplayer-adapter-js',
             plugin_dir_url(__FILE__) . '/asciiplayer/dist/bundle.js',
+            array(),
+            PLUGIN_VERSION
         );
         wp_enqueue_style(
             'asciiplayer-adapter-css',
             plugin_dir_url(__FILE__) . '/asciiplayer/dist/styles.css',
+            array(),
+            PLUGIN_VERSION
         );
     }
 }
