@@ -1,6 +1,6 @@
 === Asciicast Player ===
 Contributors: lamgc
-Tags: asciicast, asciiplayer, asciinema
+Tags: asciicast, asciiplayer, asciinema, ascii
 Requires at least: 5.2
 Tested up to: 6.2
 Stable tag: 0.1.0
@@ -50,3 +50,4 @@ which corresponds to the `style` **attribute** of the player container element:
 
 = 0.1.0 =
 * The first available version.
+* Update asciinema-player version to 3.4.0
