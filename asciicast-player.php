@@ -4,13 +4,13 @@
 Plugin Name: Asciicast Player
 Plugin URI: https://github.com/LamGC/wp-asciiplayer
 Description: AsciinemaPlayer for WordPress.
-Version: 0.1.0
+Version: 1.0.0
 Author: LamGC
 Author URI: https://blog.lamgc.moe
 License: GNU GENERAL PUBLIC LICENSE Version 3.0
 */
 
-const PLUGIN_VERSION = "0.1.0";
+const PLUGIN_VERSION = "1.0.0";
 
 const ASCIIPLAYER_TAG = "asciiplayer";
 

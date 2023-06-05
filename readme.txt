@@ -3,7 +3,7 @@ Contributors: lamgc
 Tags: asciicast, asciiplayer, asciinema, ascii
 Requires at least: 5.2
 Tested up to: 6.2
-Stable tag: 0.1.0
+Stable tag: 1.0.0
 Requires PHP: 7.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -47,6 +47,10 @@ which corresponds to the `style` **attribute** of the player container element:
 ```
 
 == Changelog ==
+
+= 1.0.0 =
+* Set the version attribute for the resource file in WordPress.
+* Added some documents.
 
 = 0.1.0 =
 * The first available version.
