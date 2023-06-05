@@ -14,8 +14,10 @@ const PLUGIN_VERSION = "0.1.0";
 
 const ASCIIPLAYER_TAG = "asciiplayer";
 
+const AP_OPTION_USE_LOCAL_RESOURCES = "ap_use_local_resources";
+
 // 是否使用本地资源, 如果可以的话, 建议使用 CDN.
-add_option("ap_use_local_resources", false);
+add_option(AP_OPTION_USE_LOCAL_RESOURCES, false);
 
 function handle_asciiplayer_code($attr = [], string $content = null): string
 {
