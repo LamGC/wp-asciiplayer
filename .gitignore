@@ -48,5 +48,3 @@ wp-config.php
 #/wp-content/themes
 
 .idea/
-node_modules/
-dist/
