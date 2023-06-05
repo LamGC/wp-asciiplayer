@@ -8,7 +8,7 @@ Requires PHP: 7.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Asciinema-Player for WordPress.
+Play Asciicast files in WordPress posts.
 
 == Description ==
 
