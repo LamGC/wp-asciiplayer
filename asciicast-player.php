@@ -17,7 +17,7 @@ const ASCIIPLAYER_TAG = "asciiplayer";
 const AP_OPTION_USE_LOCAL_RESOURCES = "ap_use_local_resources";
 
 // 是否使用本地资源, 如果可以的话, 建议使用 CDN.
-add_option(AP_OPTION_USE_LOCAL_RESOURCES, false);
+add_option(AP_OPTION_USE_LOCAL_RESOURCES, false, $autoload = true);
 
 function handle_asciiplayer_code($attr = [], string $content = null): string
 {
@@ -73,16 +73,27 @@ function load_scripts()
     if( has_shortcode( $post->post_content, ASCIIPLAYER_TAG ) ) {
         wp_enqueue_script(
             'asciiplayer-adapter-js',
-            plugin_dir_url(__FILE__) . '/asciiplayer/dist/bundle.js',
+            get_adapter_url() . '/dist/bundle.js',
             array(),
             PLUGIN_VERSION
         );
         wp_enqueue_style(
             'asciiplayer-adapter-css',
-            plugin_dir_url(__FILE__) . '/asciiplayer/dist/styles.css',
+            get_adapter_url() . '/dist/styles.css',
             array(),
             PLUGIN_VERSION
         );
     }
 }
 add_action( 'wp_enqueue_scripts', 'load_scripts' );
+
+function get_adapter_url(): string
+{
+    $use_local_resources = boolval(get_option(AP_OPTION_USE_LOCAL_RESOURCES, true));
+    $version = PLUGIN_VERSION;
+    if ($use_local_resources) {
+        return plugin_dir_url(__FILE__) . '/asciiplayer';
+    } else {
+        return "https://cdn.jsdelivr.net/npm/wp-asciiplayer-adapter@$version";
+    }
+}
