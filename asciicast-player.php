@@ -10,11 +10,11 @@ Author URI: https://blog.lamgc.moe
 License: GNU GENERAL PUBLIC LICENSE Version 3.0
 */
 
-const PLUGIN_VERSION = "1.0.0";
+const PLUGIN_VERSION = '1.0.0';
 
-const ASCIIPLAYER_TAG = "asciiplayer";
+const ASCIIPLAYER_TAG = 'asciiplayer';
 
-const AP_OPTION_USE_LOCAL_RESOURCES = "ap_use_local_resources";
+const AP_OPTION_USE_LOCAL_RESOURCES = 'ap_use_local_resources';
 
 // 是否使用本地资源, 如果可以的话, 建议使用 CDN.
 add_option(AP_OPTION_USE_LOCAL_RESOURCES, false, $autoload = true);
@@ -55,7 +55,8 @@ function is_assoc($arr): bool
 }
 
 
-function set_default_value(array &$array, string $key, $value) {
+function set_default_value(array &$array, string $key, $value)
+{
     if (!isset($array[$key])) {
         $array[$key] = $value;
     }
@@ -65,12 +66,11 @@ add_shortcode(ASCIIPLAYER_TAG, 'handle_asciiplayer_code');
 
 function load_scripts()
 {
-    if (!is_single())
-    {
+    if (!is_single()) {
         return;
     }
     global $post;
-    if( has_shortcode( $post->post_content, ASCIIPLAYER_TAG ) ) {
+    if (has_shortcode($post->post_content, ASCIIPLAYER_TAG)) {
         wp_enqueue_script(
             'asciiplayer-adapter-js',
             get_adapter_url() . '/dist/bundle.js',
@@ -85,7 +85,8 @@ function load_scripts()
         );
     }
 }
-add_action( 'wp_enqueue_scripts', 'load_scripts' );
+
+add_action('wp_enqueue_scripts', 'load_scripts');
 
 function get_adapter_url(): string
 {
