@@ -12,6 +12,8 @@ Play Asciicast files in WordPress posts.
 
 == Description ==
 
+You can find the source code for all versions on [Github](https://github.com/LamGC/wp-asciiplayer).
+
 This plugin helps you insert Asciicast files into the post, better presenting terminal operations to readers.
 
 ## Quick start
