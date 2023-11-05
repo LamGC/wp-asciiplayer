@@ -10,7 +10,7 @@ Author URI: https://blog.lamgc.moe
 License: GNU GENERAL PUBLIC LICENSE Version 3.0
 */
 
-const PLUGIN_VERSION = '1.0.0';
+const PLUGIN_VERSION = '1.0.1';
 
 const ASCIIPLAYER_TAG = 'asciiplayer';
 

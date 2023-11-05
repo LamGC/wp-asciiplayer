@@ -1,6 +1,6 @@
 {
   "name": "wp-asciiplayer-adapter",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "asciinema-player for wordpress.",
   "main": "dist/bundle.js",
   "type": "module",
