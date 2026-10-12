@@ -1,0 +1,15 @@
+.wp-block-lamgc-asciiplayer,
+.asciiplayer-container {
+	box-sizing: border-box;
+	max-width: 100%;
+	margin-inline: auto;
+}
+
+.asciiplayer-container .ap-wrapper {
+	text-align: left;
+}
+
+.asciiplayer-container[data-ap-status="error"] .asciiplayer-error {
+	padding: 1em;
+	border: 1px solid #b32d2e;
+}

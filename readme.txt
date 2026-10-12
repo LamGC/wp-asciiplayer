@@ -1,59 +1,68 @@
 === Asciicast Player ===
 Contributors: lamgc
-Tags: asciicast, asciiplayer, asciinema, ascii
-Requires at least: 5.2
-Tested up to: 6.2
-Stable tag: 1.0.1
+Tags: asciicast, asciiplayer, asciinema, terminal, block
+Requires at least: 6.3
 Requires PHP: 7.4
+Stable tag: 1.1.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
-Play Asciicast files in WordPress posts.
+Play terminal recordings with a native block, real editor playback previews, and compatible shortcodes.
 
 == Description ==
 
-You can find the source code for all versions on [Github](https://github.com/LamGC/wp-asciiplayer).
+Insert an Asciicast Player block, apply a recording-file URL, and play it directly in the editor. Configure theme, speed, looping, controls, sizing, start time and idle-time limit. Existing [asciiplayer] shortcodes remain supported without rewriting your posts.
 
-This plugin helps you insert Asciicast files into the post, better presenting terminal operations to readers.
+* Locally bundled asciinema-player, JavaScript, CSS and WebAssembly.
+* Native block-editor controls and iframe-aware interactive preview.
+* Compatible shortcode rendering in posts and pages.
+* Explicit editor preview loading and clear loading/failure feedback.
+* No account, analytics, remote proxy, custom post type or extra upload permissions.
 
-## Quick start
+The source and reproducible build instructions are included in the ZIP and available at https://github.com/LamGC/wp-asciiplayer . Third-party licenses are in THIRD-PARTY-NOTICES.md and licenses/.
 
-Add a shortcode to the post and enter the following:
+= External recordings and privacy =
 
-```
-[asciiplayer]https://asciinema.org/a/28307.cast[/asciiplayer]
-```
+The plugin itself uses no external runtime service. When you choose an external recording URL, the visitor's browser requests that URL directly. The host may receive IP address, browser request metadata and a referrer according to browser/site policy. Applying a URL or loading a preview in the editor makes the same request. Choose a trusted host and consult its privacy policy. Use a same-site HTTPS recording URL to avoid third-party requests. Review terminal output for sensitive data before publishing.
 
-The content of the shortcode is the URL of the ascicast file.
+== Installation ==
 
-### Options
+1. Upload the built wp-asciiplayer.zip using Plugins → Add New → Upload Plugin.
+2. Activate Asciicast Player.
+3. Insert an Asciicast Player block or retain your existing shortcode.
 
-The AsciiPlayer shortcode supports the options supported by Asciinema-player, such as setting `fit` to `height` and closing the control bar:
+A GitHub source ZIP needs npm ci and npm run build before installation. See SOURCE.md for packaging instructions.
 
-```
-[asciiplayer fit="height" controls="false"]https://asciinema.org/a/28307.cast[/asciiplayer]
-```
+== Frequently Asked Questions ==
 
-You can find all available options [here](https://www.npmjs.com/package/asciinema-player#options).
+= Does it change old articles? =
 
-> Currently, only the `logger` option is not supported because it requires an object to be passed in.
+No. The [asciiplayer] shortcode remains available. You can explicitly convert supported shortcodes to blocks and review them before saving.
 
-#### Style options
+= Why does a remote recording fail to load? =
 
-For the convenience of customizing player elements,
-the plugin has added an additional `style` **option**,
-which corresponds to the `style` **attribute** of the player container element:
+Use a recording-file URL rather than a share-page URL. The remote server must permit cross-origin (CORS) requests. HTTPS sites may block HTTP recordings. Network errors, invalid formats or missing files can also prevent playback. The plugin does not work around these restrictions through a server proxy.
 
-```
-[asciiplayer style="width: 80%;"]https://asciinema.org/a/28307.cast[/asciiplayer]
-```
+= Are player resources loaded from a CDN? =
+
+No. The JavaScript, CSS and WebAssembly ship with the plugin. The previous ap_use_local_resources setting is no longer used.
+
+= Is the Classic Editor supported? =
+
+Existing shortcodes work in the Classic Editor. The new visual controls and inline playback preview are for the block editor.
 
 == Changelog ==
 
+= 1.1.0 =
+* Add a native block with typed controls and interactive, iframe-aware preview.
+* Preserve shortcode support and normalize historical parameter names and types.
+* Escape output, constrain recording URLs, and filter custom styles.
+* Bundle player 3.17.0 locally and add reproducible build/install ZIP tooling.
+* Improve asset loading for posts, pages and render-time shortcode use.
+* Add unit and real WordPress browser integration tests.
+
 = 1.0.0 =
-* Set the version attribute for the resource file in WordPress.
-* Added some documents.
+* Set the version attribute for resource files and add documentation.
 
 = 0.1.0 =
-* The first available version.
-* Update asciinema-player version to 3.4.0
+* First available version; asciinema-player 3.4.0.

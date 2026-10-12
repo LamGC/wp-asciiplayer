@@ -49,3 +49,8 @@ wp-config.php
 
 .idea/
 dist/
+/node_modules/
+/build/
+/playwright-report/
+/test-results/
+/.wp-env/

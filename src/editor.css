@@ -1,0 +1,50 @@
+.asciiplayer-editor {
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	padding: 16px;
+}
+
+.asciiplayer-editor__source form {
+	display: flex;
+	align-items: flex-end;
+	gap: 12px;
+}
+
+.asciiplayer-editor__source .components-base-control {
+	flex: 1;
+	margin-bottom: 0;
+}
+
+.asciiplayer-editor__source .components-base-control__field {
+	margin-bottom: 0;
+}
+
+.asciiplayer-editor__privacy,
+.asciiplayer-editor__hint {
+	font-size: 12px;
+	line-height: 1.5;
+	color: #50575e;
+}
+
+.asciiplayer-editor__preview {
+	margin-top: 16px;
+}
+
+.asciiplayer-editor__player {
+	min-width: 0;
+	text-align: left;
+}
+
+.asciiplayer-editor__status {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 13px;
+}
+
+@media (max-width: 480px) {
+	.asciiplayer-editor__source form {
+		align-items: stretch;
+		flex-direction: column;
+	}
+}
