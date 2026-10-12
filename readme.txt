@@ -2,6 +2,7 @@
 Contributors: lamgc
 Tags: asciicast, asciiplayer, asciinema, terminal, block
 Requires at least: 6.3
+Tested up to: 7.1.3
 Requires PHP: 7.4
 Stable tag: 1.1.0
 License: GPL-3.0-only
