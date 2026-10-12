@@ -15,9 +15,9 @@ function showError( container ) {
 
 /** One explicit instance per front-end container; never scan an editor canvas. */
 export function mountPlayers( root = document ) {
-	const document = root.ownerDocument || root;
-	if ( document.body?.classList.contains( 'wp-admin' ) || document.querySelector( '.editor-styles-wrapper, .block-editor-block-list__layout' ) ) return;
-	const api = document.defaultView?.AsciinemaPlayer;
+	const ownerDocument = root.ownerDocument || root;
+	if ( ownerDocument.body?.classList.contains( 'wp-admin' ) || ownerDocument.querySelector( '.editor-styles-wrapper, .block-editor-block-list__layout' ) ) return;
+	const api = ownerDocument.defaultView?.AsciinemaPlayer;
 	if ( typeof api?.create !== 'function' ) return;
 	root.querySelectorAll( '.asciiplayer-container' ).forEach( ( container ) => {
 		if ( instances.has( container ) ) return;
@@ -45,10 +45,10 @@ export function mountPlayers( root = document ) {
 			// by its parsed duration rather than merely by a mounted DOM wrapper.
 			if ( options.preload || options.autoPlay || options.poster?.startsWith( 'npt:' ) ) {
 				let ticks = 0;
-				const timer = document.defaultView.setInterval( () => {
+				const timer = ownerDocument.defaultView.setInterval( () => {
 					const duration = player.getDuration();
 					if ( typeof duration === 'number' && Number.isFinite( duration ) ) container.dataset.apStatus = 'ready';
-					if ( ! container.isConnected || container.dataset.apStatus !== 'loading' || ++ticks > 200 ) document.defaultView.clearInterval( timer );
+					if ( ! container.isConnected || container.dataset.apStatus !== 'loading' || ++ticks > 200 ) ownerDocument.defaultView.clearInterval( timer );
 				}, 150 );
 			} else {
 				container.dataset.apStatus = 'idle';

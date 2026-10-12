@@ -1,5 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
+import { runInNewContext } from 'node:vm';
+import assert from 'node:assert/strict';
 const hash = (data) => createHash('sha256').update(data).digest('hex');
 const asset = await readFile('build/index.asset.php', 'utf8');
 if (asset.includes('react-jsx-runtime')) throw new Error('Automatic JSX runtime would break the WordPress 6.3 baseline.');
@@ -14,4 +16,38 @@ for (const [destination, original] of [
 }
 const metadata = JSON.parse(await readFile('build/block.json', 'utf8'));
 if (metadata.apiVersion !== 3 || metadata.name !== 'lamgc/asciiplayer') throw new Error('Unexpected block metadata.');
-console.log('Verified WordPress 6.3-compatible JSX dependencies, block metadata, and exact local vendor files.');
+// Execute the emitted bundle too: source-only tests miss minifier scope errors.
+// In particular, never shadow the global document used by mountPlayers' default.
+const view = await readFile('build/view.js', 'utf8');
+for (const readyState of ['loading', 'complete']) {
+  let mounts = 0;
+  let onReady;
+  const container = {
+    dataset: { apSrc: '/recording.cast', apOptions: '{"preload":false}' },
+  };
+  const document = {
+    readyState,
+    body: { classList: { contains: () => false } },
+    querySelector: () => null,
+    querySelectorAll: () => [container],
+    addEventListener(event, callback) {
+      assert.equal(event, 'DOMContentLoaded');
+      onReady = callback;
+    },
+    defaultView: { AsciinemaPlayer: { create(source, target) {
+      assert.equal(source, '/recording.cast');
+      assert.equal(target, container);
+      mounts++;
+      return { addEventListener() {} };
+    } } },
+  };
+  runInNewContext(view, { document, window: { wp: { i18n: { __: (text) => text } } }, URL });
+  if (readyState === 'loading') {
+    assert.equal(mounts, 0);
+    onReady();
+    onReady(); // A repeated boot must not mount the same container twice.
+  }
+  assert.equal(mounts, 1, `Frontend boot failed at readyState=${readyState}`);
+  assert.equal(container.dataset.apStatus, 'idle');
+}
+console.log('Verified WordPress 6.3 dependencies, block metadata, exact vendor files, and emitted frontend boot.');

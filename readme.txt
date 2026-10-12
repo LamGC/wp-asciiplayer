@@ -4,7 +4,7 @@ Tags: asciicast, asciiplayer, asciinema, terminal, block
 Requires at least: 6.3
 Requires PHP: 7.4
 Stable tag: 1.1.0
-License: GPLv3
+License: GPL-3.0-only
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
 Play terminal recordings with a native block, real editor playback previews, and compatible shortcodes.
