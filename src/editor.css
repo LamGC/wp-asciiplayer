@@ -58,3 +58,8 @@
 .asciiplayer-example__terminal > span:first-child { color: #a9da76; }
 .asciiplayer-example__controls { padding: 8px 16px; background: #222; font: 12px/1.5 monospace; }
 .asciiplayer-example figcaption { padding: 8px; background: #fff; color: #333; text-align: center; font-size: 12px; }
+
+/* Keep an empty caption's footprint stable when another block is selected.
+ * Removing it on pointerdown can move the next block's button before pointerup. */
+.asciiplayer-editor .asciiplayer-figure > figcaption { min-height: 1.5em; }
+.asciiplayer-editor .asciiplayer-caption-empty { visibility: hidden; }

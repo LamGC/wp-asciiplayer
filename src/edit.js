@@ -100,7 +100,7 @@ export default function Edit( { attributes, setAttributes, isSelected } ) {
 						{ source && <Button variant="secondary" onClick={ () => { setApprovedSource( source ); setAttempt( ( current ) => current + 1 ); } }>{ __( 'Load preview', 'wp-asciiplayer' ) }</Button> }
 					</Placeholder>
 				) }
-				{ ( isSelected || caption ) && <RichText tagName="figcaption" className="wp-element-caption" value={ caption } allowedFormats={ [] } onChange={ ( value ) => setAttributes( { caption: value } ) } placeholder={ __( 'Add a caption…', 'wp-asciiplayer' ) } aria-label={ __( 'Recording caption', 'wp-asciiplayer' ) } /> }
+				<RichText tagName="figcaption" className={ `wp-element-caption${ ! isSelected && ! caption ? ' asciiplayer-caption-empty' : '' }` } value={ caption } allowedFormats={ [] } onChange={ ( value ) => setAttributes( { caption: value } ) } placeholder={ __( 'Add a caption…', 'wp-asciiplayer' ) } aria-label={ __( 'Recording caption', 'wp-asciiplayer' ) } />
 				</figure>
 				{ approvedSource === source && source && <p className="asciiplayer-editor__hint">{ __( 'Use the player controls to play, pause, and seek. Autoplay is disabled only in the editor.', 'wp-asciiplayer' ) }</p> }
 				{ [ 'height', 'both' ].includes( fit ) && <p className="asciiplayer-editor__hint">{ __( 'Height-based previews use the shortcode’s fixed height when available, or a 320px editor frame. Published height still comes from your container style.', 'wp-asciiplayer' ) }</p> }
