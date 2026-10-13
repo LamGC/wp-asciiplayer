@@ -54,3 +54,4 @@ dist/
 /playwright-report/
 /test-results/
 /.wp-env/
+/.wp-env-uploads/

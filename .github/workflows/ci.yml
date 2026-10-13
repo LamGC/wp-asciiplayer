@@ -67,6 +67,7 @@ jobs:
           JS
       - name: Start real WordPress and install only the packaged plugin
         run: |
+          mkdir -p .wp-env-uploads
           npx --no-install wp-env start
           npx --no-install wp-env run cli wp plugin install /var/www/html/wp-content/asciiplayer-packages/wp-asciiplayer.zip --activate --force
           npx --no-install wp-env run cli wp plugin is-active wp-asciiplayer

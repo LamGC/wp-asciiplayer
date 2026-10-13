@@ -278,8 +278,10 @@ test('native Media Library rejects an invalid cast upload without applying a sou
     const malformed = await readFile(new URL('../fixtures/malformed.cast', import.meta.url));
     const result = await uploadRecording(page, dialog, `asciiplayer-invalid-${Date.now()}-${testInfo.retry}.cast`, malformed);
     expect(result.success, JSON.stringify(result)).toBe(false);
-    expect(result.data.message).toEqual(expect.any(String));
-    await expect(dialog).toContainText(result.data.message);
+    const validationMessage = 'Upload a valid Asciicast v2/v3 JSONL or pretty-printed v1 .cast recording (up to 32 MiB; v1 up to 2 MiB, 100,000 events, 256 KiB per JSONL line, and 1,000 columns or rows).';
+    // A filesystem/permission failure is not evidence of content validation.
+    expect(result.data.message).toBe(validationMessage);
+    await expect(dialog).toContainText(validationMessage);
     await expect(dialog.locator('.media-button-select')).toBeDisabled();
     await dialog.locator('.media-modal-close').click();
     await expect(block.getByRole('textbox', { name: 'Recording URL', exact: true })).toHaveValue('');

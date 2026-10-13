@@ -13,6 +13,7 @@ npm ci
 npm run build
 npm test
 npm run package
+mkdir -p .wp-env-uploads
 npm run wp-env -- start
 npm run wp-env -- run cli wp plugin install /var/www/html/wp-content/asciiplayer-packages/wp-asciiplayer.zip --activate --force
 npx --no-install playwright install chromium
@@ -29,6 +30,8 @@ The plugin's source tree is deliberately not mounted as an active plugin in the
 committed wp-env configuration. The build ZIP is installed into WordPress through
 WP-CLI, so missing package files cause a real integration failure. Fixtures are
 mapped under uploads; the package directory is mapped separately for WP-CLI.
+The host-owned .wp-env-uploads directory keeps real Media Library uploads writable
+without relaxing file modes or modifying the fixture files.
 
 ## Coverage
 

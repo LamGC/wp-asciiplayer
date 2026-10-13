@@ -44,7 +44,7 @@ async function readyPreview(block) {
 async function openInspectorPanel(page, name, control) {
     await page.evaluate(() => window.wp.data.dispatch('core/edit-post').openGeneralSidebar('edit-post/block'));
     if (!await control.isVisible()) {
-        await page.getByRole('button', { name, exact: true }).click();
+        await page.locator('.components-panel__body-toggle').filter({ hasText: new RegExp(`^${name}$`) }).click();
     }
     await expect(control).toBeVisible();
 }
