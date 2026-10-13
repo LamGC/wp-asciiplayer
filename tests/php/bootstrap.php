@@ -54,6 +54,10 @@ function get_block_wrapper_attributes( $attributes ) {
 	}
 	return implode( ' ', $output );
 }
+function wp_kses( $value, $allowed ) {
+	// Contract-only double. Actual sanitizer coverage belongs to WP browser tests.
+	return strip_tags( $value, '<br>' );
+}
 function wp_json_encode( $value, $flags = 0 ) {
 	return json_encode( $value, $flags );
 }

@@ -61,8 +61,6 @@ export default function Preview( { source, attributes, attempt, onRetry } ) {
 			{ status === 'loading' && <div className="asciiplayer-editor__status" role="status"><Spinner />{ __( 'Loading recording…', 'wp-asciiplayer' ) }</div> }
 			{ status === 'error' && <Notice status="error" isDismissible={ false }><p>{ problem }</p><Button variant="secondary" onClick={ onRetry }>{ __( 'Retry preview', 'wp-asciiplayer' ) }</Button></Notice> }
 			<div className="asciiplayer-editor__player" style={ { height: previewHeight( attributes ) } } ref={ playerRef } aria-label={ __( 'Interactive terminal recording preview', 'wp-asciiplayer' ) } />
-			{ [ 'height', 'both' ].includes( attributes.fit ) && <p className="asciiplayer-editor__hint">{ __( 'Height-based previews use the shortcode’s fixed height when available, or a 320px editor frame. Published height still comes from your container style.', 'wp-asciiplayer' ) }</p> }
-			<p className="asciiplayer-editor__hint">{ __( 'Use the player controls to play, pause, and seek. Autoplay is disabled only in the editor.', 'wp-asciiplayer' ) }</p>
 		</div>
 	);
 }

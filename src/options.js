@@ -39,6 +39,16 @@ export function normalizeWidth( value ) {
 		? value.trim() : DEFAULTS.width;
 }
 
+/** Presentation placement never changes the terminal's character grid. */
+export function normalizeDisplayAlign( value ) {
+	return [ 'left', 'center', 'right' ].includes( value ) ? value : 'center';
+}
+
+export function terminalDimension( value ) {
+	const number = finiteNumber( value, 0, 1, 1000 );
+	return Number.isInteger( number ) && number > 0 ? number : undefined;
+}
+
 /** A bounded editor frame for old height-fitting shortcodes; never persisted. */
 export function previewHeight( attributes ) {
 	if ( ! [ 'height', 'both' ].includes( attributes.fit ) ) return undefined;

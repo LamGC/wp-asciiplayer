@@ -1,15 +1,77 @@
-.wp-block-lamgc-asciiplayer,
 .asciiplayer-container {
 	box-sizing: border-box;
 	max-width: 100%;
 	margin-inline: auto;
 }
 
+/*! rtl:begin:ignore */
 .asciiplayer-container .ap-wrapper {
 	text-align: left;
 }
+/*! rtl:end:ignore */
 
 .asciiplayer-container[data-ap-status="error"] .asciiplayer-error {
 	padding: 1em;
 	border: 1px solid #b32d2e;
+}
+
+/* Keep placement separate from terminal dimensions and from theme floats. */
+.asciiplayer-figure {
+	box-sizing: border-box;
+	max-width: 100%;
+	min-width: 0;
+	margin-block: 0 1em;
+}
+
+/*! rtl:begin:ignore */
+.asciiplayer-figure.asciiplayer-align-left { margin-left: 0 !important; margin-right: auto !important; }
+.asciiplayer-figure.asciiplayer-align-center { margin-left: auto !important; margin-right: auto !important; }
+.asciiplayer-figure.asciiplayer-align-right { margin-left: auto !important; margin-right: 0 !important; }
+/*! rtl:end:ignore */
+
+.asciiplayer-figure > .asciiplayer-container { width: 100%; }
+.asciiplayer-figure > figcaption {
+	margin-block: 0.5em 0;
+	font-size: 0.875em;
+	line-height: 1.5;
+	text-align: center;
+	overflow-wrap: anywhere;
+}
+
+/* Terminal glyph geometry must inherit the size calculated by the player,
+ * not a theme's code-block typography. Scope every reset to our mount points. */
+:is(.asciiplayer-container, .asciiplayer-editor__player) .ap-term pre.ap-term-text {
+	border: 0 !important;
+	border-radius: 0 !important;
+	box-shadow: none !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	font-family: inherit !important;
+	font-size: inherit !important;
+	line-height: var(--term-line-height) !important;
+	white-space: pre !important;
+	word-break: normal !important;
+	overflow-wrap: normal !important;
+	text-transform: none !important;
+}
+
+:is(.asciiplayer-container, .asciiplayer-editor__player) .ap-term .ap-line,
+:is(.asciiplayer-container, .asciiplayer-editor__player) .ap-term .ap-line span {
+	font-family: inherit !important;
+	font-size: inherit !important;
+	line-height: inherit !important;
+	letter-spacing: normal !important;
+	white-space: pre !important;
+	text-transform: none !important;
+}
+
+:is(.asciiplayer-container, .asciiplayer-editor__player) .ap-control-bar button.ap-button {
+	border: 0 !important;
+	box-shadow: none !important;
+	border-radius: 0;
+}
+
+:is(.asciiplayer-container, .asciiplayer-editor__player) .ap-control-bar button.ap-button:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 3px;
 }

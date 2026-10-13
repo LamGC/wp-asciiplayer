@@ -30,10 +30,12 @@
 	margin-top: 16px;
 }
 
+/*! rtl:begin:ignore */
 .asciiplayer-editor__player {
 	min-width: 0;
 	text-align: left;
 }
+/*! rtl:end:ignore */
 
 .asciiplayer-editor__status {
 	display: flex;
@@ -48,3 +50,11 @@
 		flex-direction: column;
 	}
 }
+
+.asciiplayer-editor > .asciiplayer-figure { margin-top: 16px; }
+.asciiplayer-editor .asciiplayer-editor__preview { margin-top: 0; }
+.asciiplayer-example { margin: 0; background: #121314; color: #eee; border-radius: 5px; overflow: hidden; }
+.asciiplayer-example__terminal { padding: 24px 16px; font: 14px/1.7 monospace; white-space: pre; }
+.asciiplayer-example__terminal > span:first-child { color: #a9da76; }
+.asciiplayer-example__controls { padding: 8px 16px; background: #222; font: 12px/1.5 monospace; }
+.asciiplayer-example figcaption { padding: 8px; background: #fff; color: #333; text-align: center; font-size: 12px; }

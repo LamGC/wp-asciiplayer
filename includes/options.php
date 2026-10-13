@@ -45,6 +45,8 @@ function normalize_attributes( $attributes ) {
 		'terminallineheight' => 'terminalLineHeight',
 		'poster'             => 'poster',
 		'width'              => 'width',
+		'displayalign'       => 'displayAlign',
+		'caption'            => 'caption',
 		'style'              => 'legacyStyle',
 		'legacystyle'        => 'legacyStyle',
 	);

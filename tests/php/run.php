@@ -60,8 +60,8 @@ try {
 	same( array( 'lamgc-asciiplayer-player-style' ), $GLOBALS['ap_test']['styles']['lamgc-asciiplayer-style']['deps'], 'Frontend style depends on player stylesheet.' );
 	contains( 'window.wpAsciiplayerSettings = ', $GLOBALS['ap_test']['inline_scripts'][0]['source'], 'Editor iframe receives trusted runtime URLs.' );
 	same( 'before', $GLOBALS['ap_test']['inline_scripts'][0]['position'], 'Settings are available before editor boot.' );
-	contains( 'player.js?ver=1.1.0', $GLOBALS['ap_test']['inline_scripts'][0]['source'], 'Bridge JavaScript cache-buster matches registered asset version.' );
-	contains( 'player.css?ver=1.1.0', $GLOBALS['ap_test']['inline_scripts'][0]['source'], 'Bridge CSS cache-buster matches registered asset version.' );
+	contains( 'player.js?ver=1.2.0', $GLOBALS['ap_test']['inline_scripts'][0]['source'], 'Bridge JavaScript cache-buster matches registered asset version.' );
+	contains( 'player.css?ver=1.2.0', $GLOBALS['ap_test']['inline_scripts'][0]['source'], 'Bridge CSS cache-buster matches registered asset version.' );
 
 	// Source validation covers script, HTML, credential and relative-URL attacks.
 	foreach ( array( '', 'javascript:alert(1)', 'data:text/html,test', 'file:///tmp/a.cast', '//evil.test/a.cast', '/\\evil.test/a.cast', "https://example.test/a\n.cast", 'https://x.test/" onmouseover="alert(1)', 'https://user:secret@example.test/a.cast', 'https:///a.cast', 'a.cast', array( 'bad' ) ) as $source ) {
@@ -128,13 +128,30 @@ try {
 	same( true, isset( $GLOBALS['ap_test']['enqueued_styles']['lamgc-asciiplayer-style'] ), 'Every valid render requests CSS.' );
 	$html = render_block( array( 'source' => '/demo.cast', 'poster' => 'data:text/plain,"><script>alert(1)</script>', 'legacyStyle' => 'width:80%;color:red;background:url(javascript:alert(1))' ) );
 	same( false, false !== strpos( $html, '<script>' ), 'Poster cannot escape JSON/HTML attribute.' );
-	contains( 'style="width:80%;color:red"', $html, 'Legacy style passes through WordPress safe CSS filtering.' );
+	contains( 'style="color:red"', $html, 'Legacy player styles stay on the player mount point.' );
+	contains( 'style="width:80%;"', $html, 'Legacy width moves to the figure.' );
 	contains( 'background:url(javascript:alert(1))', end( $GLOBALS['ap_test']['filtered_css'] ), 'The original style is supplied to the WordPress sanitizer.' );
 	same( 'width:80%;height:200px;width:50%;', player_style( array( 'legacyStyle' => 'width:80%;height:200px', 'width' => '50%' ) ), 'Dedicated width control overrides legacy width.' );
 	same( '', player_style( array( 'width' => '100%;background:red' ) ), 'Width cannot inject extra declarations.' );
-	same( render_player( array( 'source' => '/demo.cast', 'speed' => 2 ) ), render_block( array( 'source' => '/demo.cast', 'speed' => 2 ) ), 'Block uses shared renderer.' );
-	same( 'asciiplayer-container', end( $GLOBALS['ap_test']['block_wrappers'] )['class'], 'Block wrapper classes/layout pass through WordPress block supports.' );
+	same( options_from( render_player( array( 'source' => '/demo.cast', 'speed' => 2 ) ) ), options_from( render_block( array( 'source' => '/demo.cast', 'speed' => 2 ) ) ), 'Block uses shared player options.' );
+	same( 'asciiplayer-block', end( $GLOBALS['ap_test']['block_wrappers'] )['class'], 'Block wrapper classes/layout pass through WordPress block supports.' );
 
+	$html = render_block( array( 'source' => '/demo.cast', 'width' => '480px', 'displayAlign' => 'right', 'caption' => 'Caption &amp; detail<br>second line' ) );
+	contains( '<figure ', $html, 'Block has semantic figure wrapper.' );
+	contains( 'asciiplayer-align-right', $html, 'Validated display alignment.' );
+	contains( 'width:480px;', $html, 'Display width belongs to figure.' );
+	contains( '<figcaption class="wp-element-caption">Caption &amp; detail<br>second line</figcaption>', $html, 'Caption is outside player mount point.' );
+	contains( '</div><figcaption', $html, 'Player cannot dispose caption.' );
+	$html = render_block( array( 'source' => '/demo.cast', 'displayAlign' => '\" onclick=alert(1)', 'caption' => '<img src=x onerror=alert(1)>Safe' ) );
+	contains( 'asciiplayer-align-center', $html, 'Invalid alignment falls back safely.' );
+	same( false, false !== strpos( $html, '<img' ), 'Caption does not allow image markup.' );
+	same( false, isset( player_options( array() )['cols'] ), 'Default columns come from recording.' );
+	same( false, isset( player_options( array() )['rows'] ), 'Default rows come from recording.' );
+	same( 120, player_options( array( 'cols' => 120 ) )['cols'], 'Explicit column override is retained.' );
+	same( false, isset( player_options( array( 'cols' => 120 ) )['rows'] ), 'One-axis override leaves other axis native.' );
+
+	$html = render_block( array( 'source' => '/demo.cast', 'legacyStyle' => 'height:200px;width:80%', 'caption' => 'Under player' ) );
+	contains( 'class="asciiplayer-container" style="height:200px"', $html, 'Legacy height remains on the player, so caption contributes to figure height.' );
 	// No is_single gate: query lookahead supports Pages and archive results.
 	reset_enqueues();
 	$GLOBALS['wp_query'] = (object) array( 'posts' => array( (object) array( 'post_content' => 'Ordinary content' ), (object) array( 'post_content' => '[asciiplayer]/demo.cast[/asciiplayer]' ) ) );

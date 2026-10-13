@@ -12,7 +12,7 @@ const readme = await readFile(path.join(root, 'readme.txt'), 'utf8');
 if (!php.includes(`Version: ${pkg.version}`) || !readme.includes(`Stable tag: ${pkg.version}`)) throw new Error('Version headers disagree.');
 const temp = await mkdtemp(path.join(os.tmpdir(), 'wp-asciiplayer-package-'));
 const target = path.join(temp, 'wp-asciiplayer');
-const inputs = ['asciicast-player.php', 'includes', 'build', 'LICENSE', 'licenses', 'THIRD-PARTY-NOTICES.md', 'README.md', 'README-zh.md', 'readme.txt', 'SOURCE.md', 'src', 'block.json', 'package.json', 'package-lock.json', 'webpack.config.cjs', 'babel.config.json', 'scripts'];
+const inputs = ['asciicast-player.php', 'includes', 'build', 'LICENSE', 'licenses', 'THIRD-PARTY-NOTICES.md', 'README.md', 'README-zh.md', 'readme.txt', 'SOURCE.md', 'src', 'block.json', 'package.json', 'package-lock.json', 'webpack.config.cjs', '.cssnanorc.json', 'babel.config.json', 'scripts'];
 try {
   await mkdir(target);
   for (const file of inputs) await cp(path.join(root, file), path.join(target, file), { recursive: true });

@@ -16,13 +16,26 @@ site and theme; CI tests the versions listed in `.github/workflows/ci.yml`.
 
 1. Insert **Asciicast Player**.
 2. Paste an HTTP(S) recording-file URL (for example a `.cast` file), then apply it.
-3. Play, pause and seek in the editor. Change theme, speed, looping, controls,
-   width/fit, start time and idle-time limit from the block settings.
-4. Save the post or page; the same locally bundled player is used on the front end.
+3. Play, pause and seek in the editor. **Display** offers width presets or a custom
+   CSS length (for example `480px` or `65%`), plus left/center/right alignment.
+   The width stays within the available space. Add a caption below the player.
+4. **Terminal size** is separate: leave Columns and Rows blank to use the cast
+   file's dimensions and recorded resize events. Override either axis only when
+   intentional; use **Use recording size** to clear both. Display width and
+   `fit: width` scale the existing grid without changing terminal columns.
+5. Change theme, speed, looping, controls, fit, start time and idle-time limit
+   from the remaining block settings.
+6. Save the post or page; the same locally bundled player is used on the front end.
 
 Existing saved blocks show a **Load preview** action on reopening the editor.
 This keeps external recordings from loading until you choose to preview them.
 Preview does not autoplay even when front-end autoplay is enabled.
+The inserter preview is a local static example and never loads a recording.
+
+Terminal typography is scoped against common theme `pre`/`span` styles so
+character scaling stays aligned with the player grid. A theme with additional
+custom rules may still require compatibility testing; keyboard focus indicators
+remain visible.
 
 The source must be a recording-file URL, not an asciinema share-page URL.
 A recording on another origin must allow CORS requests from your WordPress site.

@@ -4,7 +4,7 @@ Tags: asciicast, asciiplayer, asciinema, terminal, block
 Requires at least: 6.3
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPL-3.0-only
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -53,6 +53,12 @@ No. The JavaScript, CSS and WebAssembly ship with the plugin. The previous ap_us
 Existing shortcodes work in the Classic Editor. The new visual controls and inline playback preview are for the block editor.
 
 == Changelog ==
+
+= 1.2.0 =
+* Add responsive display-width presets/custom lengths, left/center/right placement and captions.
+* Preserve recorded terminal dimensions and resize events by default; expose optional row/column overrides.
+* Isolate terminal typography and frames from common host-theme code-block styles.
+* Add a local static block-inserter preview without recording requests.
 
 = 1.1.0 =
 * Add a native block with typed controls and interactive, iframe-aware preview.

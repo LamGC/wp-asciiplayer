@@ -51,3 +51,11 @@ for (const readyState of ['loading', 'complete']) {
   assert.equal(container.dataset.apStatus, 'idle');
 }
 console.log('Verified WordPress 6.3 dependencies, block metadata, exact vendor files, and emitted frontend boot.');
+
+// Physical placement and terminal direction must not be mirrored by RTLCSS.
+for (const suffix of ['', '-rtl']) {
+  const css = await readFile(`build/style-index${suffix}.css`, 'utf8');
+  assert.match(css, /asciiplayer-align-left\{[^}]*margin-left:0!important[^}]*margin-right:auto!important/);
+  assert.match(css, /asciiplayer-align-right\{[^}]*margin-left:auto!important[^}]*margin-right:0!important/);
+  assert.match(css, /asciiplayer-container \.ap-wrapper\{text-align:left/);
+}

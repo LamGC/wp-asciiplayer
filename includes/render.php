@@ -33,15 +33,33 @@ function render_player( $attributes = array(), $content = null, $block = false )
 
 	enqueue_player_assets();
 	$style   = player_style( $attributes );
-	$wrapper = $block
-		? get_block_wrapper_attributes( array( 'class' => 'asciiplayer-container', 'style' => $style ) )
-		: 'class="asciiplayer-container"' . ( '' === $style ? '' : ' style="' . esc_attr( $style ) . '"' );
-	return sprintf(
-		'<div %1$s data-ap-src="%2$s" data-ap-options="%3$s"></div>',
-		$wrapper,
+	// The mount point owns only the player. Captions must stay outside it so
+	// upstream disposal/reinitialization cannot remove author-written content.
+	$mount_style = $style;
+	$figure_style = '';
+	if ( $block ) {
+		// Keep height and other legacy player-container declarations on the
+		// mount point. Only width moves to the figure, so captions add height.
+		if ( preg_match_all( '/(?:^|;)\s*width\s*:\s*([^;]+)/i', $style, $widths ) ) {
+			$figure_style = 'width:' . end( $widths[1] ) . ';';
+		}
+		$mount_style = trim( preg_replace( '/(^|;)\s*width\s*:[^;]*/i', '$1', $style ), '; ' );
+	}
+	$player = sprintf(
+		'<div class="asciiplayer-container"%1$s data-ap-src="%2$s" data-ap-options="%3$s"></div>',
+		'' !== $mount_style ? ' style="' . esc_attr( $mount_style ) . '"' : '',
 		esc_url( $source, array( 'http', 'https' ) ),
 		esc_attr( $options )
 	);
+	if ( ! $block ) {
+		return $player;
+	}
+	$alignment = isset( $attributes['displayAlign'] ) && in_array( $attributes['displayAlign'], array( 'left', 'center', 'right' ), true ) ? $attributes['displayAlign'] : 'center';
+	$wrapper = get_block_wrapper_attributes( array( 'class' => 'asciiplayer-block' ) );
+	$figure = 'class="asciiplayer-figure asciiplayer-align-' . esc_attr( $alignment ) . '"' . ( '' !== $figure_style ? ' style="' . esc_attr( $figure_style ) . '"' : '' );
+	// RichText emits escaped text and line breaks. No other markup is needed.
+	$caption = isset( $attributes['caption'] ) ? wp_kses( (string) $attributes['caption'], array( 'br' => array() ) ) : '';
+	return '<div ' . $wrapper . '><figure ' . $figure . '>' . $player . ( '' !== trim( $caption ) ? '<figcaption class="wp-element-caption">' . $caption . '</figcaption>' : '' ) . '</figure></div>';
 }
 
 /**
