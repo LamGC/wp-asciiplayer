@@ -15,11 +15,13 @@ site and theme; CI tests the versions listed in `.github/workflows/ci.yml`.
 ## Block editor
 
 1. Insert **Asciicast Player**.
-2. Paste an HTTP(S) recording-file URL (for example a `.cast` file), then apply it.
+2. Paste an HTTP(S) recording-file URL (for example a `.cast` file). The preview loads after a short pause; **Apply URL** loads it immediately.
 3. Play, pause and seek in the editor. **Display** offers width presets or a custom
    CSS length (for example `480px` or `65%`), plus left/center/right alignment.
    The width stays within the available space. Add a caption below the player.
-4. **Terminal size** is separate: leave Columns and Rows blank to use the cast
+4. Use **Terminal size** in the floating block toolbar for quick Columns/Rows
+   edits, or expand the **Terminal size** sidebar panel. Both edit the same values.
+   Terminal size is separate from display width: leave Columns and Rows blank to use the cast
    file's dimensions and recorded resize events. Override either axis only when
    intentional; use **Use recording size** to clear both. Display width and
    `fit: width` scale the existing grid without changing terminal columns.
@@ -27,8 +29,9 @@ site and theme; CI tests the versions listed in `.github/workflows/ci.yml`.
    from the remaining block settings.
 6. Save the post or page; the same locally bundled player is used on the front end.
 
-Existing saved blocks show a **Load preview** action on reopening the editor.
-This keeps external recordings from loading until you choose to preview them.
+Existing saved blocks load their valid recording URL automatically on reopening
+the editor. Typed URL changes are debounced for 500ms; empty or invalid URLs do
+not start a recording request.
 Preview does not autoplay even when front-end autoplay is enabled.
 The inserter preview is a local static example and never loads a recording.
 
@@ -68,7 +71,7 @@ No analytics or background remote API calls are added.
 A recording URL you choose is fetched directly by the visitor's browser. Its host
 can receive the visitor's IP address, browser request metadata and possibly a
 referrer, according to browser/site policy. Editor previews have the same effect
-when you apply a URL or click **Load preview**. Choose a trusted host and review
+automatically when a valid URL is present, including when reopening saved blocks. Choose a trusted host and review
 recordings for sensitive terminal output before publishing them. The host's own
 privacy policy applies; the plugin cannot make an external recording private.
 

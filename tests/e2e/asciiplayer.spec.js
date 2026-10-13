@@ -53,13 +53,6 @@ async function readyPreview(block) {
     await expect(block.locator('.ap-wrapper')).toBeVisible();
 }
 
-async function loadPreview(block) {
-    await expect(block).toBeVisible();
-    const load = block.getByRole('button', { name: 'Load preview', exact: true });
-    if (await load.count()) await load.click();
-    await readyPreview(block);
-}
-
 async function publish(page, title) {
     return page.evaluate(async (postTitle) => {
         const editor = window.wp.data.dispatch('core/editor');
@@ -145,12 +138,12 @@ test('real iframe preview survives edits, duplicate, delete, undo, save and relo
         await window.wp.data.dispatch('core/block-editor').duplicateBlocks([clientId]);
         return window.wp.data.select('core/block-editor').getBlocks().find((entry) => entry.name === 'lamgc/asciiplayer' && entry.clientId !== clientId).clientId;
     }, id);
-    await loadPreview(playerBlock(page, duplicateId));
+    await readyPreview(playerBlock(page, duplicateId));
     await expect(canvas(page).locator('.asciiplayer-editor__player .ap-wrapper')).toHaveCount(2);
     await page.evaluate((clientId) => window.wp.data.dispatch('core/block-editor').removeBlocks([clientId]), duplicateId);
     await expect(canvas(page).locator('.asciiplayer-editor__player .ap-wrapper')).toHaveCount(1);
     await page.evaluate(() => window.wp.data.dispatch('core/editor').undo());
-    await loadPreview(playerBlock(page, duplicateId));
+    await readyPreview(playerBlock(page, duplicateId));
     await expect(canvas(page).locator('.asciiplayer-editor__player .ap-wrapper')).toHaveCount(2);
     await page.evaluate((clientId) => window.wp.data.dispatch('core/block-editor').removeBlocks([clientId]), duplicateId);
 
@@ -161,7 +154,7 @@ test('real iframe preview survives edits, duplicate, delete, undo, save and relo
     const reloaded = await page.evaluate(() => window.wp.data.select('core/block-editor').getBlocks().find((entry) => entry.name === 'lamgc/asciiplayer'));
     expect(reloaded.name).toBe(blockName);
     expect(reloaded.attributes).toMatchObject({ source, speed: 1.5, theme: 'solarized-dark' });
-    await loadPreview(playerBlock(page, reloaded.clientId));
+    await readyPreview(playerBlock(page, reloaded.clientId));
 
     await page.goto(saved.url);
     const container = page.locator('.asciiplayer-container');
@@ -177,7 +170,7 @@ test('a published Page plays its block at desktop and mobile widths', async ({ p
     await openEditor(page, 'page');
     const source = new URL(fixturePath, page.url()).href;
     const id = await insertPlayer(page, { source, controls: 'always', preload: true });
-    await loadPreview(playerBlock(page, id));
+    await readyPreview(playerBlock(page, id));
     const saved = await publish(page, 'Page playback integration');
     await page.goto(saved.url);
     const container = page.locator('.asciiplayer-container');
@@ -258,4 +251,181 @@ test('a real cross-origin server without CORS permission shows an error and reco
         server.closeAllConnections();
         await new Promise((resolve) => server.close(resolve));
     }
+});
+
+test('a saved Recording URL loads once without a click and never autoplays in the editor', async ({ page }) => {
+    await openEditor(page);
+    const source = new URL(`${fixturePath}?automatic=saved`, page.url()).href;
+    const recording = await readFile(new URL('../fixtures/hello.cast', import.meta.url));
+    const requests = [];
+    await page.route(source, async (route) => {
+        requests.push(route.request().url());
+        await route.fulfill({ contentType: 'text/plain', body: recording });
+    });
+    const id = await insertPlayer(page, { source, autoPlay: true, preload: false });
+    const block = playerBlock(page, id);
+    await readyPreview(block);
+    await expect(block.getByRole('button', { name: 'Load preview', exact: true })).toHaveCount(0);
+    await expect(block.locator('.ap-overlay-start .ap-play-button')).toBeVisible();
+    await expect(block.locator('.asciiplayer-editor__privacy')).toContainText(/automatic/i);
+    await expect(block.locator('.asciiplayer-editor__privacy')).toContainText(/server/i);
+    await page.waitForTimeout(750); // Catch a second fetch from a pending debounce.
+    expect(requests).toEqual([source]);
+    await expect(block.locator('.ap-overlay-start .ap-play-button')).toBeVisible();
+});
+
+test('rapid URL edits debounce to one recording fetch and Apply cancels its pending debounce', async ({ page }) => {
+    await openEditor(page);
+    const prefix = new URL(`${fixturePath}?automatic=`, page.url()).href;
+    const recording = await readFile(new URL('../fixtures/hello.cast', import.meta.url));
+    const requests = [];
+    await page.route(`${prefix}*`, async (route) => {
+        requests.push(route.request().url());
+        await route.fulfill({ contentType: 'text/plain', body: recording });
+    });
+    const id = await insertPlayer(page);
+    const block = playerBlock(page, id);
+    const input = block.getByRole('textbox', { name: 'Recording URL', exact: true });
+    await input.fill(`${prefix}first`);
+    await input.fill(`${prefix}second`);
+    await input.fill(`${prefix}final`);
+    await readyPreview(block);
+    await page.waitForTimeout(750);
+    expect(requests).toEqual([`${prefix}final`]);
+    await expect.poll(() => page.evaluate((clientId) =>
+        window.wp.data.select('core/block-editor').getBlockAttributes(clientId).source, id
+    )).toBe(`${prefix}final`);
+    await input.fill(`${prefix}applied`);
+    await block.getByRole('button', { name: 'Apply URL', exact: true }).click();
+    await expect.poll(() => requests).toEqual([`${prefix}final`, `${prefix}applied`]);
+    await readyPreview(block);
+    await page.waitForTimeout(750);
+    expect(requests).toEqual([`${prefix}final`, `${prefix}applied`]);
+});
+
+test('replacing a pending recording ignores its stale response', async ({ page }) => {
+    await openEditor(page);
+    const source = new URL(`${fixturePath}?automatic=stale`, page.url()).href;
+    const latest = new URL(`${fixturePath}?automatic=latest`, page.url()).href;
+    const recording = await readFile(new URL('../fixtures/hello.cast', import.meta.url), 'utf8');
+    let release;
+    const pending = new Promise((resolve) => { release = resolve; });
+    let oldRequested = false;
+    let oldResponseSettled = false;
+    await page.route(source, async (route) => {
+        oldRequested = true;
+        await pending;
+        // Aborting a replaced player may cancel this intercepted request. Both
+        // cancellation and safely ignoring a late response are valid outcomes.
+        await route.fulfill({ contentType: 'text/plain', body: recording.replace('"width":64', '"width":120') }).catch(() => {});
+        oldResponseSettled = true;
+    });
+    await page.route(latest, (route) => route.fulfill({ contentType: 'text/plain', body: recording }));
+    try {
+        const id = await insertPlayer(page, { source });
+        const block = playerBlock(page, id);
+        await expect.poll(() => oldRequested).toBe(true);
+        await block.getByRole('textbox', { name: 'Recording URL', exact: true }).fill(latest);
+        await expect.poll(() => page.evaluate((clientId) =>
+            window.wp.data.select('core/block-editor').getBlockAttributes(clientId).source, id
+        )).toBe(latest);
+        await readyPreview(block);
+        release();
+        await expect.poll(() => oldResponseSettled).toBe(true);
+        await page.waitForTimeout(750);
+        await readyPreview(block);
+        await expect.poll(() => block.locator('.ap-term').evaluate((terminal) =>
+            Number(terminal.style.getPropertyValue('--term-cols'))
+        )).toBe(64);
+        await expect(block.getByRole('textbox', { name: 'Recording URL', exact: true })).toHaveValue(latest);
+    } finally {
+        release();
+    }
+});
+
+test('automatic preview errors retry the unchanged URL through Retry preview and Apply URL', async ({ page }) => {
+    await openEditor(page);
+    const source = new URL(`${fixturePath}?automatic=retry`, page.url()).href;
+    const recording = await readFile(new URL('../fixtures/hello.cast', import.meta.url));
+    let requests = 0;
+    await page.route(source, async (route) => {
+        requests += 1;
+        await route.fulfill(requests < 3
+            ? { status: 503, contentType: 'text/plain', body: 'Temporarily unavailable' }
+            : { contentType: 'text/plain', body: recording });
+    });
+    const id = await insertPlayer(page, { source });
+    const block = playerBlock(page, id);
+    const preview = block.locator('.asciiplayer-editor__preview');
+    await expect(preview).toHaveAttribute('data-preview-status', 'error');
+    expect(requests).toBe(1);
+    await block.getByRole('button', { name: 'Retry preview', exact: true }).click();
+    await expect.poll(() => requests).toBe(2);
+    await expect(preview).toHaveAttribute('data-preview-status', 'error');
+    await block.getByRole('button', { name: 'Apply URL', exact: true }).click();
+    await readyPreview(block);
+    await page.waitForTimeout(750);
+    expect(requests).toBe(3);
+});
+
+test('empty and invalid sources never create a preview or fetch a recording', async ({ page }) => {
+    await openEditor(page);
+    const requests = [];
+    page.on('request', (request) => {
+        if (/\.cast(?:[?#]|$)|asciinema\.org|jsdelivr\.net/.test(request.url())) requests.push(request.url());
+    });
+    const emptyId = await insertPlayer(page);
+    const empty = playerBlock(page, emptyId);
+    const invalidId = await insertPlayer(page, { source: 'javascript:alert(1)' });
+    const invalid = playerBlock(page, invalidId);
+    await expect(empty.getByRole('textbox', { name: 'Recording URL', exact: true })).toHaveValue('');
+    await expect(invalid.getByRole('textbox', { name: 'Recording URL', exact: true })).toHaveValue('javascript:alert(1)');
+    await page.waitForTimeout(750);
+    await expect(empty.locator('.asciiplayer-editor__preview')).toHaveCount(0);
+    await expect(invalid.locator('.asciiplayer-editor__preview')).toHaveCount(0);
+    const input = empty.getByRole('textbox', { name: 'Recording URL', exact: true });
+    await input.fill(new URL(fixturePath, page.url()).href);
+    await input.fill('');
+    await page.waitForTimeout(750);
+    await expect(empty.locator('.asciiplayer-editor__preview')).toHaveCount(0);
+    await input.fill('https://');
+    await page.waitForTimeout(750);
+    await expect(empty.locator('.asciiplayer-editor__preview')).toHaveCount(0);
+    expect(requests).toEqual([]);
+});
+
+test('external source changes and undo clear an invalid draft error and restore the valid preview', async ({ page }) => {
+    await openEditor(page);
+    const original = new URL(`${fixturePath}?automatic=undo-original`, page.url()).href;
+    const replacement = new URL(`${fixturePath}?automatic=undo-replacement`, page.url()).href;
+    const id = await insertPlayer(page, { source: original });
+    const block = playerBlock(page, id);
+    const input = block.getByRole('textbox', { name: 'Recording URL', exact: true });
+    const validation = block.locator('.asciiplayer-editor__source .components-notice');
+    await readyPreview(block);
+    // Save a baseline so Undo below targets the external source replacement,
+    // rather than an insertion or another edit batched into the same history.
+    await publish(page, 'Automatic preview source synchronization regression');
+    await input.fill('https://');
+    await expect(validation).toContainText('Enter an HTTP(S) recording URL');
+    await expect(block.locator('.asciiplayer-editor__preview')).toHaveCount(0);
+    await page.evaluate(({ clientId, source }) =>
+        window.wp.data.dispatch('core/block-editor').updateBlockAttributes(clientId, { source }),
+    { clientId: id, source: replacement });
+    await expect(input).toHaveValue(replacement);
+    await readyPreview(block);
+    await expect(validation).toHaveCount(0);
+    // An invalid local draft does not change the saved source or undo history.
+    await input.fill('javascript:alert(1)');
+    await expect(validation).toContainText('Enter an HTTP(S) recording URL');
+    await expect(block.locator('.asciiplayer-editor__preview')).toHaveCount(0);
+    await page.evaluate(() => window.wp.data.dispatch('core/editor').undo());
+    await expect(input).toHaveValue(original);
+    await readyPreview(block);
+    await expect(validation).toHaveCount(0);
+    await page.waitForTimeout(750); // A canceled invalid-draft timer cannot reappear.
+    await expect(validation).toHaveCount(0);
+    await expect.poll(() => page.evaluate((clientId) =>
+        window.wp.data.select('core/block-editor').getBlockAttributes(clientId).source, id
+    )).toBe(original);
 });

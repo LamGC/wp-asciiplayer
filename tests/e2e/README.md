@@ -42,8 +42,11 @@ mapped under uploads; the package directory is mapped separately for WP-CLI.
 - Actual terminal output proves successful front-end parsing/playback
 - Editor and front-end requests must not load plugin assets from jsDelivr
 
-The preview intentionally requires an Apply URL / Load preview action for each
-editing session before contacting the recording server. Tests respect that gate.
+The preview automatically loads valid saved URLs and debounces typed changes.
+Tests check the request count, stale-response cleanup, immediate Apply, error
+retry, and no requests for empty/invalid URLs or static inserter examples.
+Floating-toolbar dimension controls are checked against the collapsed sidebar,
+including keyboard focus, Escape/close/reopen, and shared attribute values.
 
 ## CI evidence and limits
 

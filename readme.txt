@@ -4,7 +4,7 @@ Tags: asciicast, asciiplayer, asciinema, terminal, block
 Requires at least: 6.3
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.0
+Stable tag: 1.2.1
 License: GPL-3.0-only
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -17,14 +17,14 @@ Insert an Asciicast Player block, apply a recording-file URL, and play it direct
 * Locally bundled asciinema-player, JavaScript, CSS and WebAssembly.
 * Native block-editor controls and iframe-aware interactive preview.
 * Compatible shortcode rendering in posts and pages.
-* Explicit editor preview loading and clear loading/failure feedback.
+* Automatic preview loading for valid URLs, debounced editing, and clear loading/failure feedback.
 * No account, analytics, remote proxy, custom post type or extra upload permissions.
 
 The source and reproducible build instructions are included in the ZIP and available at https://github.com/LamGC/wp-asciiplayer . Third-party licenses are in THIRD-PARTY-NOTICES.md and licenses/.
 
 = External recordings and privacy =
 
-The plugin itself uses no external runtime service. When you choose an external recording URL, the visitor's browser requests that URL directly. The host may receive IP address, browser request metadata and a referrer according to browser/site policy. Applying a URL or loading a preview in the editor makes the same request. Choose a trusted host and consult its privacy policy. Use a same-site HTTPS recording URL to avoid third-party requests. Review terminal output for sensitive data before publishing.
+The plugin itself uses no external runtime service. When you choose an external recording URL, the visitor's browser requests that URL directly. The host may receive IP address, browser request metadata and a referrer according to browser/site policy. A valid URL automatically loads the editor preview and makes the same request, including when reopening a saved block. Choose a trusted host and consult its privacy policy. Use a same-site HTTPS recording URL to avoid third-party requests. Review terminal output for sensitive data before publishing.
 
 == Installation ==
 
@@ -53,6 +53,11 @@ No. The JavaScript, CSS and WebAssembly ship with the plugin. The previous ap_us
 Existing shortcodes work in the Classic Editor. The new visual controls and inline playback preview are for the block editor.
 
 == Changelog ==
+
+= 1.2.1 =
+* Automatically load saved recording previews without enabling playback autoplay.
+* Debounce recording URL edits; retain immediate apply, retry and request cleanup.
+* Add terminal Columns/Rows and reset controls to the floating block toolbar, synchronized with the collapsed sidebar panel.
 
 = 1.2.0 =
 * Add responsive display-width presets/custom lengths, left/center/right placement and captions.

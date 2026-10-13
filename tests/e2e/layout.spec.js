@@ -36,8 +36,7 @@ async function attributes(page, id) {
     return page.evaluate((clientId) => window.wp.data.select('core/block-editor').getBlockAttributes(clientId), id);
 }
 
-async function loadPreview(block) {
-    await block.getByRole('button', { name: 'Load preview', exact: true }).click();
+async function readyPreview(block) {
     await expect(block.locator('.asciiplayer-editor__preview')).toHaveAttribute('data-preview-status', 'ready');
     await expect(block.locator('.ap-wrapper')).toHaveCount(1);
 }
@@ -114,7 +113,7 @@ test('display width, alignment and caption survive editor save/reload without ch
     await openEditor(page);
     const source = new URL(fixturePath, page.url()).href;
     const { id, block } = await insertPlayer(page, { source, controls: 'always' });
-    await loadPreview(block);
+    await readyPreview(block);
     await expectGrid(block, 64, 12);
     expect((await attributes(page, id)).cols).toBeUndefined();
     expect((await attributes(page, id)).rows).toBeUndefined();
@@ -155,7 +154,7 @@ test('display width, alignment and caption survive editor save/reload without ch
     expect(reloaded.attributes.cols).toBeUndefined();
     expect(reloaded.attributes.rows).toBeUndefined();
     const reloadedBlock = page.frameLocator('iframe[name="editor-canvas"]').locator(`[data-block="${reloaded.clientId}"]`);
-    await loadPreview(reloadedBlock);
+    await readyPreview(reloadedBlock);
     await expectGrid(reloadedBlock, 64, 12);
     await expectAlignment(reloadedBlock.locator('.asciiplayer-figure'), 'right');
     await page.setViewportSize({ width: 390, height: 844 });
@@ -184,21 +183,59 @@ test('display width, alignment and caption survive editor save/reload without ch
     await screenshot(page, testInfo, 'layout-frontend-mobile');
 });
 
-test('optional columns and rows override the grid and clearing or resetting restores recording metadata', async ({ page }) => {
+test('toolbar terminal dimensions are discoverable, preserve focus and synchronize with the collapsed sidebar', async ({ page }, testInfo) => {
     await openEditor(page);
     const source = new URL(fixturePath, page.url()).href;
     const { id, block } = await insertPlayer(page, { source });
-    await loadPreview(block);
-    const columns = page.getByRole('spinbutton', { name: 'Columns', exact: true });
-    const rows = page.getByRole('spinbutton', { name: 'Rows', exact: true });
-    await openInspectorPanel(page, 'Terminal size', columns);
+    await readyPreview(block);
+    await expect(block.getByRole('spinbutton', { name: 'Columns', exact: true })).toHaveCount(0);
+    await expect(block.getByRole('spinbutton', { name: 'Rows', exact: true })).toHaveCount(0);
+    await page.evaluate(() => window.wp.data.dispatch('core/edit-post').closeGeneralSidebar());
+    // Core hides contextual tools while typing; mirror its own test utility.
+    await page.mouse.move(50, 50);
+    await page.mouse.move(75, 75);
+    await page.mouse.move(100, 100);
+    const toolbar = page.getByRole('toolbar', { name: 'Block tools', exact: true });
+    const toggle = toolbar.getByRole('button', { name: 'Terminal size', exact: true });
+    await expect(toggle).toBeVisible();
+    await block.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300); // Let the sidebar-close layout transition settle.
+    const before = await block.boundingBox();
+    await toggle.click();
+    const popover = page.getByRole('dialog', { name: 'Terminal size', exact: true });
+    const columns = popover.getByRole('spinbutton', { name: 'Columns', exact: true });
+    const rows = popover.getByRole('spinbutton', { name: 'Rows', exact: true });
+    await expect(popover).toBeVisible();
+    await expect(columns).toBeVisible();
+    await expect(rows).toBeVisible();
+    await expect(columns).toBeFocused();
     await expect(columns).toHaveValue('');
     await expect(rows).toHaveValue('');
+    const after = await block.boundingBox();
+    expect(Math.abs(after.width - before.width)).toBeLessThan(2);
+    expect(Math.abs(after.height - before.height)).toBeLessThan(2);
+    await screenshot(page, testInfo, 'terminal-size-toolbar-popover');
+    // Invalid overrides are cleared rather than changing the recording grid.
+    await columns.fill('0');
+    await columns.press('Tab');
+    await rows.fill('1001');
+    await rows.press('Tab');
+    await expect(columns).toHaveValue('');
+    await expect(rows).toHaveValue('');
+    expect((await attributes(page, id)).cols).toBeUndefined();
+    expect((await attributes(page, id)).rows).toBeUndefined();
+    await expectGrid(block, 64, 12);
     await columns.fill('88');
     await columns.press('Tab');
     await rows.fill('16');
     await rows.press('Tab');
     await expectGrid(block, 88, 16);
+    await rows.press('Escape');
+    await expect(popover).toBeHidden();
+    await expect(toggle).toBeFocused();
+    await toggle.click();
+    await expect(columns).toHaveValue('88');
+    await expect(rows).toHaveValue('16');
     await columns.fill('');
     await columns.press('Tab');
     await expectGrid(block, 64, 16);
@@ -206,12 +243,35 @@ test('optional columns and rows override the grid and clearing or resetting rest
     await columns.fill('88');
     await columns.press('Tab');
     await expectGrid(block, 88, 16);
-    await page.getByRole('button', { name: 'Use recording size', exact: true }).click();
+    await popover.getByRole('button', { name: 'Use recording size', exact: true }).click();
     await expectGrid(block, 64, 12);
     await expect(columns).toHaveValue('');
     await expect(rows).toHaveValue('');
+    await columns.fill('88');
+    await rows.fill('16');
+    await rows.press('Tab');
+    await expectGrid(block, 88, 16);
+    await popover.getByRole('button', { name: 'Close', exact: true }).click();
+    await expect(popover).toBeHidden();
+    await page.evaluate(() => window.wp.data.dispatch('core/edit-post').openGeneralSidebar('edit-post/block'));
+    const panelToggle = page.locator('.components-panel__body-toggle').filter({ hasText: /^Terminal size$/ });
+    await expect(panelToggle).toHaveAttribute('aria-expanded', 'false');
+    await panelToggle.click();
+    const sidebarColumns = page.getByRole('spinbutton', { name: 'Columns', exact: true });
+    const sidebarRows = page.getByRole('spinbutton', { name: 'Rows', exact: true });
+    await expect(sidebarColumns).toHaveValue('88');
+    await expect(sidebarRows).toHaveValue('16');
+    await sidebarRows.fill('');
+    await sidebarRows.press('Tab');
+    await expectGrid(block, 88, 12);
+    await page.getByRole('button', { name: 'Use recording size', exact: true }).click();
+    await expectGrid(block, 64, 12);
     expect((await attributes(page, id)).cols).toBeUndefined();
     expect((await attributes(page, id)).rows).toBeUndefined();
+    await toggle.click();
+    await expect(columns).toHaveValue('');
+    await expect(rows).toHaveValue('');
+    await popover.getByRole('button', { name: 'Close', exact: true }).click();
     const saved = await publish(page, 'Reset terminal dimensions regression');
     await page.goto(saved.url);
     const frontend = page.locator('.asciiplayer-container');
@@ -232,7 +292,7 @@ test('recorded resize events remain authoritative except on explicitly overridde
     ];
     for (const entry of cases) {
         const { block } = await insertPlayer(page, { source, startAt: 2, ...entry.overrides });
-        await loadPreview(block);
+        await readyPreview(block);
         await expectGrid(block, entry.overrides.cols ?? 64, entry.overrides.rows ?? 12);
         await block.locator('.ap-overlay-start .ap-play-button').click();
         await expectGrid(block, entry.cols, entry.rows);
@@ -373,10 +433,12 @@ test('the inserter example is a local static preview and makes no recording requ
     page.on('request', (request) => {
         if (/\.cast(?:[?#]|$)|asciinema\.org|jsdelivr\.net/.test(request.url())) recordingRequests.push(request.url());
     });
-    const { block } = await insertPlayer(page, example.attributes);
+    // A saved URL must never turn an inserter example into a network preview.
+    const { block } = await insertPlayer(page, { ...example.attributes, source: new URL(fixturePath, page.url()).href });
     await expect(block.locator('.asciiplayer-example')).toContainText('Hello, terminal!');
     await expect(block.getByRole('textbox', { name: 'Recording URL', exact: true })).toHaveCount(0);
     await expect(block.locator('.ap-wrapper')).toHaveCount(0);
+    await page.waitForTimeout(750); // Exceed the automatic URL debounce window.
     await screenshot(page, testInfo, 'static-inserter-example');
     expect(recordingRequests).toEqual([]);
 });
@@ -412,7 +474,7 @@ test('outer editor blocks respect WordPress content gutters and core wide/full b
         return entries;
     }, { name: blockName, sourceUrl: source });
     const canvas = page.frameLocator('iframe[name="editor-canvas"]');
-    for (const entry of cases) await loadPreview(canvas.locator(`[data-block="${entry.playerId}"]`));
+    for (const entry of cases) await readyPreview(canvas.locator(`[data-block="${entry.playerId}"]`));
     for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
         await page.setViewportSize(viewport);
         for (const entry of cases) {
