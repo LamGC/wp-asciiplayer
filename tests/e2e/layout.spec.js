@@ -380,3 +380,88 @@ test('the inserter example is a local static preview and makes no recording requ
     await screenshot(page, testInfo, 'static-inserter-example');
     expect(recordingRequests).toEqual([]);
 });
+
+test('outer editor blocks respect WordPress content gutters and core wide/full boundaries', async ({ page }, testInfo) => {
+    await openEditor(page);
+    const source = new URL(fixturePath, page.url()).href;
+    const cases = await page.evaluate(({ name, sourceUrl }) => {
+        const { createBlock, getBlockType } = window.wp.blocks;
+        const paragraph = (text) => createBlock('core/paragraph', { content: text });
+        const before = paragraph('Paragraph before the player: the standard editor content boundary.');
+        const player = createBlock(name, { source: sourceUrl, width: '100%' });
+        const after = paragraph('Paragraph after the player: the same standard content boundary.');
+        const blocks = [before, player, after];
+        const entries = [{ alignment: 'default', playerId: player.clientId, referenceIds: [before.clientId, after.clientId] }];
+        const supportsAlignment = (block, align) => {
+            const support = getBlockType(block)?.supports?.align;
+            return support === true || Array.isArray(support) && support.includes(align);
+        };
+        for (const align of ['wide', 'full']) {
+            if (!supportsAlignment(name, align) || !supportsAlignment('core/group', align)) continue;
+            // Paragraphs do not support wide/full. A core Group supplies the
+            // native aligned boundary for its paragraph without custom sizing.
+            const reference = createBlock('core/group', { align, layout: { type: 'default' } }, [
+                paragraph(`${align} core Group paragraph: native WordPress alignment reference.`),
+            ]);
+            const alignedPlayer = createBlock(name, { source: sourceUrl, width: '100%', align });
+            blocks.push(reference, alignedPlayer);
+            entries.push({ alignment: align, playerId: alignedPlayer.clientId, referenceIds: [reference.clientId] });
+        }
+        window.wp.data.dispatch('core/block-editor').insertBlocks(blocks);
+        window.wp.data.dispatch('core/block-editor').selectBlock(player.clientId);
+        return entries;
+    }, { name: blockName, sourceUrl: source });
+    const canvas = page.frameLocator('iframe[name="editor-canvas"]');
+    for (const entry of cases) await loadPreview(canvas.locator(`[data-block="${entry.playerId}"]`));
+    for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
+        await page.setViewportSize(viewport);
+        for (const entry of cases) {
+            const block = canvas.locator(`[data-block="${entry.playerId}"]`);
+            const measure = () => block.evaluate((element, referenceIds) => {
+                const document = element.ownerDocument;
+                const horizontal = (node) => {
+                    const box = node.getBoundingClientRect();
+                    return { left: box.left, right: box.right, width: box.width };
+                };
+                const outer = horizontal(element);
+                const references = referenceIds.map((id) => horizontal(document.querySelector(`[data-block="${id}"]`)));
+                const root = element.closest('.is-root-container');
+                if (!root) throw new Error('WordPress editor content root was not found.');
+                const rootBounds = horizontal(root);
+                const rootStyle = getComputedStyle(root);
+                const contentLeft = rootBounds.left + parseFloat(rootStyle.borderLeftWidth) + parseFloat(rootStyle.paddingLeft);
+                const contentRight = rootBounds.right - parseFloat(rootStyle.borderRightWidth) - parseFloat(rootStyle.paddingRight);
+                return {
+                    outer, references, contentLeft, contentRight,
+                    viewportWidth: document.documentElement.clientWidth,
+                    leftError: Math.max(...references.map((reference) => Math.abs(outer.left - reference.left))),
+                    rightError: Math.max(...references.map((reference) => Math.abs(outer.right - reference.right))),
+                    player: horizontal(element.querySelector('.ap-wrapper')),
+                    boxSizing: getComputedStyle(element).boxSizing,
+                };
+            }, entry.referenceIds);
+            // Compare the OUTER border box to independently rendered native
+            // blocks. Inner-figure/parent checks alone miss a 34px padding leak.
+            await expect.poll(async () => (await measure()).leftError).toBeLessThan(2);
+            await expect.poll(async () => (await measure()).rightError).toBeLessThan(2);
+            const geometry = await measure();
+            expect(geometry.boxSizing).toBe('border-box');
+            expect(geometry.outer.left).toBeGreaterThanOrEqual(-2);
+            expect(geometry.outer.right).toBeLessThanOrEqual(geometry.viewportWidth + 2);
+            if (entry.alignment === 'default') {
+                expect(geometry.outer.left).toBeGreaterThanOrEqual(geometry.contentLeft - 2);
+                expect(geometry.outer.right).toBeLessThanOrEqual(geometry.contentRight + 2);
+                expect(geometry.outer.left).toBeGreaterThan(0);
+                expect(geometry.outer.right).toBeLessThan(geometry.viewportWidth);
+            }
+            expect(geometry.player.left).toBeGreaterThanOrEqual(geometry.outer.left);
+            expect(geometry.player.right).toBeLessThanOrEqual(geometry.outer.right + 1);
+            await expectGrid(block, 64, 12);
+            await testInfo.attach(`editor-gutters-${entry.alignment}-${viewport.width}`, {
+                body: Buffer.from(JSON.stringify(geometry, null, 2)), contentType: 'application/json',
+            });
+        }
+        await canvas.locator(`[data-block="${cases[0].playerId}"]`).scrollIntoViewIfNeeded();
+        await screenshot(page, testInfo, `editor-content-gutters-${viewport.width}`);
+    }
+});
