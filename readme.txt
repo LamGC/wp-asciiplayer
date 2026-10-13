@@ -4,7 +4,7 @@ Tags: asciicast, asciiplayer, asciinema, terminal, block
 Requires at least: 6.3
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: GPL-3.0-only
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -18,7 +18,8 @@ Insert an Asciicast Player block, apply a recording-file URL, and play it direct
 * Native block-editor controls and iframe-aware interactive preview.
 * Compatible shortcode rendering in posts and pages.
 * Automatic preview loading for valid URLs, debounced editing, and clear loading/failure feedback.
-* No account, analytics, remote proxy, custom post type or extra upload permissions.
+* Media Library selection and validated .cast uploads using existing WordPress upload permissions.
+* No account, analytics, remote proxy, custom post type or extra upload capabilities.
 
 The source and reproducible build instructions are included in the ZIP and available at https://github.com/LamGC/wp-asciiplayer . Third-party licenses are in THIRD-PARTY-NOTICES.md and licenses/.
 
@@ -53,6 +54,11 @@ No. The JavaScript, CSS and WebAssembly ship with the plugin. The previous ap_us
 Existing shortcodes work in the Classic Editor. The new visual controls and inline playback preview are for the block editor.
 
 == Changelog ==
+
+= 1.2.2 =
+* Show original cast dimensions as toolbar/sidebar placeholders without forcing overrides.
+* Refresh recording metadata when the URL changes, reusing the preview request.
+* Select and upload validated .cast recordings through the native Media Library.
 
 = 1.2.1 =
 * Automatically load saved recording previews without enabling playback autoplay.

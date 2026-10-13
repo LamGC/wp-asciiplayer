@@ -60,8 +60,8 @@ try {
 	same( array( 'lamgc-asciiplayer-player-style' ), $GLOBALS['ap_test']['styles']['lamgc-asciiplayer-style']['deps'], 'Frontend style depends on player stylesheet.' );
 	contains( 'window.wpAsciiplayerSettings = ', $GLOBALS['ap_test']['inline_scripts'][0]['source'], 'Editor iframe receives trusted runtime URLs.' );
 	same( 'before', $GLOBALS['ap_test']['inline_scripts'][0]['position'], 'Settings are available before editor boot.' );
-	contains( 'player.js?ver=1.2.1', $GLOBALS['ap_test']['inline_scripts'][0]['source'], 'Bridge JavaScript cache-buster matches registered asset version.' );
-	contains( 'player.css?ver=1.2.1', $GLOBALS['ap_test']['inline_scripts'][0]['source'], 'Bridge CSS cache-buster matches registered asset version.' );
+	contains( 'player.js?ver=1.2.2', $GLOBALS['ap_test']['inline_scripts'][0]['source'], 'Bridge JavaScript cache-buster matches registered asset version.' );
+	contains( 'player.css?ver=1.2.2', $GLOBALS['ap_test']['inline_scripts'][0]['source'], 'Bridge CSS cache-buster matches registered asset version.' );
 
 	// Source validation covers script, HTML, credential and relative-URL attacks.
 	foreach ( array( '', 'javascript:alert(1)', 'data:text/html,test', 'file:///tmp/a.cast', '//evil.test/a.cast', '/\\evil.test/a.cast', "https://example.test/a\n.cast", 'https://x.test/" onmouseover="alert(1)', 'https://user:secret@example.test/a.cast', 'https:///a.cast', 'a.cast', array( 'bad' ) ) as $source ) {
@@ -169,6 +169,8 @@ try {
 	print_late_styles();
 	print_late_styles();
 	same( array( 'lamgc-asciiplayer-style' ), $GLOBALS['ap_test']['style_print_calls'], 'Late/widget styles print once in the footer.' );
+
+	require __DIR__ . '/uploads.php';
 
 	echo "OK: {$assertions} assertions passed.\n";
 } catch ( Throwable $error ) {

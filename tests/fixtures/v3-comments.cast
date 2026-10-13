@@ -1,0 +1,6 @@
+{"version":3,"term":{"cols":92,"rows":22,"type":"xterm-256color"},"timestamp":1700000000,"title":"v3 recording with comments","env":{"SHELL":"/bin/sh"}}
+# Comments are permitted after the header in asciicast v3.
+[0.0,"o","$ printf 'Commented v3 recording'\r\n"]
+[0.1,"o","Commented v3 recording\r\n"]
+# v3 timestamps are delays from the previous event.
+[11.9,"o","$ "]

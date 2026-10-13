@@ -330,6 +330,14 @@ test('replacing a pending recording ignores its stale response', async ({ page }
             window.wp.data.select('core/block-editor').getBlockAttributes(clientId).source, id
         )).toBe(latest);
         await readyPreview(block);
+        await page.evaluate(() => window.wp.data.dispatch('core/edit-post').openGeneralSidebar('edit-post/block'));
+        const columns = page.getByRole('spinbutton', { name: 'Columns', exact: true });
+        const rows = page.getByRole('spinbutton', { name: 'Rows', exact: true });
+        if (!await columns.isVisible()) {
+            await page.locator('.components-panel__body-toggle').filter({ hasText: /^Terminal size$/ }).click();
+        }
+        await expect(columns).toHaveAttribute('placeholder', '64');
+        await expect(rows).toHaveAttribute('placeholder', '12');
         release();
         await expect.poll(() => oldResponseSettled).toBe(true);
         await page.waitForTimeout(750);
@@ -337,6 +345,11 @@ test('replacing a pending recording ignores its stale response', async ({ page }
         await expect.poll(() => block.locator('.ap-term').evaluate((terminal) =>
             Number(terminal.style.getPropertyValue('--term-cols'))
         )).toBe(64);
+        // A late header from the old 120-column cast must not become a hint.
+        await expect(columns).toHaveAttribute('placeholder', '64');
+        await expect(rows).toHaveAttribute('placeholder', '12');
+        await expect(columns).toHaveValue('');
+        await expect(rows).toHaveValue('');
         await expect(block.getByRole('textbox', { name: 'Recording URL', exact: true })).toHaveValue(latest);
     } finally {
         release();

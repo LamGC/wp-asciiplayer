@@ -1,39 +1,61 @@
 import { Button, Notice, Spinner } from '@wordpress/components';
 import { useRefEffect } from '@wordpress/compose';
-import { useState } from '@wordpress/element';
+import { useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { normalizePlayerOptions, previewHeight } from './options.js';
 import { playerAssets, playerForDocument } from './player-bridge.js';
+import { readRecordingSize } from './recording-metadata.js';
 
-export default function Preview( { source, attributes, attempt, onRetry } ) {
+export default function Preview( { source, attributes, attempt, onRetry, onRecordingSize } ) {
 	const [ status, setStatus ] = useState( 'loading' );
 	const [ problem, setProblem ] = useState( '' );
+	const onRecordingSizeRef = useRef( onRecordingSize );
+	onRecordingSizeRef.current = onRecordingSize;
 	const optionsJSON = JSON.stringify( normalizePlayerOptions( attributes, { preview: true } ) );
 	const playerRef = useRefEffect( ( container ) => {
 		let disposed = false;
+		let failed = false;
 		let player;
 		let readinessTimer;
 		let deadline;
 		const canvasWindow = container.ownerDocument.defaultView;
 		const request = new canvasWindow.AbortController();
+		const reportSize = ( size ) => {
+			if ( ! disposed ) onRecordingSizeRef.current?.( source, size );
+		};
 		setStatus( 'loading' );
 		setProblem( '' );
+		reportSize( null );
 		const fail = ( message ) => {
-			if ( disposed ) return;
+			if ( disposed || failed ) return;
+			failed = true;
+			request.abort();
 			canvasWindow.clearInterval( readinessTimer );
 			canvasWindow.clearTimeout( deadline );
+			reportSize( null );
 			setProblem( message );
 			setStatus( 'error' );
 		};
 		const ready = () => {
-			if ( disposed ) return;
+			if ( disposed || failed ) return;
 			canvasWindow.clearInterval( readinessTimer );
 			canvasWindow.clearTimeout( deadline );
 			setStatus( 'ready' );
 		};
 		playerForDocument( container.ownerDocument, playerAssets() ).then( ( api ) => {
 			if ( disposed ) return;
-			player = api.create( { url: source, fetchOpts: { signal: request.signal } }, container, JSON.parse( optionsJSON ) );
+			player = api.create( {
+				data: async () => {
+					// The parser checks instanceof Response in the canvas realm.
+					// Reuse this one request for playback and original-size hints.
+					const response = await canvasWindow.fetch( source, { signal: request.signal } );
+					if ( ! response.ok ) throw new Error( `Recording request failed: ${ response.status }` );
+					readRecordingSize( response ).then( ( size ) => {
+						if ( ! failed ) reportSize( size );
+					} );
+					return response;
+				},
+			}, container, JSON.parse( optionsJSON ) );
 			player.addEventListener( 'error', () => fail( __( 'Unable to load the recording. Check the URL, file format, and the source server’s CORS permissions.', 'wp-asciiplayer' ) ) );
 			player.addEventListener( 'playing', ready );
 			// getDuration is public API; a mounted wrapper alone does not mean the

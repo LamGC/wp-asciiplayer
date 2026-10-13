@@ -17,6 +17,39 @@ function ap_record( $key, $value ) {
 function add_action( $hook, $callback, $priority = 10 ) {
 	ap_record( 'actions', array( $hook, $callback, $priority ) );
 }
+function add_filter( $hook, $callback, $priority = 10, $accepted_args = 1 ) {
+	ap_record( 'filters', array( $hook, $callback, $priority, $accepted_args ) );
+}
+function __( $text, $domain = 'default' ) {
+	return $text;
+}
+function current_user_can( $capability ) {
+	return ! empty( $GLOBALS['ap_test']['capabilities'][ $capability ] );
+}
+function user_can( $user, $capability ) {
+	return ! empty( $GLOBALS['ap_test']['user_capabilities'][ $user ][ $capability ] );
+}
+function is_multisite() {
+	return ! empty( $GLOBALS['ap_test']['multisite'] );
+}
+function get_site_option( $key, $default = false ) {
+	return $GLOBALS['ap_test']['site_options'][ $key ] ?? $default;
+}
+function get_allowed_mime_types() {
+	return $GLOBALS['ap_test']['allowed_mimes'] ?? LamGC\Asciiplayer\allow_cast_upload_mime( array( 'txt' => 'text/plain', 'jpg' => 'image/jpeg' ) );
+}
+function wp_check_filetype( $filename, $mimes = null ) {
+	// Mirrors core's empty-map fallback to cover explicit MIME deny-lists.
+	if ( empty( $mimes ) ) {
+		$mimes = get_allowed_mime_types();
+	}
+	foreach ( $mimes as $extension => $mime ) {
+		if ( preg_match( '/\.(' . $extension . ')$/i', $filename, $matches ) ) {
+			return array( 'ext' => $matches[1], 'type' => $mime );
+		}
+	}
+	return array( 'ext' => false, 'type' => false );
+}
 function add_shortcode( $tag, $callback ) {
 	ap_record( 'shortcodes', array( $tag, $callback ) );
 }

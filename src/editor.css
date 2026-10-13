@@ -71,3 +71,5 @@
 .asciiplayer-terminal-popover__content { box-sizing: border-box; width: 300px; max-width: calc(100vw - 32px); padding: 16px; }
 .asciiplayer-terminal-popover__content > p:first-child { margin-top: 0; }
 .asciiplayer-terminal-popover__content > .components-button { margin-top: 8px; margin-right: 8px; }
+
+.asciiplayer-editor__source .asciiplayer-editor__media { margin-top: 12px; }

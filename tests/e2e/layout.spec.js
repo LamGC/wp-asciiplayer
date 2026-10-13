@@ -211,6 +211,10 @@ test('toolbar terminal dimensions are discoverable, preserve focus and synchroni
     await expect(columns).toBeFocused();
     await expect(columns).toHaveValue('');
     await expect(rows).toHaveValue('');
+    await expect(columns).toHaveAttribute('placeholder', '64');
+    await expect(rows).toHaveAttribute('placeholder', '12');
+    expect((await attributes(page, id)).cols).toBeUndefined();
+    expect((await attributes(page, id)).rows).toBeUndefined();
     const after = await block.boundingBox();
     expect(Math.abs(after.width - before.width)).toBeLessThan(2);
     expect(Math.abs(after.height - before.height)).toBeLessThan(2);
@@ -236,6 +240,9 @@ test('toolbar terminal dimensions are discoverable, preserve focus and synchroni
     await toggle.click();
     await expect(columns).toHaveValue('88');
     await expect(rows).toHaveValue('16');
+    // A manual override must not become the displayed recording metadata.
+    await expect(columns).toHaveAttribute('placeholder', '64');
+    await expect(rows).toHaveAttribute('placeholder', '12');
     await columns.fill('');
     await columns.press('Tab');
     await expectGrid(block, 64, 16);
@@ -261,6 +268,8 @@ test('toolbar terminal dimensions are discoverable, preserve focus and synchroni
     const sidebarRows = page.getByRole('spinbutton', { name: 'Rows', exact: true });
     await expect(sidebarColumns).toHaveValue('88');
     await expect(sidebarRows).toHaveValue('16');
+    await expect(sidebarColumns).toHaveAttribute('placeholder', '64');
+    await expect(sidebarRows).toHaveAttribute('placeholder', '12');
     await sidebarRows.fill('');
     await sidebarRows.press('Tab');
     await expectGrid(block, 88, 12);
@@ -271,6 +280,8 @@ test('toolbar terminal dimensions are discoverable, preserve focus and synchroni
     await toggle.click();
     await expect(columns).toHaveValue('');
     await expect(rows).toHaveValue('');
+    await expect(columns).toHaveAttribute('placeholder', '64');
+    await expect(rows).toHaveAttribute('placeholder', '12');
     await popover.getByRole('button', { name: 'Close', exact: true }).click();
     const saved = await publish(page, 'Reset terminal dimensions regression');
     await page.goto(saved.url);
@@ -291,11 +302,19 @@ test('recorded resize events remain authoritative except on explicitly overridde
         { overrides: { cols: 80, rows: 24 }, cols: 80, rows: 24 },
     ];
     for (const entry of cases) {
-        const { block } = await insertPlayer(page, { source, startAt: 2, ...entry.overrides });
+        const { id, block } = await insertPlayer(page, { source, startAt: 2, ...entry.overrides });
         await readyPreview(block);
         await expectGrid(block, entry.overrides.cols ?? 64, entry.overrides.rows ?? 12);
         await block.locator('.ap-overlay-start .ap-play-button').click();
         await expectGrid(block, entry.cols, entry.rows);
+        const columns = page.getByRole('spinbutton', { name: 'Columns', exact: true });
+        const rows = page.getByRole('spinbutton', { name: 'Rows', exact: true });
+        await openInspectorPanel(page, 'Terminal size', columns);
+        // Placeholders describe the cast header, even after its resize event.
+        await expect(columns).toHaveAttribute('placeholder', '64');
+        await expect(rows).toHaveAttribute('placeholder', '12');
+        expect((await attributes(page, id)).cols).toBe(entry.overrides.cols);
+        expect((await attributes(page, id)).rows).toBe(entry.overrides.rows);
     }
     const saved = await publish(page, 'Recording resize and explicit axes regression');
     await page.goto(saved.url);

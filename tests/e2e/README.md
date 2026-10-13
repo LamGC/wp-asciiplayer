@@ -47,6 +47,17 @@ Tests check the request count, stale-response cleanup, immediate Apply, error
 retry, and no requests for empty/invalid URLs or static inserter examples.
 Floating-toolbar dimension controls are checked against the collapsed sidebar,
 including keyboard focus, Escape/close/reopen, and shared attribute values.
+Both controls show the recording header's native columns and rows as placeholders
+without saving overrides. URL replacement, pending/error/invalid sources and late
+responses cover metadata cleanup; recorded resize events still control blank axes.
+Pretty-printed v1 and comment-bearing v3 fixtures also exercise actual parsing,
+native-size placeholders and playback output, alongside the existing v2 fixtures.
+
+Media Library tests use WordPress's real upload dialog, file input and attachment
+tiles. They upload a valid `.cast`, select and play it without Apply URL, cancel a
+replacement, reopen to select the existing replacement, and reload the saved URL.
+A malformed `.cast` must be rejected by the real upload endpoint and shown as an
+upload error. These tests create small attachments in the isolated wp-env database.
 
 ## CI evidence and limits
 
@@ -68,3 +79,9 @@ References:
 - https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/
 - https://developer.wordpress.org/block-editor/reference-guides/block-api/block-api-versions/block-migration-for-iframe-editor-compatibility/
 - https://github.com/WordPress/plugin-check/blob/trunk/docs/CLI.md
+
+Native recording-size hints are checked against v1/v2/v3 headers, explicit
+overrides, URL replacement, error/empty states and recorded resize events.
+The Media Library tests use actual isolated WordPress upload dialogs to upload
+validated fixtures, reject malformed casts, cancel/reopen and select an existing
+recording. No production-site media is accessed.

@@ -1,18 +1,18 @@
-import { BlockAlignmentToolbar, BlockControls, InspectorControls, RichText, useBlockProps } from '@wordpress/block-editor';
+import { BlockAlignmentToolbar, BlockControls, InspectorControls, MediaUpload, MediaUploadCheck, RichText, useBlockProps } from '@wordpress/block-editor';
 import { Button, Dropdown, Notice, PanelBody, Placeholder, RangeControl, SelectControl, TextControl, ToggleControl, ToolbarButton, ToolbarGroup } from '@wordpress/components';
-import { useEffect, useState } from '@wordpress/element';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { finiteNumber, normalizeDisplayAlign, normalizeSource, normalizeWidth, terminalDimension } from './options.js';
 import Preview from './preview.js';
 
 /** One shared set of dimension controls in the block toolbar and settings sidebar. */
-function TerminalSizeControls( { attributes, setAttributes } ) {
+function TerminalSizeControls( { attributes, setAttributes, recordingSize } ) {
 	return <>
 		<div className="asciiplayer-editor__dimension-fields">
-			<TextControl label={ __( 'Columns', 'wp-asciiplayer' ) } type="number" min="1" max="1000" step="1" value={ attributes.cols ?? '' } placeholder={ __( 'From recording', 'wp-asciiplayer' ) } onChange={ ( value ) => setAttributes( { cols: terminalDimension( value ) } ) } />
-			<TextControl label={ __( 'Rows', 'wp-asciiplayer' ) } type="number" min="1" max="1000" step="1" value={ attributes.rows ?? '' } placeholder={ __( 'From recording', 'wp-asciiplayer' ) } onChange={ ( value ) => setAttributes( { rows: terminalDimension( value ) } ) } />
+			<TextControl label={ __( 'Columns', 'wp-asciiplayer' ) } type="number" min="1" max="1000" step="1" value={ attributes.cols ?? '' } placeholder={ recordingSize ? String( recordingSize.cols ) : __( 'From recording', 'wp-asciiplayer' ) } onChange={ ( value ) => setAttributes( { cols: terminalDimension( value ) } ) } />
+			<TextControl label={ __( 'Rows', 'wp-asciiplayer' ) } type="number" min="1" max="1000" step="1" value={ attributes.rows ?? '' } placeholder={ recordingSize ? String( recordingSize.rows ) : __( 'From recording', 'wp-asciiplayer' ) } onChange={ ( value ) => setAttributes( { rows: terminalDimension( value ) } ) } />
 		</div>
-		<p className="asciiplayer-editor__hint">{ __( 'Leave blank to use the cast file’s terminal size and recorded resize events. These overrides change the character grid, not the display width, and may alter or crop the layout.', 'wp-asciiplayer' ) }</p>
+		<p className="asciiplayer-editor__hint">{ __( 'Placeholders show the recording’s original columns and rows once loaded. Leave blank to follow its terminal size and recorded resize events. These overrides change the character grid, not the display width, and may alter or crop the layout.', 'wp-asciiplayer' ) }</p>
 		<Button variant="secondary" onClick={ () => setAttributes( { cols: undefined, rows: undefined } ) }>{ __( 'Use recording size', 'wp-asciiplayer' ) }</Button>
 	</>;
 }
@@ -21,11 +21,15 @@ export default function Edit( { attributes, setAttributes, isSelected } ) {
 	const { source, theme, speed, loop, controls, fit, startAt, idleTimeLimit, autoPlay, preload, width, caption, displayAlign } = attributes;
 	const [ draftSource, setDraftSource ] = useState( source );
 	const [ urlError, setUrlError ] = useState( false );
+	const [ mediaError, setMediaError ] = useState( false );
+	const [ recording, setRecording ] = useState( null );
+	const onRecordingSize = useCallback( ( loadedSource, size ) => setRecording( { source: loadedSource, size } ), [] );
 	const [ attempt, setAttempt ] = useState( 0 );
 	const [ draftWidth, setDraftWidth ] = useState( width );
 	useEffect( () => setDraftWidth( width ), [ width ] );
 	useEffect( () => {
 		setDraftSource( source );
+		setRecording( null );
 		setUrlError( Boolean( source.trim() ) && ! normalizeSource( source ) );
 	}, [ source ] );
 	// Saved/undone sources load immediately. Typed changes wait until the user
@@ -41,6 +45,7 @@ export default function Edit( { attributes, setAttributes, isSelected } ) {
 	}, [ draftSource, source, attributes.isExample, setAttributes ] );
 	const previewSource = normalizeSource( source );
 	const showPreview = previewSource && previewSource === normalizeSource( draftSource );
+	const recordingSize = showPreview && recording?.source === previewSource ? recording.size : null;
 	const blockProps = useBlockProps( { className: 'asciiplayer-editor' } );
 	const applySource = ( event ) => {
 		event.preventDefault();
@@ -49,6 +54,19 @@ export default function Edit( { attributes, setAttributes, isSelected } ) {
 		if ( ! next ) return;
 		setAttributes( { source: next } );
 		setDraftSource( next );
+		setAttempt( ( current ) => current + 1 );
+	};
+	const selectRecording = ( media ) => {
+		const next = normalizeSource( media?.url );
+		if ( ! next || ! /\.cast$/i.test( next.split( /[?#]/ )[ 0 ] ) ) {
+			setMediaError( true );
+			return;
+		}
+		setMediaError( false );
+		setUrlError( false );
+		setRecording( null );
+		setDraftSource( next );
+		setAttributes( { source: next } );
 		setAttempt( ( current ) => current + 1 );
 	};
 	const themes = [
@@ -82,7 +100,7 @@ export default function Edit( { attributes, setAttributes, isSelected } ) {
 					) } renderContent={ ( { onClose } ) => (
 						<div className="asciiplayer-terminal-popover__content" role="dialog" aria-label={ __( 'Terminal size', 'wp-asciiplayer' ) }>
 							<p><strong>{ __( 'Terminal size (columns × rows)', 'wp-asciiplayer' ) }</strong></p>
-							<TerminalSizeControls attributes={ attributes } setAttributes={ setAttributes } />
+							<TerminalSizeControls attributes={ attributes } setAttributes={ setAttributes } recordingSize={ recordingSize } />
 							<Button variant="tertiary" onClick={ onClose }>{ __( 'Close', 'wp-asciiplayer' ) }</Button>
 						</div>
 					) } />
@@ -90,7 +108,7 @@ export default function Edit( { attributes, setAttributes, isSelected } ) {
 			</BlockControls>
 			<InspectorControls>
 				<PanelBody title={ __( 'Terminal size', 'wp-asciiplayer' ) } initialOpen={ false }>
-					<TerminalSizeControls attributes={ attributes } setAttributes={ setAttributes } />
+					<TerminalSizeControls attributes={ attributes } setAttributes={ setAttributes } recordingSize={ recordingSize } />
 				</PanelBody>
 				<PanelBody title={ __( 'Display', 'wp-asciiplayer' ) }>
 					<SelectControl label={ __( 'Player width', 'wp-asciiplayer' ) } value={ customWidth || ! widthPresets.includes( width ) ? 'custom' : width } options={ widthOptions } onChange={ ( value ) => { setCustomWidth( value === 'custom' ); if ( value !== 'custom' ) setAttributes( { width: value } ); } } />
@@ -121,16 +139,22 @@ export default function Edit( { attributes, setAttributes, isSelected } ) {
 			<div { ...blockProps }>
 				<div className="asciiplayer-editor__source">
 					<form onSubmit={ applySource }>
-						<TextControl label={ __( 'Recording URL', 'wp-asciiplayer' ) } placeholder="https://example.com/recording.cast" value={ draftSource } onChange={ ( value ) => { setDraftSource( value ); setUrlError( false ); } } autoComplete="off" />
+						<TextControl label={ __( 'Recording URL', 'wp-asciiplayer' ) } placeholder="https://example.com/recording.cast" value={ draftSource } onChange={ ( value ) => { setDraftSource( value ); setUrlError( false ); setMediaError( false ); } } autoComplete="off" />
 						<Button type="submit" variant="primary">{ __( 'Apply URL', 'wp-asciiplayer' ) }</Button>
 					</form>
+					<MediaUploadCheck>
+						<MediaUpload title={ __( 'Choose an Asciicast recording', 'wp-asciiplayer' ) } allowedTypes={ [ 'application/x-asciicast', 'text/plain', 'application/json', 'application/octet-stream', 'application/jsonl', 'application/x-ndjson' ] } multiple={ false } onSelect={ selectRecording } render={ ( { open } ) => (
+							<Button className="asciiplayer-editor__media" variant="secondary" onClick={ open }>{ __( 'Choose recording', 'wp-asciiplayer' ) }</Button>
+						) } />
+					</MediaUploadCheck>
+					{ mediaError && <Notice status="error" isDismissible={ false }>{ __( 'Choose an Asciicast (.cast) file from the Media Library.', 'wp-asciiplayer' ) }</Notice> }
 					<p className="asciiplayer-editor__privacy">{ __( 'A valid recording URL loads its preview automatically, including when reopening this editor. That server receives your browser’s request. Published players contact the same server. Use a direct .cast URL; external servers must allow CORS.', 'wp-asciiplayer' ) }</p>
 					{ urlError && <Notice status="error" isDismissible={ false }>{ __( 'Enter an HTTP(S) recording URL or a path starting with a single /.', 'wp-asciiplayer' ) }</Notice> }
 				</div>
 				<figure className={ `asciiplayer-figure asciiplayer-align-${ placement }` } style={ { width: normalizeWidth( width ) } }>
 				{ showPreview ? (
 					<>
-						<Preview source={ previewSource } attributes={ attributes } attempt={ attempt } onRetry={ () => setAttempt( ( current ) => current + 1 ) } />
+						<Preview source={ previewSource } attributes={ attributes } attempt={ attempt } onRecordingSize={ onRecordingSize } onRetry={ () => setAttempt( ( current ) => current + 1 ) } />
 					</>
 				) : (
 					<Placeholder icon="editor-code" label={ __( 'Asciicast Player', 'wp-asciiplayer' ) } instructions={ __( 'Enter a recording URL to load its preview automatically. Playback starts only when you press play.', 'wp-asciiplayer' ) } />
