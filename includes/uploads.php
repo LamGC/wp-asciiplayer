@@ -130,7 +130,8 @@ function is_valid_cast_file( $path ) {
 	if ( ! is_string( $path ) || '' === $path || false !== strpos( $path, '://' ) || ! is_file( $path ) || ! is_readable( $path ) ) {
 		return false;
 	}
-	$handle = fopen( $path, 'rb' );
+	// Read-only local upload validation needs bounded streaming; WP_Filesystem reads whole files.
+	$handle = fopen( $path, 'rb' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Local temporary upload only; wrappers rejected above.
 	if ( false === $handle ) {
 		return false;
 	}
@@ -180,7 +181,7 @@ function is_valid_cast_file( $path ) {
 		}
 		return feof( $handle );
 	} finally {
-		fclose( $handle );
+		fclose( $handle ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Always close the bounded read-only upload stream.
 	}
 }
 
