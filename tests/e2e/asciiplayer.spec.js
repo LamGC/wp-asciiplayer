@@ -267,8 +267,21 @@ test('a saved Recording URL loads once without a click and never autoplays in th
     await readyPreview(block);
     await expect(block.getByRole('button', { name: 'Load preview', exact: true })).toHaveCount(0);
     await expect(block.locator('.ap-overlay-start .ap-play-button')).toBeVisible();
-    await expect(block.locator('.asciiplayer-editor__privacy')).toContainText(/automatic/i);
-    await expect(block.locator('.asciiplayer-editor__privacy')).toContainText(/server/i);
+    await expect(block.locator('.asciiplayer-editor__privacy')).toHaveCount(0);
+    await expect(block.locator(':scope > .asciiplayer-editor__hint')).toHaveCount(0);
+    await expect(block.getByRole('textbox', { name: 'Recording URL', exact: true })).toBeVisible();
+    await expect(block.getByRole('button', { name: 'Choose recording', exact: true })).toBeVisible();
+    await expect(block.locator('figcaption[contenteditable="true"]')).toBeVisible();
+    await page.evaluate(() => window.wp.data.dispatch('core/edit-post').openGeneralSidebar('edit-post/block'));
+    const helpToggle = page.locator('.components-panel__body-toggle').filter({ hasText: /^Help$/ });
+    await expect(helpToggle).toHaveAttribute('aria-expanded', 'false');
+    await helpToggle.click();
+    const help = page.locator('.components-panel__body').filter({ has: helpToggle });
+    await expect(help.locator('.asciiplayer-editor__privacy')).toContainText(/automatic/i);
+    await expect(help.locator('.asciiplayer-editor__privacy')).toContainText(/server/i);
+    await expect(help).toContainText('Use the player controls to play, pause, and seek.');
+    await helpToggle.click();
+    await expect(helpToggle).toHaveAttribute('aria-expanded', 'false');
     await page.waitForTimeout(750); // Catch a second fetch from a pending debounce.
     expect(requests).toEqual([source]);
     await expect(block.locator('.ap-overlay-start .ap-play-button')).toBeVisible();

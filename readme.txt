@@ -4,7 +4,7 @@ Tags: asciicast, asciiplayer, asciinema, terminal, block
 Requires at least: 6.3
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.2
+Stable tag: 1.2.3
 License: GPL-3.0-only
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -54,6 +54,9 @@ No. The JavaScript, CSS and WebAssembly ship with the plugin. The previous ap_us
 Existing shortcodes work in the Classic Editor. The new visual controls and inline playback preview are for the block editor.
 
 == Changelog ==
+
+= 1.2.3 =
+* Move recording/privacy and playback explanations from the block canvas to a collapsed sidebar Help panel.
 
 = 1.2.2 =
 * Show original cast dimensions as toolbar/sidebar placeholders without forcing overrides.

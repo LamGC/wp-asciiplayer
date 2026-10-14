@@ -36,6 +36,8 @@ Existing saved blocks load their valid recording URL automatically on reopening
 the editor. Typed URL changes are debounced for 500ms; empty or invalid URLs do
 not start a recording request.
 Preview does not autoplay even when front-end autoplay is enabled.
+Recording/privacy and playback explanations are available in the collapsed
+**Help** sidebar panel, keeping the block canvas focused on editing.
 The inserter preview is a local static example and never loads a recording.
 
 Terminal typography is scoped against common theme `pre`/`span` styles so

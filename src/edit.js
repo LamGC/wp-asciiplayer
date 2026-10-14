@@ -135,6 +135,10 @@ export default function Edit( { attributes, setAttributes, isSelected } ) {
 					<SelectControl label={ __( 'Fit', 'wp-asciiplayer' ) } value={ fit } options={ fitOptions } help={ [ 'height', 'both' ].includes( fit ) ? __( 'Height-based fitting requires a fixed container height in your site CSS.', 'wp-asciiplayer' ) : undefined } onChange={ ( value ) => setAttributes( { fit: value } ) } />
 					{ attributes.legacyStyle && <p>{ __( 'The custom container style from your shortcode is preserved on the published page.', 'wp-asciiplayer' ) }</p> }
 				</PanelBody>
+				<PanelBody title={ __( 'Help', 'wp-asciiplayer' ) } initialOpen={ false }>
+					<p className="asciiplayer-editor__privacy">{ __( 'A valid recording URL loads its preview automatically, including when reopening this editor. That server receives your browser’s request. Published players contact the same server. Use a direct .cast URL; external servers must allow CORS.', 'wp-asciiplayer' ) }</p>
+					<p className="asciiplayer-editor__hint">{ __( 'Use the player controls to play, pause, and seek. Autoplay is disabled only in the editor.', 'wp-asciiplayer' ) }</p>
+				</PanelBody>
 			</InspectorControls>
 			<div { ...blockProps }>
 				<div className="asciiplayer-editor__source">
@@ -148,7 +152,6 @@ export default function Edit( { attributes, setAttributes, isSelected } ) {
 						) } />
 					</MediaUploadCheck>
 					{ mediaError && <Notice status="error" isDismissible={ false }>{ __( 'Choose an Asciicast (.cast) file from the Media Library.', 'wp-asciiplayer' ) }</Notice> }
-					<p className="asciiplayer-editor__privacy">{ __( 'A valid recording URL loads its preview automatically, including when reopening this editor. That server receives your browser’s request. Published players contact the same server. Use a direct .cast URL; external servers must allow CORS.', 'wp-asciiplayer' ) }</p>
 					{ urlError && <Notice status="error" isDismissible={ false }>{ __( 'Enter an HTTP(S) recording URL or a path starting with a single /.', 'wp-asciiplayer' ) }</Notice> }
 				</div>
 				<figure className={ `asciiplayer-figure asciiplayer-align-${ placement }` } style={ { width: normalizeWidth( width ) } }>
@@ -161,7 +164,6 @@ export default function Edit( { attributes, setAttributes, isSelected } ) {
 				) }
 				<RichText tagName="figcaption" className={ `wp-element-caption${ ! isSelected && ! caption ? ' asciiplayer-caption-empty' : '' }` } value={ caption } allowedFormats={ [] } onChange={ ( value ) => setAttributes( { caption: value } ) } placeholder={ __( 'Add a caption…', 'wp-asciiplayer' ) } aria-label={ __( 'Recording caption', 'wp-asciiplayer' ) } />
 				</figure>
-				{ showPreview && <p className="asciiplayer-editor__hint">{ __( 'Use the player controls to play, pause, and seek. Autoplay is disabled only in the editor.', 'wp-asciiplayer' ) }</p> }
 				{ [ 'height', 'both' ].includes( fit ) && <p className="asciiplayer-editor__hint">{ __( 'Height-based previews use the shortcode’s fixed height when available, or a 320px editor frame. Published height still comes from your container style.', 'wp-asciiplayer' ) }</p> }
 			</div>
 		</>

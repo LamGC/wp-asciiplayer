@@ -1,6 +1,6 @@
 {
   "name": "wp-asciiplayer",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "private": true,
   "description": "Native WordPress asciicast block with real playback previews and compatible shortcodes",
   "type": "module",
