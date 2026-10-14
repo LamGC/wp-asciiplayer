@@ -3,12 +3,6 @@
 An Asciicast Player block for WordPress, with real playback in the editor and
 backwards-compatible `[asciiplayer]` shortcodes. [中文说明](README-zh.md)
 
-## Development preview: 1.1.0-dev
-
-This PR is an unreleased development preview. Earlier draft ZIP labels 1.1.0 and
-1.2.0–1.2.3 were iteration labels, not published releases. Review packages use
-`wp-asciiplayer-1.1.0-dev-<commit>.zip`; no release tag or deployment is implied.
-
 ## Languages
 
 Plugin-owned UI includes English and Simplified Chinese (`zh_CN`). The editor

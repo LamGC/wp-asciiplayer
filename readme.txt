@@ -56,37 +56,3 @@ Existing shortcodes work in the Classic Editor. The new visual controls and inli
 = Which languages are included? =
 
 English (en_US fallback) and Simplified Chinese (zh_CN) are bundled and work offline. Plugin-owned editor controls follow the WordPress user language; public pages follow the site language. Set these in Users > Profile and Settings > General. Other Chinese locales, including zh_TW, are not mapped to zh_CN. Recording output and author captions are never translated. The upstream player's own controls and help remain English.
-
-== Changelog ==
-
-= 1.1.0-dev (unreleased) =
-* Development preview only, not a tagged or published release. Earlier draft package labels 1.1.0 and 1.2.0–1.2.3 were internal iteration labels, not releases.
-* Bundle English/Simplified Chinese plugin UI translations using WordPress gettext, with reproducible PO/MO/JSON catalogs and real locale integration tests.
-* Use asset content hashes to prevent stale resources between development builds.
-* Move recording/privacy and playback explanations from the block canvas to a collapsed sidebar Help panel.
-
-* Show original cast dimensions as toolbar/sidebar placeholders without forcing overrides.
-* Refresh recording metadata when the URL changes, reusing the preview request.
-* Select and upload validated .cast recordings through the native Media Library.
-
-* Automatically load saved recording previews without enabling playback autoplay.
-* Debounce recording URL edits; retain immediate apply, retry and request cleanup.
-* Add terminal Columns/Rows and reset controls to the floating block toolbar, synchronized with the collapsed sidebar panel.
-
-* Add responsive display-width presets/custom lengths, left/center/right placement and captions.
-* Preserve recorded terminal dimensions and resize events by default; expose optional row/column overrides.
-* Isolate terminal typography and frames from common host-theme code-block styles.
-* Add a local static block-inserter preview without recording requests.
-
-* Add a native block with typed controls and interactive, iframe-aware preview.
-* Preserve shortcode support and normalize historical parameter names and types.
-* Escape output, constrain recording URLs, and filter custom styles.
-* Bundle player 3.17.0 locally and add reproducible build/install ZIP tooling.
-* Improve asset loading for posts, pages and render-time shortcode use.
-* Add unit and real WordPress browser integration tests.
-
-= 1.0.0 =
-* Set the version attribute for resource files and add documentation.
-
-= 0.1.0 =
-* First available version; asciinema-player 3.4.0.
