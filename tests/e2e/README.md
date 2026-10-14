@@ -16,6 +16,9 @@ npm run package
 mkdir -p .wp-env-uploads
 npm run wp-env -- start
 npm run wp-env -- run cli wp plugin install /var/www/html/wp-content/asciiplayer-packages/wp-asciiplayer.zip --activate --force
+npm run wp-env -- run cli wp language core install zh_CN
+npm run wp-env -- run cli wp site switch-language en_US
+npm run wp-env -- run cli wp user meta update admin locale en_US
 npx --no-install playwright install chromium
 npm run test:e2e
 npm run wp-env -- stop
@@ -88,3 +91,15 @@ overrides, URL replacement, error/empty states and recorded resize events.
 The Media Library tests use actual isolated WordPress upload dialogs to upload
 validated fixtures, reject malformed casts, cancel/reopen and select an existing
 recording. No production-site media is accessed.
+
+## Plugin localization
+
+Five `@i18n` cases set real site and user languages via the authenticated WordPress
+REST API, covering all en_US/zh_CN combinations and site-default inheritance.
+They verify bundled PHP upload errors, editor metadata and controls, recoverable
+preview errors, and logged-in/anonymous frontend messages. Author captions and
+actual recording content remain unchanged, and upstream player controls stay
+English. Original site/user locale values are restored after each test.
+Run these only against the isolated test site, with zh_CN installed first.
+CI runs the existing English suite before the locale suite and retains separate
+reports/screenshots. No catalog data is injected into the browser by the tests.

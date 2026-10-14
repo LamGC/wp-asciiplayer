@@ -48,6 +48,14 @@ try {
 		same( true, is_callable( $action[1] ), 'Every registered callback is callable.' );
 	}
 	register_plugin();
+	same( array( 'wp-asciiplayer', 'wp-asciiplayer/languages' ), $GLOBALS['ap_test']['textdomains'][0], 'Bundled PHP catalogs register during init.' );
+	if ( file_exists( dirname( __DIR__, 2 ) . '/build/runtime.asset.php' ) ) {
+		$versions = require dirname( __DIR__, 2 ) . '/build/runtime.asset.php';
+		same( $versions['player.js'], $GLOBALS['ap_test']['scripts']['lamgc-asciiplayer-player']['version'], 'Player script uses its content hash.' );
+		foreach ( array( 'lamgc-asciiplayer-player-style' => 'player.css', 'lamgc-asciiplayer-style' => 'style-index.css', 'lamgc-asciiplayer-editor-style' => 'index.css' ) as $handle => $file ) {
+			same( $versions[ $file ], $GLOBALS['ap_test']['styles'][ $handle ]['version'], 'Each stylesheet uses its own content hash.' );
+		}
+	}
 	same( 'asciiplayer', $GLOBALS['ap_test']['shortcodes'][0][0], 'Legacy shortcode stays registered.' );
 	contains( '/build', $GLOBALS['ap_test']['blocks'][0]['path'], 'Block uses local metadata.' );
 	same( 'LamGC\\Asciiplayer\\render_block', $GLOBALS['ap_test']['blocks'][0]['args']['render_callback'], 'Block is server rendered.' );
@@ -60,8 +68,8 @@ try {
 	same( array( 'lamgc-asciiplayer-player-style' ), $GLOBALS['ap_test']['styles']['lamgc-asciiplayer-style']['deps'], 'Frontend style depends on player stylesheet.' );
 	contains( 'window.wpAsciiplayerSettings = ', $GLOBALS['ap_test']['inline_scripts'][0]['source'], 'Editor iframe receives trusted runtime URLs.' );
 	same( 'before', $GLOBALS['ap_test']['inline_scripts'][0]['position'], 'Settings are available before editor boot.' );
-	contains( 'player.js?ver=1.2.3', $GLOBALS['ap_test']['inline_scripts'][0]['source'], 'Bridge JavaScript cache-buster matches registered asset version.' );
-	contains( 'player.css?ver=1.2.3', $GLOBALS['ap_test']['inline_scripts'][0]['source'], 'Bridge CSS cache-buster matches registered asset version.' );
+	contains( 'player.js?ver=' . $GLOBALS['ap_test']['scripts']['lamgc-asciiplayer-player']['version'], $GLOBALS['ap_test']['inline_scripts'][0]['source'], 'Bridge JavaScript cache-buster matches registered asset version.' );
+	contains( 'player.css?ver=' . $GLOBALS['ap_test']['styles']['lamgc-asciiplayer-player-style']['version'], $GLOBALS['ap_test']['inline_scripts'][0]['source'], 'Bridge CSS cache-buster matches registered asset version.' );
 
 	// Source validation covers script, HTML, credential and relative-URL attacks.
 	foreach ( array( '', 'javascript:alert(1)', 'data:text/html,test', 'file:///tmp/a.cast', '//evil.test/a.cast', '/\\evil.test/a.cast', "https://example.test/a\n.cast", 'https://x.test/" onmouseover="alert(1)', 'https://user:secret@example.test/a.cast', 'https:///a.cast', 'a.cast', array( 'bad' ) ) as $source ) {

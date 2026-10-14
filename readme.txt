@@ -4,7 +4,7 @@ Tags: asciicast, asciiplayer, asciinema, terminal, block
 Requires at least: 6.3
 Tested up to: 7.1
 Requires PHP: 7.4
-Stable tag: 1.2.3
+Stable tag: 1.1.0-dev
 License: GPL-3.0-only
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -53,28 +53,31 @@ No. The JavaScript, CSS and WebAssembly ship with the plugin. The previous ap_us
 
 Existing shortcodes work in the Classic Editor. The new visual controls and inline playback preview are for the block editor.
 
+= Which languages are included? =
+
+English (en_US fallback) and Simplified Chinese (zh_CN) are bundled and work offline. Plugin-owned editor controls follow the WordPress user language; public pages follow the site language. Set these in Users > Profile and Settings > General. Other Chinese locales, including zh_TW, are not mapped to zh_CN. Recording output and author captions are never translated. The upstream player's own controls and help remain English.
+
 == Changelog ==
 
-= 1.2.3 =
+= 1.1.0-dev (unreleased) =
+* Development preview only, not a tagged or published release. Earlier draft package labels 1.1.0 and 1.2.0–1.2.3 were internal iteration labels, not releases.
+* Bundle English/Simplified Chinese plugin UI translations using WordPress gettext, with reproducible PO/MO/JSON catalogs and real locale integration tests.
+* Use asset content hashes to prevent stale resources between development builds.
 * Move recording/privacy and playback explanations from the block canvas to a collapsed sidebar Help panel.
 
-= 1.2.2 =
 * Show original cast dimensions as toolbar/sidebar placeholders without forcing overrides.
 * Refresh recording metadata when the URL changes, reusing the preview request.
 * Select and upload validated .cast recordings through the native Media Library.
 
-= 1.2.1 =
 * Automatically load saved recording previews without enabling playback autoplay.
 * Debounce recording URL edits; retain immediate apply, retry and request cleanup.
 * Add terminal Columns/Rows and reset controls to the floating block toolbar, synchronized with the collapsed sidebar panel.
 
-= 1.2.0 =
 * Add responsive display-width presets/custom lengths, left/center/right placement and captions.
 * Preserve recorded terminal dimensions and resize events by default; expose optional row/column overrides.
 * Isolate terminal typography and frames from common host-theme code-block styles.
 * Add a local static block-inserter preview without recording requests.
 
-= 1.1.0 =
 * Add a native block with typed controls and interactive, iframe-aware preview.
 * Preserve shortcode support and normalize historical parameter names and types.
 * Escape output, constrain recording URLs, and filter custom styles.

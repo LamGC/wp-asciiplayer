@@ -1,0 +1,237 @@
+{
+  "domain": "wp-asciiplayer",
+  "locale_data": {
+    "messages": {
+      "": {
+        "domain": "wp-asciiplayer",
+        "lang": "zh_CN",
+        "plural-forms": "nplurals=1; plural=0;"
+      },
+      "Columns": [
+        "列数"
+      ],
+      "From recording": [
+        "使用录制尺寸"
+      ],
+      "Rows": [
+        "行数"
+      ],
+      "Placeholders show the recording’s original columns and rows once loaded. Leave blank to follow its terminal size and recorded resize events. These overrides change the character grid, not the display width, and may alter or crop the layout.": [
+        "加载后，占位提示会显示录制文件的原始行列数。留空可使用录制尺寸，并跟随录制中的尺寸变化。手动设置会改变字符网格，而非显示宽度，可能影响排版或裁切内容。"
+      ],
+      "Use recording size": [
+        "使用录制尺寸"
+      ],
+      "Asciinema": [
+        "Asciinema"
+      ],
+      "Recording theme (automatic)": [
+        "录制文件主题（自动）"
+      ],
+      "Custom": [
+        "自定义"
+      ],
+      "Width": [
+        "按宽度缩放"
+      ],
+      "Original size": [
+        "原始大小"
+      ],
+      "Height (legacy)": [
+        "按高度缩放（旧版）"
+      ],
+      "Width and height (legacy)": [
+        "按宽高缩放（旧版）"
+      ],
+      "Example terminal recording": [
+        "终端录屏示例"
+      ],
+      "A terminal recording, right in your post.": [
+        "在文章中直接播放终端录屏。"
+      ],
+      "Terminal size": [
+        "终端尺寸"
+      ],
+      "Terminal size (columns × rows)": [
+        "终端尺寸（列数 × 行数）"
+      ],
+      "Close": [
+        "关闭"
+      ],
+      "Display": [
+        "显示"
+      ],
+      "Player width": [
+        "播放器宽度"
+      ],
+      "Custom width": [
+        "自定义宽度"
+      ],
+      "Use a CSS length, such as 480px or 65%. The player stays within its available space.": [
+        "使用 CSS 长度，例如 480px 或 65%。播放器不会超出可用空间。"
+      ],
+      "Enter a positive width with a unit, such as 480px or 65%. The last valid width is kept.": [
+        "请输入带单位的正数宽度，例如 480px 或 65%。将保留上一次有效的宽度。"
+      ],
+      "Display alignment": [
+        "对齐方式"
+      ],
+      "Left": [
+        "左对齐"
+      ],
+      "Center": [
+        "居中"
+      ],
+      "Right": [
+        "右对齐"
+      ],
+      "Display width scales the recording without changing its terminal columns or rows. Add a caption directly below the player.": [
+        "显示宽度只缩放画面，不改变终端行列数。可在播放器下方直接添加说明文字。"
+      ],
+      "Playback": [
+        "播放"
+      ],
+      "Playback speed": [
+        "播放速度"
+      ],
+      "Loop playback": [
+        "循环播放"
+      ],
+      "Autoplay on published page": [
+        "在发布后的页面自动播放"
+      ],
+      "The editor preview always waits for you to press play.": [
+        "编辑器预览始终需要点击播放后才会开始。"
+      ],
+      "Preload on published page": [
+        "在发布后的页面预加载"
+      ],
+      "Loads the recording before the visitor presses play. The editor preview always preloads a valid recording URL.": [
+        "在访客点击播放前加载录制文件。编辑器预览始终会预加载有效的录制文件 URL。"
+      ],
+      "Start at (seconds)": [
+        "起始时间（秒）"
+      ],
+      "Idle time limit (seconds)": [
+        "最长空闲时间（秒）"
+      ],
+      "Shorten long pauses. Use 0 to keep the recording’s default.": [
+        "缩短过长的停顿。设为 0 可保留录制文件的默认设置。"
+      ],
+      "Appearance": [
+        "外观"
+      ],
+      "Theme": [
+        "主题"
+      ],
+      "Player controls": [
+        "播放控制栏"
+      ],
+      "Show on interaction": [
+        "交互时显示"
+      ],
+      "Always show": [
+        "始终显示"
+      ],
+      "Hide": [
+        "隐藏"
+      ],
+      "Fit": [
+        "缩放方式"
+      ],
+      "Height-based fitting requires a fixed container height in your site CSS.": [
+        "按高度缩放需要在站点 CSS 中设置固定的容器高度。"
+      ],
+      "The custom container style from your shortcode is preserved on the published page.": [
+        "发布后的页面会保留简码中的自定义容器样式。"
+      ],
+      "Help": [
+        "帮助"
+      ],
+      "A valid recording URL loads its preview automatically, including when reopening this editor. That server receives your browser’s request. Published players contact the same server. Use a direct .cast URL; external servers must allow CORS.": [
+        "有效的录制文件 URL 会自动加载预览，重新打开编辑器时也一样。文件所在服务器会收到浏览器请求，发布后的播放器也会访问该服务器。请使用 .cast 文件直链；外部服务器需允许跨域请求（CORS）。"
+      ],
+      "Use the player controls to play, pause, and seek. Autoplay is disabled only in the editor.": [
+        "使用播放器控件播放、暂停和跳转。仅编辑器预览禁用自动播放。"
+      ],
+      "Recording URL": [
+        "录制文件 URL"
+      ],
+      "Apply URL": [
+        "应用 URL"
+      ],
+      "Choose an Asciicast recording": [
+        "选择 Asciicast 录制文件"
+      ],
+      "Choose recording": [
+        "选择录制文件"
+      ],
+      "Choose an Asciicast (.cast) file from the Media Library.": [
+        "请从媒体库选择 Asciicast（.cast）文件。"
+      ],
+      "Enter an HTTP(S) recording URL or a path starting with a single /.": [
+        "请输入 HTTP(S) 录制文件 URL，或以单个 / 开头的路径。"
+      ],
+      "Asciicast Player": [
+        "Asciicast 播放器"
+      ],
+      "Enter a recording URL to load its preview automatically. Playback starts only when you press play.": [
+        "输入录制文件 URL 后会自动加载预览，点击播放才会开始播放。"
+      ],
+      "Add a caption…": [
+        "添加说明文字…"
+      ],
+      "Recording caption": [
+        "录屏说明文字"
+      ],
+      "Height-based previews use the shortcode’s fixed height when available, or a 320px editor frame. Published height still comes from your container style.": [
+        "按高度缩放的预览会使用简码中的固定高度；未设置时使用 320px 的编辑器预览高度。发布后的高度仍由容器样式决定。"
+      ],
+      "block title\u0004Asciicast Player": [
+        "Asciicast 播放器"
+      ],
+      "block description\u0004Embed and preview a terminal recording with the locally bundled asciinema player.": [
+        "使用本地附带的 asciinema 播放器嵌入和预览终端录屏。"
+      ],
+      "block keyword\u0004asciinema": [
+        "asciinema"
+      ],
+      "block keyword\u0004terminal": [
+        "终端"
+      ],
+      "block keyword\u0004recording": [
+        "录屏"
+      ],
+      "Unable to load the recording. Check the URL, file format, and the source server’s CORS permissions.": [
+        "无法加载录制文件。请检查 URL、文件格式及来源服务器的跨域请求（CORS）权限。"
+      ],
+      "The recording is taking too long to load. Check your connection and try again.": [
+        "录制文件加载超时。请检查网络连接后重试。"
+      ],
+      "The local player could not start. Try again, or check that the plugin’s built assets are installed.": [
+        "本地播放器无法启动。请重试，或检查插件的构建资源是否已安装。"
+      ],
+      "Loading recording…": [
+        "正在加载录制文件…"
+      ],
+      "Retry preview": [
+        "重试预览"
+      ],
+      "Interactive terminal recording preview": [
+        "可交互的终端录屏预览"
+      ],
+      "Unable to load this terminal recording. The file may be unavailable, invalid, or blocked by the source server’s CORS policy.": [
+        "无法加载此终端录屏。文件可能无法访问、格式无效，或被来源服务器的跨域请求（CORS）策略阻止。"
+      ],
+      "You are not allowed to upload Asciicast files.": [
+        "你没有上传 Asciicast 文件的权限。"
+      ],
+      "Upload a valid Asciicast v2/v3 JSONL or pretty-printed v1 .cast recording (up to 32 MiB; v1 up to 2 MiB, 100,000 events, 256 KiB per JSONL line, and 1,000 columns or rows).": [
+        "请上传有效的 Asciicast v2/v3 JSONL 或格式化的 v1 .cast 录制文件（最大 32 MiB；v1 最大 2 MiB；最多 100,000 个事件；每行 JSONL最大 256 KiB；列数和行数均不超过 1,000）。"
+      ],
+      "Add interactive terminal recordings to posts and pages with a block or shortcode.": [
+        "通过区块或简码在文章和页面中添加可交互的终端录屏。"
+      ]
+    }
+  }
+}

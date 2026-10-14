@@ -2,6 +2,7 @@ import { createBlock, registerBlockType } from '@wordpress/blocks';
 import { next } from '@wordpress/shortcode';
 import { decodeEntities } from '@wordpress/html-entities';
 import metadata from '../block.json';
+import { _x } from '@wordpress/i18n';
 import Edit from './edit.js';
 import { attributesFromShortcode, canTransformShortcode, normalizeSource } from './options.js';
 import './style.css';
@@ -14,6 +15,9 @@ function matchShortcodeBlock( text = '' ) {
 
 registerBlockType( metadata.name, {
 	...metadata,
+	title: _x( 'Asciicast Player', 'block title', 'wp-asciiplayer' ),
+	description: _x( 'Embed and preview a terminal recording with the locally bundled asciinema player.', 'block description', 'wp-asciiplayer' ),
+	keywords: [ _x( 'asciinema', 'block keyword', 'wp-asciiplayer' ), _x( 'terminal', 'block keyword', 'wp-asciiplayer' ), _x( 'recording', 'block keyword', 'wp-asciiplayer' ) ],
 	edit: Edit,
 	save: () => null,
 	transforms: {

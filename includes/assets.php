@@ -17,6 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @return void
  */
 function register_plugin() {
+	load_plugin_textdomain( 'wp-asciiplayer', false, dirname( plugin_basename( PLUGIN_FILE ) ) . '/languages' );
 	$base  = plugin_dir_url( PLUGIN_FILE ) . 'build/';
 	$asset = array(
 		'dependencies' => array( 'wp-blocks', 'wp-element', 'wp-block-editor', 'wp-components', 'wp-i18n' ),
@@ -31,7 +32,9 @@ function register_plugin() {
 		$view_asset = require dirname( PLUGIN_FILE ) . '/build/view.asset.php';
 	}
 
-	wp_register_script( 'lamgc-asciiplayer-player', $base . 'player.js', array(), VERSION, true );
+	$versions = file_exists( dirname( PLUGIN_FILE ) . '/build/runtime.asset.php' ) ? require dirname( PLUGIN_FILE ) . '/build/runtime.asset.php' : array();
+	$player_version = $versions['player.js'] ?? VERSION;
+	wp_register_script( 'lamgc-asciiplayer-player', $base . 'player.js', array(), $player_version, true );
 	wp_register_script(
 		'lamgc-asciiplayer-view',
 		$base . 'view.js',
@@ -46,16 +49,16 @@ function register_plugin() {
 		$asset['version'],
 		true
 	);
-	wp_register_style( 'lamgc-asciiplayer-player-style', $base . 'player.css', array(), VERSION );
-	wp_register_style( 'lamgc-asciiplayer-style', $base . 'style-index.css', array( 'lamgc-asciiplayer-player-style' ), VERSION );
-	wp_register_style( 'lamgc-asciiplayer-editor-style', $base . 'index.css', array( 'lamgc-asciiplayer-player-style' ), VERSION );
+	wp_register_style( 'lamgc-asciiplayer-player-style', $base . 'player.css', array(), $versions['player.css'] ?? VERSION );
+	wp_register_style( 'lamgc-asciiplayer-style', $base . 'style-index.css', array( 'lamgc-asciiplayer-player-style' ), $versions['style-index.css'] ?? VERSION );
+	wp_register_style( 'lamgc-asciiplayer-editor-style', $base . 'index.css', array( 'lamgc-asciiplayer-player-style' ), $versions['index.css'] ?? VERSION );
 
 	wp_add_inline_script(
 		'lamgc-asciiplayer-editor',
 		'window.wpAsciiplayerSettings = ' . wp_json_encode(
 			array(
-				'playerScriptUrl' => add_query_arg( 'ver', VERSION, $base . 'player.js' ),
-				'playerStyleUrl'  => add_query_arg( 'ver', VERSION, $base . 'player.css' ),
+				'playerScriptUrl' => add_query_arg( 'ver', $player_version, $base . 'player.js' ),
+				'playerStyleUrl'  => add_query_arg( 'ver', $versions['player.css'] ?? VERSION, $base . 'player.css' ),
 			),
 			JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
 		) . ';',

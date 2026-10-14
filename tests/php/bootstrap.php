@@ -20,6 +20,12 @@ function add_action( $hook, $callback, $priority = 10 ) {
 function add_filter( $hook, $callback, $priority = 10, $accepted_args = 1 ) {
 	ap_record( 'filters', array( $hook, $callback, $priority, $accepted_args ) );
 }
+function load_plugin_textdomain( $domain, $deprecated, $path ) {
+	ap_record( 'textdomains', array( $domain, $path ) );
+}
+function plugin_basename( $file ) {
+	return 'wp-asciiplayer/asciicast-player.php';
+}
 function __( $text, $domain = 'default' ) {
 	return $text;
 }

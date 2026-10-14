@@ -3,13 +3,14 @@
  * Plugin Name: Asciicast Player
  * Plugin URI: https://github.com/LamGC/wp-asciiplayer
  * Description: Add interactive terminal recordings to posts and pages with a block or shortcode.
- * Version: 1.2.3
+ * Version: 1.1.0-dev
  * Requires at least: 6.3
  * Requires PHP: 7.4
  * Author: LamGC
  * Author URI: https://blog.lamgc.moe
  * License: GPL-3.0-only
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
+ * Domain Path: /languages
  * Text Domain: wp-asciiplayer
  *
  * @package LamGC\Asciiplayer
@@ -21,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-const VERSION = '1.2.3';
+const VERSION = '1.1.0-dev';
 const PLUGIN_FILE = __FILE__;
 const SHORTCODE = 'asciiplayer';
 

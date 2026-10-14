@@ -1,0 +1,367 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: wp-asciiplayer 1.1.0-dev\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Domain: wp-asciiplayer\n"
+"Language: zh_CN\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Language-Team: Simplified Chinese\n"
+
+#: src/edit.js:91
+msgid "A terminal recording, right in your post."
+msgstr "在文章中直接播放终端录屏。"
+
+#: src/edit.js:139
+msgid ""
+"A valid recording URL loads its preview automatically, including when "
+"reopening this editor. That server receives your browser’s request. "
+"Published players contact the same server. Use a direct .cast URL; external "
+"servers must allow CORS."
+msgstr ""
+"有效的录制文件 URL 会自动加载预览，重新打开编辑器时也一样。文件所在服务器会收到浏览器请求，发布后的播放器也会访问该服务器。请使用 .cast "
+"文件直链；外部服务器需允许跨域请求（CORS）。"
+
+#: src/edit.js:165
+msgid "Add a caption…"
+msgstr "添加说明文字…"
+
+#: asciicast-player.php:1
+msgid ""
+"Add interactive terminal recordings to posts and pages with a block or "
+"shortcode."
+msgstr "通过区块或简码在文章和页面中添加可交互的终端录屏。"
+
+#: src/edit.js:132
+msgid "Always show"
+msgstr "始终显示"
+
+#: src/edit.js:128
+msgid "Appearance"
+msgstr "外观"
+
+#: src/edit.js:147
+msgid "Apply URL"
+msgstr "应用 URL"
+
+#: src/edit.js:163
+#: asciicast-player.php:1
+msgid "Asciicast Player"
+msgstr "Asciicast 播放器"
+
+#: src/edit.js:73
+msgid "Asciinema"
+msgstr "Asciinema"
+
+#: src/edit.js:123
+msgid "Autoplay on published page"
+msgstr "在发布后的页面自动播放"
+
+#: src/edit.js:116
+msgid "Center"
+msgstr "居中"
+
+#: src/edit.js:154
+msgid "Choose an Asciicast (.cast) file from the Media Library."
+msgstr "请从媒体库选择 Asciicast（.cast）文件。"
+
+#: src/edit.js:150
+msgid "Choose an Asciicast recording"
+msgstr "选择 Asciicast 录制文件"
+
+#: src/edit.js:151
+msgid "Choose recording"
+msgstr "选择录制文件"
+
+#: src/edit.js:104
+msgid "Close"
+msgstr "关闭"
+
+#: src/edit.js:12
+msgid "Columns"
+msgstr "列数"
+
+#: src/edit.js:81
+msgid "Custom"
+msgstr "自定义"
+
+#: src/edit.js:115
+msgid "Custom width"
+msgstr "自定义宽度"
+
+#: src/edit.js:113
+msgid "Display"
+msgstr "显示"
+
+#: src/edit.js:116
+msgid "Display alignment"
+msgstr "对齐方式"
+
+#: src/edit.js:117
+msgid ""
+"Display width scales the recording without changing its terminal columns or "
+"rows. Add a caption directly below the player."
+msgstr "显示宽度只缩放画面，不改变终端行列数。可在播放器下方直接添加说明文字。"
+
+#: src/edit.js:115
+msgid ""
+"Enter a positive width with a unit, such as 480px or 65%. The last valid "
+"width is kept."
+msgstr "请输入带单位的正数宽度，例如 480px 或 65%。将保留上一次有效的宽度。"
+
+#: src/edit.js:163
+msgid ""
+"Enter a recording URL to load its preview automatically. Playback starts "
+"only when you press play."
+msgstr "输入录制文件 URL 后会自动加载预览，点击播放才会开始播放。"
+
+#: src/edit.js:155
+msgid "Enter an HTTP(S) recording URL or a path starting with a single /."
+msgstr "请输入 HTTP(S) 录制文件 URL，或以单个 / 开头的路径。"
+
+#: src/edit.js:91
+msgid "Example terminal recording"
+msgstr "终端录屏示例"
+
+#: src/edit.js:135
+msgid "Fit"
+msgstr "缩放方式"
+
+#: src/edit.js:12
+#: src/edit.js:13
+msgid "From recording"
+msgstr "使用录制尺寸"
+
+#: src/edit.js:89
+msgid "Height (legacy)"
+msgstr "按高度缩放（旧版）"
+
+#: src/edit.js:135
+msgid "Height-based fitting requires a fixed container height in your site CSS."
+msgstr "按高度缩放需要在站点 CSS 中设置固定的容器高度。"
+
+#: src/edit.js:167
+msgid ""
+"Height-based previews use the shortcode’s fixed height when available, or a "
+"320px editor frame. Published height still comes from your container style."
+msgstr "按高度缩放的预览会使用简码中的固定高度；未设置时使用 320px 的编辑器预览高度。发布后的高度仍由容器样式决定。"
+
+#: src/edit.js:138
+msgid "Help"
+msgstr "帮助"
+
+#: src/edit.js:133
+msgid "Hide"
+msgstr "隐藏"
+
+#: src/edit.js:126
+msgid "Idle time limit (seconds)"
+msgstr "最长空闲时间（秒）"
+
+#: src/preview.js:85
+msgid "Interactive terminal recording preview"
+msgstr "可交互的终端录屏预览"
+
+#: src/edit.js:116
+msgid "Left"
+msgstr "左对齐"
+
+#: src/preview.js:83
+msgid "Loading recording…"
+msgstr "正在加载录制文件…"
+
+#: src/edit.js:124
+msgid ""
+"Loads the recording before the visitor presses play. The editor preview "
+"always preloads a valid recording URL."
+msgstr "在访客点击播放前加载录制文件。编辑器预览始终会预加载有效的录制文件 URL。"
+
+#: src/edit.js:122
+msgid "Loop playback"
+msgstr "循环播放"
+
+#: src/edit.js:87
+msgid "Original size"
+msgstr "原始大小"
+
+#: src/edit.js:15
+msgid ""
+"Placeholders show the recording’s original columns and rows once loaded. "
+"Leave blank to follow its terminal size and recorded resize events. These "
+"overrides change the character grid, not the display width, and may alter "
+"or crop the layout."
+msgstr "加载后，占位提示会显示录制文件的原始行列数。留空可使用录制尺寸，并跟随录制中的尺寸变化。手动设置会改变字符网格，而非显示宽度，可能影响排版或裁切内容。"
+
+#: src/edit.js:120
+msgid "Playback"
+msgstr "播放"
+
+#: src/edit.js:121
+msgid "Playback speed"
+msgstr "播放速度"
+
+#: src/edit.js:130
+msgid "Player controls"
+msgstr "播放控制栏"
+
+#: src/edit.js:114
+msgid "Player width"
+msgstr "播放器宽度"
+
+#: src/edit.js:124
+msgid "Preload on published page"
+msgstr "在发布后的页面预加载"
+
+#: src/edit.js:165
+msgid "Recording caption"
+msgstr "录屏说明文字"
+
+#: src/edit.js:74
+msgid "Recording theme (automatic)"
+msgstr "录制文件主题（自动）"
+
+#: src/edit.js:146
+msgid "Recording URL"
+msgstr "录制文件 URL"
+
+#: src/preview.js:84
+msgid "Retry preview"
+msgstr "重试预览"
+
+#: src/edit.js:116
+msgid "Right"
+msgstr "右对齐"
+
+#: src/edit.js:13
+msgid "Rows"
+msgstr "行数"
+
+#: src/edit.js:126
+msgid "Shorten long pauses. Use 0 to keep the recording’s default."
+msgstr "缩短过长的停顿。设为 0 可保留录制文件的默认设置。"
+
+#: src/edit.js:131
+msgid "Show on interaction"
+msgstr "交互时显示"
+
+#: src/edit.js:125
+msgid "Start at (seconds)"
+msgstr "起始时间（秒）"
+
+#: src/edit.js:99
+#: src/edit.js:101
+#: src/edit.js:110
+msgid "Terminal size"
+msgstr "终端尺寸"
+
+#: src/edit.js:102
+msgid "Terminal size (columns × rows)"
+msgstr "终端尺寸（列数 × 行数）"
+
+#: src/edit.js:136
+msgid ""
+"The custom container style from your shortcode is preserved on the "
+"published page."
+msgstr "发布后的页面会保留简码中的自定义容器样式。"
+
+#: src/edit.js:123
+msgid "The editor preview always waits for you to press play."
+msgstr "编辑器预览始终需要点击播放后才会开始。"
+
+#: src/preview.js:70
+msgid ""
+"The local player could not start. Try again, or check that the plugin’s "
+"built assets are installed."
+msgstr "本地播放器无法启动。请重试，或检查插件的构建资源是否已安装。"
+
+#: src/preview.js:68
+msgid ""
+"The recording is taking too long to load. Check your connection and try "
+"again."
+msgstr "录制文件加载超时。请检查网络连接后重试。"
+
+#: src/edit.js:129
+msgid "Theme"
+msgstr "主题"
+
+#: src/preview.js:59
+msgid ""
+"Unable to load the recording. Check the URL, file format, and the source "
+"server’s CORS permissions."
+msgstr "无法加载录制文件。请检查 URL、文件格式及来源服务器的跨域请求（CORS）权限。"
+
+#: src/view.js:12
+msgid ""
+"Unable to load this terminal recording. The file may be unavailable, "
+"invalid, or blocked by the source server’s CORS policy."
+msgstr "无法加载此终端录屏。文件可能无法访问、格式无效，或被来源服务器的跨域请求（CORS）策略阻止。"
+
+#: includes/uploads.php:197
+msgid ""
+"Upload a valid Asciicast v2/v3 JSONL or pretty-printed v1 .cast recording "
+"(up to 32 MiB; v1 up to 2 MiB, 100,000 events, 256 KiB per JSONL line, and "
+"1,000 columns or rows)."
+msgstr ""
+"请上传有效的 Asciicast v2/v3 JSONL 或格式化的 v1 .cast 录制文件（最大 32 MiB；v1 最大 2 MiB；最多 "
+"100,000 个事件；每行 JSONL最大 256 KiB；列数和行数均不超过 1,000）。"
+
+#: src/edit.js:115
+msgid ""
+"Use a CSS length, such as 480px or 65%. The player stays within its "
+"available space."
+msgstr "使用 CSS 长度，例如 480px 或 65%。播放器不会超出可用空间。"
+
+#: src/edit.js:16
+msgid "Use recording size"
+msgstr "使用录制尺寸"
+
+#: src/edit.js:140
+msgid ""
+"Use the player controls to play, pause, and seek. Autoplay is disabled only "
+"in the editor."
+msgstr "使用播放器控件播放、暂停和跳转。仅编辑器预览禁用自动播放。"
+
+#: src/edit.js:86
+msgid "Width"
+msgstr "按宽度缩放"
+
+#: src/edit.js:89
+msgid "Width and height (legacy)"
+msgstr "按宽高缩放（旧版）"
+
+#: includes/uploads.php:195
+msgid "You are not allowed to upload Asciicast files."
+msgstr "你没有上传 Asciicast 文件的权限。"
+
+#: src/index.js:19
+#: block.json:1
+msgctxt "block description"
+msgid ""
+"Embed and preview a terminal recording with the locally bundled asciinema "
+"player."
+msgstr "使用本地附带的 asciinema 播放器嵌入和预览终端录屏。"
+
+#: src/index.js:20
+#: block.json:1
+msgctxt "block keyword"
+msgid "asciinema"
+msgstr "asciinema"
+
+#: src/index.js:20
+#: block.json:1
+msgctxt "block keyword"
+msgid "recording"
+msgstr "录屏"
+
+#: src/index.js:20
+#: block.json:1
+msgctxt "block keyword"
+msgid "terminal"
+msgstr "终端"
+
+#: src/index.js:18
+#: block.json:1
+msgctxt "block title"
+msgid "Asciicast Player"
+msgstr "Asciicast 播放器"

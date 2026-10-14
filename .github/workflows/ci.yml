@@ -73,10 +73,19 @@ jobs:
           npx --no-install wp-env run cli wp plugin is-active wp-asciiplayer
           npx --no-install wp-env run cli wp core version | tee wordpress-version.txt
           npx --no-install wp-env run cli wp plugin list
+          npx --no-install wp-env run cli wp language core install zh_CN
+          npx --no-install wp-env run cli wp site switch-language en_US
+          npx --no-install wp-env run cli wp user meta update admin locale en_US
       - name: Install Chromium
         run: npx --no-install playwright install --with-deps chromium
       - name: Exercise editor iframe, saved blocks, Pages, posts and legacy shortcodes
-        run: npm run test:e2e
+        env:
+          PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report/en-US
+        run: npm run test:e2e -- --grep-invert @i18n --output=test-results/en-US
+      - name: Exercise real en_US and zh_CN site and user locale combinations
+        env:
+          PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report/i18n
+        run: npm run test:e2e -- --grep @i18n --output=test-results/i18n
       - name: Run Plugin Check (advisory until directory review)
         if: always() && matrix.wordpress == 'latest'
         continue-on-error: true
