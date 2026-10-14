@@ -1,0 +1,119 @@
+name: Build and WordPress integration
+
+on:
+  pull_request:
+  push:
+    branches: ['main', 'codex/**']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  php-compatibility:
+    name: PHP ${{ matrix.php }} syntax and regression tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.3']
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Check syntax and execute PHP regression tests
+        run: |
+          docker run --rm -v "$PWD:/app" -w /app "php:${{ matrix.php }}-cli" sh -ec '
+            find . -type f -name "*.php" -not -path "./node_modules/*" -print0 | xargs -0 -n1 php -l
+            php tests/php/run.php
+          '
+
+  wordpress:
+    name: WordPress ${{ matrix.wordpress }} / PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - wordpress: 'latest'
+            php: '8.2'
+          - wordpress: '6.3'
+            php: '7.4'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+      - run: npm run package
+      - name: Configure clean WordPress version
+        env:
+          WP_TEST_VERSION: ${{ matrix.wordpress }}
+          WP_TEST_PHP: ${{ matrix.php }}
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          fs.writeFileSync('.wp-env.override.json', JSON.stringify({
+            core: process.env.WP_TEST_VERSION === 'latest' ? null : `https://wordpress.org/wordpress-${process.env.WP_TEST_VERSION}.zip`,
+            phpVersion: process.env.WP_TEST_PHP,
+          }, null, 2));
+          JS
+      - name: Start real WordPress and install only the packaged plugin
+        run: |
+          mkdir -p .wp-env-uploads
+          npx --no-install wp-env start
+          npx --no-install wp-env run cli wp plugin install /var/www/html/wp-content/asciiplayer-packages/wp-asciiplayer.zip --activate --force
+          npx --no-install wp-env run cli wp plugin is-active wp-asciiplayer
+          npx --no-install wp-env run cli wp core version | tee wordpress-version.txt
+          npx --no-install wp-env run cli wp plugin list
+          npx --no-install wp-env run cli wp language core install zh_CN
+          npx --no-install wp-env run cli wp site switch-language en_US
+          npx --no-install wp-env run cli wp user meta update admin locale en_US
+      - name: Install Chromium
+        run: npx --no-install playwright install --with-deps chromium
+      - name: Exercise editor iframe, saved blocks, Pages, posts and legacy shortcodes
+        env:
+          PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report/en-US
+        run: npm run test:e2e -- --grep-invert @i18n --output=test-results/en-US
+      - name: Exercise real en_US and zh_CN site and user locale combinations
+        env:
+          PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report/i18n
+        run: npm run test:e2e -- --grep @i18n --output=test-results/i18n
+      - name: Run Plugin Check (advisory until directory review)
+        if: always() && matrix.wordpress == 'latest'
+        continue-on-error: true
+        run: |
+          npx --no-install wp-env run cli wp plugin install plugin-check --activate
+          npx --no-install wp-env run cli wp plugin get plugin-check --field=version | tee plugin-check-version.txt
+          npx --no-install wp-env run cli wp plugin check wp-asciiplayer --require=/var/www/html/wp-content/plugins/plugin-check/cli.php --format=json | tee plugin-check-report.txt
+      - name: Record WordPress and PHP logs
+        if: always()
+        run: |
+          npx --no-install wp-env logs --watch=false > wordpress-logs.txt 2>&1 || true
+          npx --no-install wp-env run cli sh -c 'test ! -f wp-content/debug.log || cat wp-content/debug.log' > wordpress-debug.txt 2>&1 || true
+      - name: Upload integration evidence and installable ZIP
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: wordpress-${{ matrix.wordpress }}-php-${{ matrix.php }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            playwright-report/
+            test-results/
+            plugin-check-version.txt
+            plugin-check-report.txt
+            wordpress-version.txt
+            wordpress-logs.txt
+            wordpress-debug.txt
+            dist/wp-asciiplayer.zip
+      - name: Stop WordPress
+        if: always()
+        run: npx --no-install wp-env stop

@@ -1,0 +1,2 @@
+# Preserve verbatim upstream license texts (some use CRLF or trailing spaces).
+licenses/* -whitespace

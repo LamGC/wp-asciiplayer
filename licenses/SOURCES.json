@@ -1,0 +1,183 @@
+{
+  "notice": "License texts are preserved from the specified upstream versions or release commits. Dependency inventories describe upstream source declarations, not an independently generated binary SBOM.",
+  "sources": [
+    {
+      "file": "avt-LICENSE",
+      "source": "https://raw.githubusercontent.com/asciinema/avt/v0.16.0/LICENSE"
+    },
+    {
+      "file": "rgb-LICENSE",
+      "source": "https://raw.githubusercontent.com/kornelski/rust-rgb/v0.8.50/LICENSE"
+    },
+    {
+      "file": "unicode-width-LICENSE",
+      "source": "https://raw.githubusercontent.com/unicode-rs/unicode-width/v0.1.14/LICENSE-MIT"
+    },
+    {
+      "file": "unicode-width-COPYRIGHT-LICENSE",
+      "source": "https://raw.githubusercontent.com/unicode-rs/unicode-width/v0.1.14/COPYRIGHT"
+    },
+    {
+      "file": "bytemuck-LICENSE",
+      "source": "https://raw.githubusercontent.com/Lokathor/bytemuck/v1.18.0/LICENSE-MIT"
+    },
+    {
+      "file": "talc-LICENSE",
+      "source": "https://raw.githubusercontent.com/SFBdragon/talc/9e75a551c30bd82661e366ede044ba4695826966/LICENSE.md"
+    },
+    {
+      "file": "allocator-api2-LICENSE",
+      "source": "https://raw.githubusercontent.com/zakarumych/allocator-api2/5b163e41f5f6b68969a65dc7afe8a6a9d3d49ccb/LICENSE-MIT"
+    },
+    {
+      "file": "lock_api-LICENSE",
+      "source": "https://raw.githubusercontent.com/Amanieu/parking_lot/lock_api-v0.4.14/LICENSE-MIT"
+    },
+    {
+      "file": "scopeguard-LICENSE",
+      "source": "https://raw.githubusercontent.com/bluss/scopeguard/v1.2.0/LICENSE-MIT"
+    },
+    {
+      "file": "serde-LICENSE",
+      "source": "https://raw.githubusercontent.com/serde-rs/serde/v1.0.203/LICENSE-MIT"
+    },
+    {
+      "file": "serde-wasm-bindgen-LICENSE",
+      "source": "https://raw.githubusercontent.com/RReverser/serde-wasm-bindgen/v0.6.5/LICENSE"
+    },
+    {
+      "file": "wasm-bindgen-LICENSE",
+      "source": "https://raw.githubusercontent.com/wasm-bindgen/wasm-bindgen/0.2.106/LICENSE-MIT"
+    },
+    {
+      "file": "cfg-if-LICENSE",
+      "source": "https://raw.githubusercontent.com/rust-lang/cfg-if/1.0.0/LICENSE-MIT"
+    },
+    {
+      "file": "once_cell-LICENSE",
+      "source": "https://raw.githubusercontent.com/matklad/once_cell/v1.17.1/LICENSE-MIT"
+    },
+    {
+      "file": "serde_json-LICENSE",
+      "source": "https://raw.githubusercontent.com/serde-rs/json/v1.0.93/LICENSE-MIT"
+    },
+    {
+      "file": "ryu-LICENSE",
+      "source": "https://raw.githubusercontent.com/dtolnay/ryu/1.0.12/LICENSE-APACHE"
+    },
+    {
+      "file": "itoa-LICENSE",
+      "source": "https://raw.githubusercontent.com/dtolnay/itoa/1.0.5/LICENSE-MIT"
+    },
+    {
+      "file": "solid-js-LICENSE",
+      "source": "https://raw.githubusercontent.com/solidjs/solid/v1.9.6/LICENSE"
+    },
+    {
+      "file": "solid-primitives-LICENSE",
+      "source": "https://raw.githubusercontent.com/solidjs-community/solid-primitives/@solid-primitives/transition-group@1.1.2/LICENSE",
+      "additional_verified_sources": [
+        "https://raw.githubusercontent.com/solidjs-community/solid-primitives/@solid-primitives/refs@1.1.2/LICENSE",
+        "https://raw.githubusercontent.com/solidjs-community/solid-primitives/@solid-primitives/utils@6.3.2/LICENSE"
+      ]
+    },
+    {
+      "file": "babel-runtime-LICENSE",
+      "source": "https://raw.githubusercontent.com/babel/babel/v7.27.0/LICENSE"
+    },
+    {
+      "file": "regenerator-runtime-LICENSE",
+      "source": "https://raw.githubusercontent.com/facebook/regenerator/v0.14.1/LICENSE"
+    },
+    {
+      "file": "csstype-LICENSE",
+      "source": "https://raw.githubusercontent.com/frenic/csstype/v3.1.1/LICENSE"
+    },
+    {
+      "file": "seroval-LICENSE",
+      "source": "https://raw.githubusercontent.com/lxsmnsyc/seroval/1.5.0/LICENSE"
+    },
+    {
+      "file": "seroval-plugins-LICENSE",
+      "source": "https://raw.githubusercontent.com/lxsmnsyc/seroval/v1.3.0/LICENSE"
+    },
+    {
+      "file": "js-sys-LICENSE",
+      "source": "https://raw.githubusercontent.com/wasm-bindgen/wasm-bindgen/0.2.84/LICENSE-MIT"
+    },
+    {
+      "file": "rustversion-LICENSE",
+      "source": "https://raw.githubusercontent.com/dtolnay/rustversion/1.0.22/LICENSE-MIT"
+    },
+    {
+      "file": "proc-macro2-LICENSE",
+      "source": "https://raw.githubusercontent.com/dtolnay/proc-macro2/1.0.84/LICENSE-MIT"
+    },
+    {
+      "file": "quote-LICENSE",
+      "source": "https://raw.githubusercontent.com/dtolnay/quote/1.0.36/LICENSE-MIT"
+    },
+    {
+      "file": "syn-LICENSE",
+      "source": "https://raw.githubusercontent.com/dtolnay/syn/2.0.66/LICENSE-MIT"
+    },
+    {
+      "file": "bumpalo-LICENSE",
+      "source": "https://raw.githubusercontent.com/fitzgen/bumpalo/3.12.0/LICENSE-MIT"
+    },
+    {
+      "file": "unicode-ident-LICENSE",
+      "source": "https://raw.githubusercontent.com/dtolnay/unicode-ident/1.0.6/LICENSE-UNICODE"
+    },
+    {
+      "file": "unicode-ident-MIT-LICENSE",
+      "source": "https://raw.githubusercontent.com/dtolnay/unicode-ident/1.0.6/LICENSE-MIT"
+    },
+    {
+      "file": "asciinema-player-LICENSE",
+      "source": "https://github.com/asciinema/asciinema-player/blob/v3.17.0/LICENSE"
+    },
+    {
+      "file": "vt-js-LICENSE-APACHE",
+      "source": "https://github.com/asciinema/asciinema-player/blob/v3.17.0/src/vt/LICENSE_APACHE"
+    },
+    {
+      "file": "vt-js-LICENSE-MIT",
+      "source": "https://github.com/asciinema/asciinema-player/blob/v3.17.0/src/vt/LICENSE_MIT"
+    },
+    {
+      "file": "rust-1.85.0-LICENSE-MIT",
+      "source": "https://github.com/rust-lang/rust/blob/1.85.0/LICENSE-MIT"
+    },
+    {
+      "file": "rust-1.85.0-COPYRIGHT",
+      "source": "https://github.com/rust-lang/rust/blob/1.85.0/COPYRIGHT"
+    },
+    {
+      "file": "compiler-builtins-LICENSE",
+      "source": "https://raw.githubusercontent.com/rust-lang/compiler-builtins/compiler_builtins-v0.1.140/LICENSE.txt"
+    },
+    {
+      "file": "upstream-asciinema-player-Cargo.lock",
+      "source": "https://github.com/asciinema/asciinema-player/blob/v3.17.0/src/vt/Cargo.lock"
+    },
+    {
+      "file": "upstream-npm-production-dependencies.json",
+      "source": "https://github.com/asciinema/asciinema-player/blob/v3.17.0/package-lock.json",
+      "note": "Non-dev entries extracted; includes root package metadata."
+    },
+    {
+      "file": "solid-transition-group-LICENSE",
+      "source": "npm:solid-transition-group@0.2.3/LICENSE",
+      "note": "Copied byte-for-byte from installed official npm package; exact upstream version."
+    },
+    {
+      "file": "rust-1.85.0-LICENSE-APACHE",
+      "source": "https://raw.githubusercontent.com/rust-lang/rust/1.85.0/LICENSE-APACHE"
+    },
+    {
+      "file": "compiler-rt-CREDITS",
+      "source": "https://raw.githubusercontent.com/llvm/llvm-project/main/compiler-rt/CREDITS.TXT"
+    }
+  ]
+}

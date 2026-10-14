@@ -1,0 +1,6 @@
+{"version":2,"width":64,"height":12,"timestamp":1700000000,"env":{"TERM":"xterm-256color","SHELL":"/bin/sh"},"title":"Recording-controlled terminal resize"}
+[0.0,"o","$ printf 'Original 64 x 12 grid'\r\n"]
+[0.1,"o","Original 64 x 12 grid\r\n"]
+[1.0,"r","96x18"]
+[1.1,"o","\u001b[2J\u001b[HResized recording grid: 96 x 18\r\n"]
+[30.0,"o","$ "]

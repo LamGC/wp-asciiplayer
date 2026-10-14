@@ -1,0 +1,42 @@
+{
+  "name": "wp-asciiplayer",
+  "version": "1.1.0-dev",
+  "private": true,
+  "description": "Native WordPress asciicast block with real playback previews and compatible shortcodes",
+  "type": "module",
+  "license": "GPL-3.0-only",
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "scripts": {
+    "build": "wp-scripts build --config webpack.config.cjs && node scripts/vendor.mjs && npm run i18n && node scripts/verify-build.mjs",
+    "start": "wp-scripts start --config webpack.config.cjs",
+    "test": "npm run i18n:check && node --test tests/js/*.test.js",
+    "test:php": "php tests/php/run.php",
+    "test:e2e": "playwright test",
+    "wp-env": "wp-env",
+    "package": "node scripts/package.mjs",
+    "i18n": "node scripts/i18n.mjs",
+    "i18n:check": "node scripts/i18n.mjs --check"
+  },
+  "dependencies": {
+    "asciinema-player": "3.17.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.0",
+    "@wordpress/env": "11.17.0",
+    "@wordpress/scripts": "36.1.0",
+    "@babel/parser": "7.29.9",
+    "gettext-parser": "1.4.0"
+  },
+  "cssnano": {
+    "preset": [
+      "default",
+      {
+        "discardComments": {
+          "removeAll": false
+        }
+      }
+    ]
+  }
+}

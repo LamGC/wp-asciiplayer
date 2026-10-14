@@ -1,0 +1,360 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: wp-asciiplayer 1.1.0-dev\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Domain: wp-asciiplayer\n"
+
+#: src/edit.js:91
+msgid "A terminal recording, right in your post."
+msgstr ""
+
+#: src/edit.js:139
+msgid ""
+"A valid recording URL loads its preview automatically, including when "
+"reopening this editor. That server receives your browser’s request. "
+"Published players contact the same server. Use a direct .cast URL; external "
+"servers must allow CORS."
+msgstr ""
+
+#: src/edit.js:165
+msgid "Add a caption…"
+msgstr ""
+
+#: asciicast-player.php:1
+msgid ""
+"Add interactive terminal recordings to posts and pages with a block or "
+"shortcode."
+msgstr ""
+
+#: src/edit.js:132
+msgid "Always show"
+msgstr ""
+
+#: src/edit.js:128
+msgid "Appearance"
+msgstr ""
+
+#: src/edit.js:147
+msgid "Apply URL"
+msgstr ""
+
+#: src/edit.js:163
+#: asciicast-player.php:1
+msgid "Asciicast Player"
+msgstr ""
+
+#: src/edit.js:73
+msgid "Asciinema"
+msgstr ""
+
+#: src/edit.js:123
+msgid "Autoplay on published page"
+msgstr ""
+
+#: src/edit.js:116
+msgid "Center"
+msgstr ""
+
+#: src/edit.js:154
+msgid "Choose an Asciicast (.cast) file from the Media Library."
+msgstr ""
+
+#: src/edit.js:150
+msgid "Choose an Asciicast recording"
+msgstr ""
+
+#: src/edit.js:151
+msgid "Choose recording"
+msgstr ""
+
+#: src/edit.js:104
+msgid "Close"
+msgstr ""
+
+#: src/edit.js:12
+msgid "Columns"
+msgstr ""
+
+#: src/edit.js:81
+msgid "Custom"
+msgstr ""
+
+#: src/edit.js:115
+msgid "Custom width"
+msgstr ""
+
+#: src/edit.js:113
+msgid "Display"
+msgstr ""
+
+#: src/edit.js:116
+msgid "Display alignment"
+msgstr ""
+
+#: src/edit.js:117
+msgid ""
+"Display width scales the recording without changing its terminal columns or "
+"rows. Add a caption directly below the player."
+msgstr ""
+
+#: src/edit.js:115
+msgid ""
+"Enter a positive width with a unit, such as 480px or 65%. The last valid "
+"width is kept."
+msgstr ""
+
+#: src/edit.js:163
+msgid ""
+"Enter a recording URL to load its preview automatically. Playback starts "
+"only when you press play."
+msgstr ""
+
+#: src/edit.js:155
+msgid "Enter an HTTP(S) recording URL or a path starting with a single /."
+msgstr ""
+
+#: src/edit.js:91
+msgid "Example terminal recording"
+msgstr ""
+
+#: src/edit.js:135
+msgid "Fit"
+msgstr ""
+
+#: src/edit.js:12
+#: src/edit.js:13
+msgid "From recording"
+msgstr ""
+
+#: src/edit.js:89
+msgid "Height (legacy)"
+msgstr ""
+
+#: src/edit.js:135
+msgid "Height-based fitting requires a fixed container height in your site CSS."
+msgstr ""
+
+#: src/edit.js:167
+msgid ""
+"Height-based previews use the shortcode’s fixed height when available, or a "
+"320px editor frame. Published height still comes from your container style."
+msgstr ""
+
+#: src/edit.js:138
+msgid "Help"
+msgstr ""
+
+#: src/edit.js:133
+msgid "Hide"
+msgstr ""
+
+#: src/edit.js:126
+msgid "Idle time limit (seconds)"
+msgstr ""
+
+#: src/preview.js:85
+msgid "Interactive terminal recording preview"
+msgstr ""
+
+#: src/edit.js:116
+msgid "Left"
+msgstr ""
+
+#: src/preview.js:83
+msgid "Loading recording…"
+msgstr ""
+
+#: src/edit.js:124
+msgid ""
+"Loads the recording before the visitor presses play. The editor preview "
+"always preloads a valid recording URL."
+msgstr ""
+
+#: src/edit.js:122
+msgid "Loop playback"
+msgstr ""
+
+#: src/edit.js:87
+msgid "Original size"
+msgstr ""
+
+#: src/edit.js:15
+msgid ""
+"Placeholders show the recording’s original columns and rows once loaded. "
+"Leave blank to follow its terminal size and recorded resize events. These "
+"overrides change the character grid, not the display width, and may alter "
+"or crop the layout."
+msgstr ""
+
+#: src/edit.js:120
+msgid "Playback"
+msgstr ""
+
+#: src/edit.js:121
+msgid "Playback speed"
+msgstr ""
+
+#: src/edit.js:130
+msgid "Player controls"
+msgstr ""
+
+#: src/edit.js:114
+msgid "Player width"
+msgstr ""
+
+#: src/edit.js:124
+msgid "Preload on published page"
+msgstr ""
+
+#: src/edit.js:165
+msgid "Recording caption"
+msgstr ""
+
+#: src/edit.js:74
+msgid "Recording theme (automatic)"
+msgstr ""
+
+#: src/edit.js:146
+msgid "Recording URL"
+msgstr ""
+
+#: src/preview.js:84
+msgid "Retry preview"
+msgstr ""
+
+#: src/edit.js:116
+msgid "Right"
+msgstr ""
+
+#: src/edit.js:13
+msgid "Rows"
+msgstr ""
+
+#: src/edit.js:126
+msgid "Shorten long pauses. Use 0 to keep the recording’s default."
+msgstr ""
+
+#: src/edit.js:131
+msgid "Show on interaction"
+msgstr ""
+
+#: src/edit.js:125
+msgid "Start at (seconds)"
+msgstr ""
+
+#: src/edit.js:99
+#: src/edit.js:101
+#: src/edit.js:110
+msgid "Terminal size"
+msgstr ""
+
+#: src/edit.js:102
+msgid "Terminal size (columns × rows)"
+msgstr ""
+
+#: src/edit.js:136
+msgid ""
+"The custom container style from your shortcode is preserved on the "
+"published page."
+msgstr ""
+
+#: src/edit.js:123
+msgid "The editor preview always waits for you to press play."
+msgstr ""
+
+#: src/preview.js:70
+msgid ""
+"The local player could not start. Try again, or check that the plugin’s "
+"built assets are installed."
+msgstr ""
+
+#: src/preview.js:68
+msgid ""
+"The recording is taking too long to load. Check your connection and try "
+"again."
+msgstr ""
+
+#: src/edit.js:129
+msgid "Theme"
+msgstr ""
+
+#: src/preview.js:59
+msgid ""
+"Unable to load the recording. Check the URL, file format, and the source "
+"server’s CORS permissions."
+msgstr ""
+
+#: src/view.js:12
+msgid ""
+"Unable to load this terminal recording. The file may be unavailable, "
+"invalid, or blocked by the source server’s CORS policy."
+msgstr ""
+
+#: includes/uploads.php:197
+msgid ""
+"Upload a valid Asciicast v2/v3 JSONL or pretty-printed v1 .cast recording "
+"(up to 32 MiB; v1 up to 2 MiB, 100,000 events, 256 KiB per JSONL line, and "
+"1,000 columns or rows)."
+msgstr ""
+
+#: src/edit.js:115
+msgid ""
+"Use a CSS length, such as 480px or 65%. The player stays within its "
+"available space."
+msgstr ""
+
+#: src/edit.js:16
+msgid "Use recording size"
+msgstr ""
+
+#: src/edit.js:140
+msgid ""
+"Use the player controls to play, pause, and seek. Autoplay is disabled only "
+"in the editor."
+msgstr ""
+
+#: src/edit.js:86
+msgid "Width"
+msgstr ""
+
+#: src/edit.js:89
+msgid "Width and height (legacy)"
+msgstr ""
+
+#: includes/uploads.php:195
+msgid "You are not allowed to upload Asciicast files."
+msgstr ""
+
+#: src/index.js:19
+#: block.json:1
+msgctxt "block description"
+msgid ""
+"Embed and preview a terminal recording with the locally bundled asciinema "
+"player."
+msgstr ""
+
+#: src/index.js:20
+#: block.json:1
+msgctxt "block keyword"
+msgid "asciinema"
+msgstr ""
+
+#: src/index.js:20
+#: block.json:1
+msgctxt "block keyword"
+msgid "recording"
+msgstr ""
+
+#: src/index.js:20
+#: block.json:1
+msgctxt "block keyword"
+msgid "terminal"
+msgstr ""
+
+#: src/index.js:18
+#: block.json:1
+msgctxt "block title"
+msgid "Asciicast Player"
+msgstr ""

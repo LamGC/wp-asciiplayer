@@ -1,0 +1,548 @@
+import { test, expect } from '@playwright/test';
+
+const blockName = 'lamgc/asciiplayer';
+const fixturePath = '/wp-content/uploads/asciiplayer-fixtures/hello.cast';
+
+async function openEditor(page) {
+    await page.goto('/wp-login.php');
+    await page.locator('#user_login').fill(process.env.WP_USERNAME || 'admin');
+    await page.locator('#user_pass').fill(process.env.WP_PASSWORD || 'password');
+    await page.locator('#wp-submit').click();
+    await expect(page).toHaveURL(/\/wp-admin\//);
+    await page.goto('/wp-admin/post-new.php');
+    await page.waitForFunction((name) => Boolean(
+        window.wp?.blocks?.getBlockType(name) &&
+        window.wp?.data?.select('core/editor')?.getCurrentPostId()
+    ), blockName);
+    await page.evaluate(() => {
+        for (const scope of ['core/edit-post', 'core/editor']) {
+            window.wp.data.dispatch('core/preferences').set(scope, 'welcomeGuide', false);
+        }
+    });
+    await expect(page.locator('iframe[name="editor-canvas"]')).toBeVisible();
+}
+
+async function insertPlayer(page, attributes = {}) {
+    const id = await page.evaluate(({ name, attrs }) => {
+        const block = window.wp.blocks.createBlock(name, attrs);
+        window.wp.data.dispatch('core/block-editor').insertBlocks(block);
+        window.wp.data.dispatch('core/block-editor').selectBlock(block.clientId);
+        return block.clientId;
+    }, { name: blockName, attrs: attributes });
+    return { id, block: page.frameLocator('iframe[name="editor-canvas"]').locator(`[data-block="${id}"]`) };
+}
+
+async function attributes(page, id) {
+    return page.evaluate((clientId) => window.wp.data.select('core/block-editor').getBlockAttributes(clientId), id);
+}
+
+async function readyPreview(block) {
+    await expect(block.locator('.asciiplayer-editor__preview')).toHaveAttribute('data-preview-status', 'ready');
+    await expect(block.locator('.ap-wrapper')).toHaveCount(1);
+}
+
+async function openInspectorPanel(page, name, control) {
+    await page.evaluate(() => window.wp.data.dispatch('core/edit-post').openGeneralSidebar('edit-post/block'));
+    if (!await control.isVisible()) {
+        await page.locator('.components-panel__body-toggle').filter({ hasText: new RegExp(`^${name}$`) }).click();
+    }
+    await expect(control).toBeVisible();
+}
+
+async function publish(page, title) {
+    return page.evaluate(async (postTitle) => {
+        const editor = window.wp.data.dispatch('core/editor');
+        editor.editPost({ title: postTitle, status: 'publish' });
+        await editor.savePost();
+        const state = window.wp.data.select('core/editor');
+        if (state.didPostSaveRequestFail()) throw new Error('WordPress could not save the test post.');
+        return { id: state.getCurrentPostId(), url: state.getPermalink() };
+    }, title);
+}
+
+async function grid(container) {
+    // These are the live VT dimensions rendered by bundled asciinema-player,
+    // not the WordPress attributes or an inferred CSS aspect ratio.
+    return container.locator('.ap-term').evaluate((terminal) => ({
+        cols: Number(terminal.style.getPropertyValue('--term-cols')),
+        rows: Number(terminal.style.getPropertyValue('--term-rows')),
+    }));
+}
+
+async function expectGrid(container, cols, rows) {
+    await expect(container.locator('.ap-term')).toBeVisible();
+    await expect.poll(() => grid(container)).toEqual({ cols, rows });
+    await expect(container.locator('.ap-term-text > .ap-line')).toHaveCount(rows);
+}
+
+async function figureMetrics(figure) {
+    return figure.evaluate((element) => {
+        const rect = element.getBoundingClientRect();
+        const parent = element.parentElement;
+        const outer = parent.getBoundingClientRect();
+        const style = getComputedStyle(parent);
+        const left = outer.left + parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft);
+        const right = outer.right - parseFloat(style.borderRightWidth) - parseFloat(style.paddingRight);
+        return {
+            width: rect.width,
+            available: right - left,
+            leftGap: rect.left - left,
+            rightGap: right - rect.right,
+        };
+    });
+}
+
+async function expectAlignment(figure, alignment, fraction = 0.5) {
+    await expect.poll(async () => {
+        const dimensions = await figureMetrics(figure);
+        return Math.abs(dimensions.width - dimensions.available * fraction);
+    }).toBeLessThan(3);
+    await expect.poll(async () => {
+        const { leftGap, rightGap } = await figureMetrics(figure);
+        return alignment === 'center' ? Math.abs(leftGap - rightGap) : Math.abs(alignment === 'left' ? leftGap : rightGap);
+    }).toBeLessThan(3);
+}
+
+async function screenshot(page, testInfo, name) {
+    const path = testInfo.outputPath(`${name}.png`);
+    await page.screenshot({ path, fullPage: true });
+    await testInfo.attach(name, { path, contentType: 'image/png' });
+}
+
+test('display width, alignment and caption survive editor save/reload without changing the recording grid', async ({ page }, testInfo) => {
+    await openEditor(page);
+    const source = new URL(fixturePath, page.url()).href;
+    const { id, block } = await insertPlayer(page, { source, controls: 'always' });
+    await readyPreview(block);
+    await expectGrid(block, 64, 12);
+    expect((await attributes(page, id)).cols).toBeUndefined();
+    expect((await attributes(page, id)).rows).toBeUndefined();
+    const figure = block.locator('.asciiplayer-figure');
+    const width = page.getByRole('combobox', { name: 'Player width', exact: true });
+    await openInspectorPanel(page, 'Display', width);
+    // Keep a marker on the actual terminal: display-only changes must neither
+    // reconstruct it nor alter rows/columns, so playback position is preserved.
+    await block.locator('.ap-term').evaluate((element) => { element.dataset.layoutIdentity = 'unchanged'; });
+    await width.selectOption('50%');
+    const alignment = page.getByRole('combobox', { name: 'Display alignment', exact: true });
+    for (const value of ['left', 'center', 'right']) {
+        await alignment.selectOption(value);
+        await expectAlignment(figure, value);
+        await expectGrid(block, 64, 12);
+        await expect(block.locator('.ap-term')).toHaveAttribute('data-layout-identity', 'unchanged');
+    }
+    await width.selectOption('custom');
+    const customWidth = page.getByRole('textbox', { name: 'Custom width', exact: true });
+    await customWidth.fill('240px');
+    await customWidth.press('Tab');
+    await expect.poll(async () => Math.abs((await figure.boundingBox()).width - 240)).toBeLessThan(2);
+    await customWidth.fill('calc(100% - 20px)');
+    await customWidth.press('Tab');
+    await expect(customWidth).toHaveAttribute('aria-invalid', 'true');
+    expect((await attributes(page, id)).width).toBe('240px');
+    await width.selectOption('50%');
+    const caption = figure.locator('figcaption[contenteditable="true"]');
+    await caption.fill('Example terminal session');
+    await caption.press('Tab');
+    await expect.poll(async () => (await attributes(page, id)).caption).toContain('Example terminal session');
+    const saved = await publish(page, 'Player display layout regression');
+    await screenshot(page, testInfo, 'layout-editor-desktop');
+    await page.reload();
+    await page.waitForFunction((name) => window.wp?.data?.select('core/block-editor')?.getBlocks().some((block) => block.name === name), blockName);
+    const reloaded = await page.evaluate((name) => window.wp.data.select('core/block-editor').getBlocks().find((block) => block.name === name), blockName);
+    expect(reloaded.attributes).toMatchObject({ source, width: '50%', displayAlign: 'right', caption: 'Example terminal session' });
+    expect(reloaded.attributes.cols).toBeUndefined();
+    expect(reloaded.attributes.rows).toBeUndefined();
+    const reloadedBlock = page.frameLocator('iframe[name="editor-canvas"]').locator(`[data-block="${reloaded.clientId}"]`);
+    await readyPreview(reloadedBlock);
+    await expectGrid(reloadedBlock, 64, 12);
+    await expectAlignment(reloadedBlock.locator('.asciiplayer-figure'), 'right');
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expectGrid(reloadedBlock, 64, 12);
+    const editorCanvasWidth = await page.locator('iframe[name="editor-canvas"]').evaluate((element) => element.clientWidth);
+    await expect.poll(async () => (await reloadedBlock.locator('.ap-wrapper').boundingBox()).width).toBeLessThanOrEqual(editorCanvasWidth);
+    await screenshot(page, testInfo, 'layout-editor-mobile');
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto(saved.url);
+    const frontend = page.locator('.asciiplayer-container');
+    const frontendFigure = page.locator('.asciiplayer-figure');
+    await expectGrid(frontend, 64, 12);
+    await expect(frontendFigure.locator('figcaption')).toHaveText('Example terminal session');
+    await expectAlignment(frontendFigure, 'right');
+    const options = JSON.parse(await frontend.getAttribute('data-ap-options'));
+    expect(options).not.toHaveProperty('cols');
+    expect(options).not.toHaveProperty('rows');
+    expect(options).not.toHaveProperty('width');
+    expect(options).not.toHaveProperty('caption');
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expectGrid(frontend, 64, 12);
+    await expectAlignment(frontendFigure, 'right');
+    const bounds = await frontendFigure.boundingBox();
+    expect(bounds.x).toBeGreaterThanOrEqual(0);
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(391);
+    await screenshot(page, testInfo, 'layout-frontend-mobile');
+});
+
+test('toolbar terminal dimensions are discoverable, preserve focus and synchronize with the collapsed sidebar', async ({ page }, testInfo) => {
+    await openEditor(page);
+    const source = new URL(fixturePath, page.url()).href;
+    const { id, block } = await insertPlayer(page, { source });
+    await readyPreview(block);
+    await expect(block.getByRole('spinbutton', { name: 'Columns', exact: true })).toHaveCount(0);
+    await expect(block.getByRole('spinbutton', { name: 'Rows', exact: true })).toHaveCount(0);
+    await page.evaluate(() => window.wp.data.dispatch('core/edit-post').closeGeneralSidebar());
+    // Core hides contextual tools while typing; mirror its own test utility.
+    await page.mouse.move(50, 50);
+    await page.mouse.move(75, 75);
+    await page.mouse.move(100, 100);
+    const toolbar = page.getByRole('toolbar', { name: 'Block tools', exact: true });
+    const toggle = toolbar.getByRole('button', { name: 'Terminal size', exact: true });
+    await expect(toggle).toBeVisible();
+    await block.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300); // Let the sidebar-close layout transition settle.
+    const before = await block.boundingBox();
+    await toggle.click();
+    const popover = page.getByRole('dialog', { name: 'Terminal size', exact: true });
+    const columns = popover.getByRole('spinbutton', { name: 'Columns', exact: true });
+    const rows = popover.getByRole('spinbutton', { name: 'Rows', exact: true });
+    await expect(popover).toBeVisible();
+    await expect(columns).toBeVisible();
+    await expect(rows).toBeVisible();
+    await expect(columns).toBeFocused();
+    await expect(columns).toHaveValue('');
+    await expect(rows).toHaveValue('');
+    await expect(columns).toHaveAttribute('placeholder', '64');
+    await expect(rows).toHaveAttribute('placeholder', '12');
+    expect((await attributes(page, id)).cols).toBeUndefined();
+    expect((await attributes(page, id)).rows).toBeUndefined();
+    const after = await block.boundingBox();
+    expect(Math.abs(after.width - before.width)).toBeLessThan(2);
+    expect(Math.abs(after.height - before.height)).toBeLessThan(2);
+    await screenshot(page, testInfo, 'terminal-size-toolbar-popover');
+    // Invalid overrides are cleared rather than changing the recording grid.
+    await columns.fill('0');
+    await columns.press('Tab');
+    await rows.fill('1001');
+    await rows.press('Tab');
+    await expect(columns).toHaveValue('');
+    await expect(rows).toHaveValue('');
+    expect((await attributes(page, id)).cols).toBeUndefined();
+    expect((await attributes(page, id)).rows).toBeUndefined();
+    await expectGrid(block, 64, 12);
+    await columns.fill('88');
+    await columns.press('Tab');
+    await rows.fill('16');
+    await rows.press('Tab');
+    await expectGrid(block, 88, 16);
+    await rows.press('Escape');
+    await expect(popover).toBeHidden();
+    await expect(toggle).toBeFocused();
+    await toggle.click();
+    await expect(columns).toHaveValue('88');
+    await expect(rows).toHaveValue('16');
+    // A manual override must not become the displayed recording metadata.
+    await expect(columns).toHaveAttribute('placeholder', '64');
+    await expect(rows).toHaveAttribute('placeholder', '12');
+    await columns.fill('');
+    await columns.press('Tab');
+    await expectGrid(block, 64, 16);
+    expect((await attributes(page, id)).cols).toBeUndefined();
+    await columns.fill('88');
+    await columns.press('Tab');
+    await expectGrid(block, 88, 16);
+    await popover.getByRole('button', { name: 'Use recording size', exact: true }).click();
+    await expectGrid(block, 64, 12);
+    await expect(columns).toHaveValue('');
+    await expect(rows).toHaveValue('');
+    await columns.fill('88');
+    await rows.fill('16');
+    await rows.press('Tab');
+    await expectGrid(block, 88, 16);
+    await popover.getByRole('button', { name: 'Close', exact: true }).click();
+    await expect(popover).toBeHidden();
+    await page.evaluate(() => window.wp.data.dispatch('core/edit-post').openGeneralSidebar('edit-post/block'));
+    const panelToggle = page.locator('.components-panel__body-toggle').filter({ hasText: /^Terminal size$/ });
+    await expect(panelToggle).toHaveAttribute('aria-expanded', 'false');
+    await panelToggle.click();
+    const sidebarColumns = page.getByRole('spinbutton', { name: 'Columns', exact: true });
+    const sidebarRows = page.getByRole('spinbutton', { name: 'Rows', exact: true });
+    await expect(sidebarColumns).toHaveValue('88');
+    await expect(sidebarRows).toHaveValue('16');
+    await expect(sidebarColumns).toHaveAttribute('placeholder', '64');
+    await expect(sidebarRows).toHaveAttribute('placeholder', '12');
+    await sidebarRows.fill('');
+    await sidebarRows.press('Tab');
+    await expectGrid(block, 88, 12);
+    await page.getByRole('button', { name: 'Use recording size', exact: true }).click();
+    await expectGrid(block, 64, 12);
+    expect((await attributes(page, id)).cols).toBeUndefined();
+    expect((await attributes(page, id)).rows).toBeUndefined();
+    await toggle.click();
+    await expect(columns).toHaveValue('');
+    await expect(rows).toHaveValue('');
+    await expect(columns).toHaveAttribute('placeholder', '64');
+    await expect(rows).toHaveAttribute('placeholder', '12');
+    await popover.getByRole('button', { name: 'Close', exact: true }).click();
+    const saved = await publish(page, 'Reset terminal dimensions regression');
+    await page.goto(saved.url);
+    const frontend = page.locator('.asciiplayer-container');
+    await expectGrid(frontend, 64, 12);
+    const options = JSON.parse(await frontend.getAttribute('data-ap-options'));
+    expect(options).not.toHaveProperty('cols');
+    expect(options).not.toHaveProperty('rows');
+});
+
+test('recorded resize events remain authoritative except on explicitly overridden axes', async ({ page }) => {
+    await openEditor(page);
+    const source = new URL('/wp-content/uploads/asciiplayer-fixtures/resize.cast', page.url()).href;
+    const cases = [
+        { overrides: {}, cols: 96, rows: 18 },
+        { overrides: { cols: 80 }, cols: 80, rows: 18 },
+        { overrides: { rows: 24 }, cols: 96, rows: 24 },
+        { overrides: { cols: 80, rows: 24 }, cols: 80, rows: 24 },
+    ];
+    for (const entry of cases) {
+        const { id, block } = await insertPlayer(page, { source, startAt: 2, ...entry.overrides });
+        await readyPreview(block);
+        await expectGrid(block, entry.overrides.cols ?? 64, entry.overrides.rows ?? 12);
+        await block.locator('.ap-overlay-start .ap-play-button').click();
+        await expectGrid(block, entry.cols, entry.rows);
+        const columns = page.getByRole('spinbutton', { name: 'Columns', exact: true });
+        const rows = page.getByRole('spinbutton', { name: 'Rows', exact: true });
+        await openInspectorPanel(page, 'Terminal size', columns);
+        // Placeholders describe the cast header, even after its resize event.
+        await expect(columns).toHaveAttribute('placeholder', '64');
+        await expect(rows).toHaveAttribute('placeholder', '12');
+        expect((await attributes(page, id)).cols).toBe(entry.overrides.cols);
+        expect((await attributes(page, id)).rows).toBe(entry.overrides.rows);
+    }
+    const saved = await publish(page, 'Recording resize and explicit axes regression');
+    await page.goto(saved.url);
+    const players = page.locator('.asciiplayer-container');
+    await expect(players).toHaveCount(cases.length);
+    for (const [index, entry] of cases.entries()) {
+        await expectGrid(players.nth(index), entry.overrides.cols ?? 64, entry.overrides.rows ?? 12);
+        await players.nth(index).locator('.ap-overlay-start .ap-play-button').click();
+        await expectGrid(players.nth(index), entry.cols, entry.rows);
+        await expect(players.nth(index).locator('.ap-term-text')).toContainText('Resized recording grid');
+    }
+    await page.setViewportSize({ width: 390, height: 844 });
+    for (const [index, entry] of cases.entries()) await expectGrid(players.nth(index), entry.cols, entry.rows);
+});
+
+test('published figures preserve all alignments, safe captions and terminal typography under theme CSS', async ({ page }, testInfo) => {
+    await openEditor(page);
+    const source = new URL(fixturePath, page.url()).href;
+    const caption = 'Safe caption<br>with a second line &amp; literal text';
+    for (const displayAlign of ['left', 'center', 'right']) {
+        await insertPlayer(page, { source, width: '50%', displayAlign, caption });
+    }
+    // Raw block attributes can come from REST/imported post content, bypassing
+    // RichText's editor filtering. The server must sanitize them independently.
+    await insertPlayer(page, {
+        source,
+        caption: '<script>window.__captionXss = true</script><img src="x" onerror="window.__captionXss = true"><a href="javascript:window.__captionXss=true">unsafe link</a><strong>Still safe</strong>',
+    });
+    const saved = await publish(page, 'Frontend figure and caption sanitization regression');
+    await page.addInitScript((content) => {
+        const install = () => {
+            if (!document.documentElement) return false;
+            const stylesheet = document.createElement('style');
+            stylesheet.textContent = content;
+            document.documentElement.appendChild(stylesheet);
+            return true;
+        };
+        if (!install()) {
+            const observer = new MutationObserver(() => { if (install()) observer.disconnect(); });
+            observer.observe(document, { childList: true, subtree: true });
+        }
+    }, `
+        body { letter-spacing: 1.5px; line-height: 2; text-align: center; }
+        figure { margin: 2em 40px; }
+        pre { padding: 24px !important; margin: 24px !important; font-family: serif !important; font-size: 24px !important; line-height: 2 !important; white-space: pre-wrap !important; border: 2px solid red !important; box-shadow: 0 0 0 3px red !important; }
+        pre span { font-family: serif !important; font-size: 24px !important; line-height: 2 !important; letter-spacing: 2px !important; }
+        button { border: 2px solid red !important; box-shadow: 0 0 0 3px red !important; }
+    `);
+    await page.goto(saved.url);
+    const figures = page.locator('.asciiplayer-figure');
+    const desktopFontSizes = [];
+    await expect(figures).toHaveCount(4);
+    for (const [index, displayAlign] of ['left', 'center', 'right'].entries()) {
+        const figure = figures.nth(index);
+        await expectAlignment(figure, displayAlign);
+        await expectGrid(figure, 64, 12);
+        await figure.locator('.ap-overlay-start .ap-play-button').click();
+        await expect(figure.locator('.ap-term-text')).toContainText('Hello from wp-asciiplayer');
+        await expect(figure.locator('figcaption')).toHaveText('Safe captionwith a second line & literal text');
+        await expect(figure.locator('figcaption br')).toHaveCount(1);
+        const typography = await figure.locator('.ap-term-text').evaluate((element) => {
+            const style = getComputedStyle(element);
+            const parent = getComputedStyle(element.parentElement);
+            return {
+                padding: style.padding,
+                margin: style.margin,
+                whiteSpace: style.whiteSpace,
+                borderWidth: style.borderWidth,
+                boxShadow: style.boxShadow,
+                familyMatches: style.fontFamily === parent.fontFamily,
+                fontSizeMatches: style.fontSize === parent.fontSize,
+                textAlign: style.textAlign,
+            };
+        });
+        expect(typography).toEqual({ padding: '0px', margin: '0px', whiteSpace: 'pre', borderWidth: '0px', boxShadow: 'none', familyMatches: true, fontSizeMatches: true, textAlign: 'left' });
+        desktopFontSizes.push(await figure.locator('.ap-term').evaluate((element) => parseFloat(getComputedStyle(element).fontSize)));
+        const rowTypography = await figure.locator('.ap-term-text .ap-line').first().evaluate((element) => {
+            const style = getComputedStyle(element);
+            const terminal = getComputedStyle(element.closest('.ap-term'));
+            return { fontSizeMatches: style.fontSize === terminal.fontSize, familyMatches: style.fontFamily === terminal.fontFamily };
+        });
+        expect(rowTypography).toEqual({ fontSizeMatches: true, familyMatches: true });
+        const spanTypography = await figure.locator('.ap-term-text .ap-line span').first().evaluate((element) => {
+            const style = getComputedStyle(element);
+            const terminal = getComputedStyle(element.closest('.ap-term'));
+            return { fontSizeMatches: style.fontSize === terminal.fontSize, familyMatches: style.fontFamily === terminal.fontFamily, letterSpacing: style.letterSpacing };
+        });
+        expect(spanTypography).toEqual({ fontSizeMatches: true, familyMatches: true, letterSpacing: 'normal' });
+        const controls = await figure.locator('.ap-control-bar button.ap-button').first().evaluate((element) => {
+            const style = getComputedStyle(element);
+            return { borderWidth: style.borderWidth, boxShadow: style.boxShadow };
+        });
+        expect(controls).toEqual({ borderWidth: '0px', boxShadow: 'none' });
+    }
+    const unsafeCaption = figures.nth(3).locator('figcaption');
+    await expect(unsafeCaption).toContainText('Still safe');
+    await expect(unsafeCaption.locator('script, img, iframe, a, strong, [onerror], [onclick]')).toHaveCount(0);
+    expect(await page.evaluate(() => window.__captionXss)).toBeUndefined();
+    await page.setViewportSize({ width: 390, height: 844 });
+    for (const [index, displayAlign] of ['left', 'center', 'right'].entries()) {
+        await expectAlignment(figures.nth(index), displayAlign);
+        await expectGrid(figures.nth(index), 64, 12);
+        await expect.poll(() => figures.nth(index).locator('.ap-term').evaluate((element) => parseFloat(getComputedStyle(element).fontSize))).toBeLessThan(desktopFontSizes[index]);
+        const scaledTypography = await figures.nth(index).locator('.ap-term').evaluate((terminal) => {
+            const expected = getComputedStyle(terminal);
+            return [...terminal.querySelectorAll('.ap-term-text, .ap-line, .ap-line span')].every((element) => {
+                const style = getComputedStyle(element);
+                return style.fontSize === expected.fontSize && style.fontFamily === expected.fontFamily;
+            });
+        });
+        expect(scaledTypography).toBe(true);
+    }
+    await screenshot(page, testInfo, 'layout-theme-css-mobile');
+    // Physical left/right placement must remain the same inside RTL content.
+    // This covers direction inheritance at runtime; generated RTL stylesheets
+    // are independently protected by the source's rtlcss ignore directive.
+    await page.evaluate(() => {
+        document.documentElement.dir = 'rtl';
+        for (const figure of document.querySelectorAll('.asciiplayer-figure')) {
+            figure.parentElement.dir = 'rtl';
+        }
+    });
+    for (const [index, displayAlign] of ['left', 'center', 'right'].entries()) {
+        await expectAlignment(figures.nth(index), displayAlign);
+        await expectGrid(figures.nth(index), 64, 12);
+    }
+    await screenshot(page, testInfo, 'layout-theme-css-mobile-rtl');
+});
+
+test('the inserter example is a local static preview and makes no recording request', async ({ page }, testInfo) => {
+    await openEditor(page);
+    const example = await page.evaluate((name) => window.wp.blocks.getBlockType(name).example, blockName);
+    expect(example).toMatchObject({ attributes: { isExample: true } });
+    const recordingRequests = [];
+    page.on('request', (request) => {
+        if (/\.cast(?:[?#]|$)|asciinema\.org|jsdelivr\.net/.test(request.url())) recordingRequests.push(request.url());
+    });
+    // A saved URL must never turn an inserter example into a network preview.
+    const { block } = await insertPlayer(page, { ...example.attributes, source: new URL(fixturePath, page.url()).href });
+    await expect(block.locator('.asciiplayer-example')).toContainText('Hello, terminal!');
+    await expect(block.getByRole('textbox', { name: 'Recording URL', exact: true })).toHaveCount(0);
+    await expect(block.locator('.ap-wrapper')).toHaveCount(0);
+    await page.waitForTimeout(750); // Exceed the automatic URL debounce window.
+    await screenshot(page, testInfo, 'static-inserter-example');
+    expect(recordingRequests).toEqual([]);
+});
+
+test('outer editor blocks respect WordPress content gutters and core wide/full boundaries', async ({ page }, testInfo) => {
+    await openEditor(page);
+    const source = new URL(fixturePath, page.url()).href;
+    const cases = await page.evaluate(({ name, sourceUrl }) => {
+        const { createBlock, getBlockType } = window.wp.blocks;
+        const paragraph = (text) => createBlock('core/paragraph', { content: text });
+        const before = paragraph('Paragraph before the player: the standard editor content boundary.');
+        const player = createBlock(name, { source: sourceUrl, width: '100%' });
+        const after = paragraph('Paragraph after the player: the same standard content boundary.');
+        const blocks = [before, player, after];
+        const entries = [{ alignment: 'default', playerId: player.clientId, referenceIds: [before.clientId, after.clientId] }];
+        const supportsAlignment = (block, align) => {
+            const support = getBlockType(block)?.supports?.align;
+            return support === true || Array.isArray(support) && support.includes(align);
+        };
+        for (const align of ['wide', 'full']) {
+            if (!supportsAlignment(name, align) || !supportsAlignment('core/group', align)) continue;
+            // Paragraphs do not support wide/full. A core Group supplies the
+            // native aligned boundary for its paragraph without custom sizing.
+            const reference = createBlock('core/group', { align, layout: { type: 'default' } }, [
+                paragraph(`${align} core Group paragraph: native WordPress alignment reference.`),
+            ]);
+            const alignedPlayer = createBlock(name, { source: sourceUrl, width: '100%', align });
+            blocks.push(reference, alignedPlayer);
+            entries.push({ alignment: align, playerId: alignedPlayer.clientId, referenceIds: [reference.clientId] });
+        }
+        window.wp.data.dispatch('core/block-editor').insertBlocks(blocks);
+        window.wp.data.dispatch('core/block-editor').selectBlock(player.clientId);
+        return entries;
+    }, { name: blockName, sourceUrl: source });
+    const canvas = page.frameLocator('iframe[name="editor-canvas"]');
+    for (const entry of cases) await readyPreview(canvas.locator(`[data-block="${entry.playerId}"]`));
+    for (const viewport of [{ width: 1280, height: 900 }, { width: 390, height: 844 }]) {
+        await page.setViewportSize(viewport);
+        for (const entry of cases) {
+            const block = canvas.locator(`[data-block="${entry.playerId}"]`);
+            const measure = () => block.evaluate((element, referenceIds) => {
+                const document = element.ownerDocument;
+                const horizontal = (node) => {
+                    const box = node.getBoundingClientRect();
+                    return { left: box.left, right: box.right, width: box.width };
+                };
+                const outer = horizontal(element);
+                const references = referenceIds.map((id) => horizontal(document.querySelector(`[data-block="${id}"]`)));
+                const root = element.closest('.is-root-container');
+                if (!root) throw new Error('WordPress editor content root was not found.');
+                const rootBounds = horizontal(root);
+                const rootStyle = getComputedStyle(root);
+                const contentLeft = rootBounds.left + parseFloat(rootStyle.borderLeftWidth) + parseFloat(rootStyle.paddingLeft);
+                const contentRight = rootBounds.right - parseFloat(rootStyle.borderRightWidth) - parseFloat(rootStyle.paddingRight);
+                return {
+                    outer, references, contentLeft, contentRight,
+                    viewportWidth: document.documentElement.clientWidth,
+                    leftError: Math.max(...references.map((reference) => Math.abs(outer.left - reference.left))),
+                    rightError: Math.max(...references.map((reference) => Math.abs(outer.right - reference.right))),
+                    player: horizontal(element.querySelector('.ap-wrapper')),
+                    boxSizing: getComputedStyle(element).boxSizing,
+                };
+            }, entry.referenceIds);
+            // Compare the OUTER border box to independently rendered native
+            // blocks. Inner-figure/parent checks alone miss a 34px padding leak.
+            await expect.poll(async () => (await measure()).leftError).toBeLessThan(2);
+            await expect.poll(async () => (await measure()).rightError).toBeLessThan(2);
+            const geometry = await measure();
+            expect(geometry.boxSizing).toBe('border-box');
+            expect(geometry.outer.left).toBeGreaterThanOrEqual(-2);
+            expect(geometry.outer.right).toBeLessThanOrEqual(geometry.viewportWidth + 2);
+            if (entry.alignment === 'default') {
+                expect(geometry.outer.left).toBeGreaterThanOrEqual(geometry.contentLeft - 2);
+                expect(geometry.outer.right).toBeLessThanOrEqual(geometry.contentRight + 2);
+                expect(geometry.outer.left).toBeGreaterThan(0);
+                expect(geometry.outer.right).toBeLessThan(geometry.viewportWidth);
+            }
+            expect(geometry.player.left).toBeGreaterThanOrEqual(geometry.outer.left);
+            expect(geometry.player.right).toBeLessThanOrEqual(geometry.outer.right + 1);
+            await expectGrid(block, 64, 12);
+            await testInfo.attach(`editor-gutters-${entry.alignment}-${viewport.width}`, {
+                body: Buffer.from(JSON.stringify(geometry, null, 2)), contentType: 'application/json',
+            });
+        }
+        await canvas.locator(`[data-block="${cases[0].playerId}"]`).scrollIntoViewIfNeeded();
+        await screenshot(page, testInfo, `editor-content-gutters-${viewport.width}`);
+    }
+});
