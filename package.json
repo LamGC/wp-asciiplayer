@@ -27,7 +27,7 @@
     "@wordpress/env": "11.17.0",
     "@wordpress/scripts": "36.1.0",
     "@babel/parser": "7.29.9",
-    "gettext-parser": "1.4.0"
+    "gettext-parser": "9.1.1"
   },
   "cssnano": {
     "preset": [
