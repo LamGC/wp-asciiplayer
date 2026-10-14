@@ -7,7 +7,7 @@ const copy = {
     en_US: {
         title: 'Asciicast Player', source: 'Recording URL', apply: 'Apply URL',
         choose: 'Choose recording', dimensions: 'Terminal size', columns: 'Columns', rows: 'Rows',
-        help: 'Help', retry: 'Retry preview', caption: 'Add a caption…',
+        help: 'Help', retry: 'Retry preview', captionLabel: 'Recording caption',
         previewError: 'Unable to load the recording. Check the URL, file format, and the source server’s CORS permissions.',
         frontendError: 'Unable to load this terminal recording. The file may be unavailable, invalid, or blocked by the source server’s CORS policy.',
         uploadError: 'Upload a valid Asciicast v2/v3 JSONL or pretty-printed v1 .cast recording (up to 32 MiB; v1 up to 2 MiB, 100,000 events, 256 KiB per JSONL line, and 1,000 columns or rows).',
@@ -15,7 +15,7 @@ const copy = {
     zh_CN: {
         title: 'Asciicast 播放器', source: '录制文件 URL', apply: '应用 URL',
         choose: '选择录制文件', dimensions: '终端尺寸', columns: '列数', rows: '行数',
-        help: '帮助', retry: '重试预览', caption: '添加说明文字…',
+        help: '帮助', retry: '重试预览', captionLabel: '录屏说明文字',
         previewError: '无法加载录制文件。请检查 URL、文件格式及来源服务器的跨域请求（CORS）权限。',
         frontendError: '无法加载此终端录屏。文件可能无法访问、格式无效，或被来源服务器的跨域请求（CORS）策略阻止。',
         uploadError: '请上传有效的 Asciicast v2/v3 JSONL 或格式化的 v1 .cast 录制文件（最大 32 MiB；v1 最大 2 MiB；最多 100,000 个事件；每行 JSONL最大 256 KiB；列数和行数均不超过 1,000）。',
@@ -116,7 +116,7 @@ async function rejectInvalidUpload(page, block, locale, testInfo) {
 
 async function verifyFrontend(page, url, locale) {
     await page.goto(url);
-    await expect(page.locator('html')).toHaveAttribute('lang', locale.replace('_', '-'));
+    await expect(page.locator('html')).toHaveAttribute('lang', locale === 'zh_CN' ? /^zh-(CN|Hans)$/ : 'en-US');
     const players = page.locator('.asciiplayer-container');
     await expect(players).toHaveCount(3);
     await assertTranslatedError(players.nth(1).locator('.asciiplayer-error'), locale, 'frontendError');
@@ -145,14 +145,14 @@ test.describe('@i18n real WordPress site and user locales', () => {
             const pageErrors = [];
             page.on('pageerror', (error) => pageErrors.push(error.message));
             await openEditor(page);
-            await expect(page.locator('html')).toHaveAttribute('lang', userLocale.replace('_', '-'));
+            await expect(page.locator('html')).toHaveAttribute('lang', userLocale === 'zh_CN' ? /^zh-(CN|Hans)$/ : 'en-US');
             expect(await page.evaluate((name) => window.wp.blocks.getBlockType(name).title, blockName)).toBe(ui.title);
             const block = await insertPlayer(page);
             const source = block.getByRole('textbox', { name: ui.source, exact: true });
             await expect(source).toBeVisible();
             await expect(block.getByRole('button', { name: ui.apply, exact: true })).toBeVisible();
             await expect(block.getByRole('button', { name: ui.choose, exact: true })).toBeVisible();
-            await expect(block.locator('figcaption[contenteditable="true"]')).toHaveAttribute('data-placeholder', ui.caption);
+            await expect(block.locator('figcaption[contenteditable="true"]')).toHaveAttribute('aria-label', ui.captionLabel);
 
             await page.evaluate(() => window.wp.data.dispatch('core/edit-post').openGeneralSidebar('edit-post/block'));
             await page.locator('.components-panel__body-toggle').filter({ hasText: new RegExp(`^${ui.dimensions}$`) }).click();
