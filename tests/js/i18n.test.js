@@ -27,8 +27,12 @@ test('all extracted strings and gettext contexts round-trip through MO and both 
 });
 
 test('catalogs use Chinese plural rules, exact locale, and standard WordPress textdomain', () => {
-  assert.equal(po.headers.language, 'zh_CN');
-  assert.equal(mo.headers.language, 'zh_CN');
+  assert.equal(po.headers.Language, 'zh_CN');
+  assert.equal(mo.headers.Language, 'zh_CN');
+  assert.equal(po.headers['Plural-Forms'], 'nplurals=1; plural=0;');
+  assert.equal(mo.headers['Plural-Forms'], 'nplurals=1; plural=0;');
+  assert.equal(pot.headers['Project-Id-Version'], `wp-asciiplayer ${JSON.parse(fs.readFileSync('package.json')).version}`);
+  assert.equal(pot.headers['Content-Type'], 'text/plain; charset=utf-8');
   assert.equal(editor[''].lang, 'zh_CN');
   assert.equal(editor[''].domain, 'wp-asciiplayer');
   assert.equal(editor['']['plural-forms'], 'nplurals=1; plural=0;');
