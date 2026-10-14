@@ -6,7 +6,8 @@
   "type": "module",
   "license": "GPL-3.0-only",
   "engines": {
-    "node": ">=22.22.2"
+    "node": "^24.18.0 || >=26.0.0",
+    "npm": ">=11.16.0"
   },
   "scripts": {
     "build": "wp-scripts build --config webpack.config.cjs && node scripts/vendor.mjs && npm run i18n && node scripts/verify-build.mjs",
@@ -26,8 +27,8 @@
     "@playwright/test": "1.64.0",
     "@wordpress/env": "11.17.0",
     "@wordpress/scripts": "36.1.0",
-    "@babel/parser": "7.29.9",
-    "gettext-parser": "1.4.0"
+    "@babel/parser": "8.0.7",
+    "gettext-parser": "9.1.1"
   },
   "cssnano": {
     "preset": [
@@ -38,5 +39,20 @@
         }
       }
     ]
+  },
+  "overrides": {
+    "copy-webpack-plugin": {
+      "serialize-javascript": "7.0.5"
+    },
+    "markdownlint-cli": {
+      "js-yaml": "5.4.3",
+      "smol-toml": "1.9.1"
+    },
+    "express": {
+      "qs": "6.16.0"
+    },
+    "simple-git": {
+      "@simple-git/argv-parser": "2.0.1"
+    }
   }
 }

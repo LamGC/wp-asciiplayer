@@ -51,7 +51,7 @@ const metadata = JSON.parse(fs.readFileSync('block.json'));
 for (const [field, context] of [['title', 'block title'], ['description', 'block description'], ['keywords', 'block keyword']]) {
   for (const value of [].concat(metadata[field])) add(value, context, 'block.json', 1);
 }
-const headers = { 'project-id-version': `${domain} ${version}`, 'mime-version': '1.0', 'content-type': 'text/plain; charset=UTF-8', 'content-transfer-encoding': '8bit', 'x-domain': domain };
+const headers = { 'Project-Id-Version': `${domain} ${version}`, 'MIME-Version': '1.0', 'Content-Type': 'text/plain; charset=UTF-8', 'Content-Transfer-Encoding': '8bit', 'X-Domain': domain };
 const pot = { charset: 'utf-8', headers, translations: { '': {} } };
 for (const entry of [...entries.values()].sort((a, b) => `${a.msgctxt || ''}\u0004${a.msgid}`.localeCompare(`${b.msgctxt || ''}\u0004${b.msgid}`, 'en'))) {
   const context = entry.msgctxt || '';
@@ -61,8 +61,8 @@ fs.mkdirSync('languages', { recursive: true });
 const output = new Map([['languages/wp-asciiplayer.pot', gettext.po.compile(pot)]]);
 if (!process.argv.includes('--pot-only')) {
   const po = gettext.po.parse(fs.readFileSync('languages/wp-asciiplayer-zh_CN.po'));
-  assert.equal(po.headers.language, 'zh_CN');
-  assert.match(po.headers['plural-forms'], /^nplurals=1;\s*plural=0;$/);
+  assert.equal(po.headers.Language, 'zh_CN');
+  assert.match(po.headers['Plural-Forms'], /^nplurals=1;\s*plural=0;$/);
   const messages = { '': { domain, lang: 'zh_CN', 'plural-forms': 'nplurals=1; plural=0;' } };
   for (const entry of entries.values()) {
     const translation = po.translations[entry.msgctxt || '']?.[entry.msgid];

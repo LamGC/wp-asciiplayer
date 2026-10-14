@@ -4,11 +4,15 @@ This distribution contains the plugin's PHP and JavaScript source, block metadat
 build configuration, scripts, and npm lockfile. The development repository is
 https://github.com/LamGC/wp-asciiplayer .
 
-Use Node.js 24 (24.15 or later), npm, and the standard `zip` command:
+Use Node.js 24.18+ (24.x) or 26+, npm 11.16+, and the standard `zip` command:
 
     npm ci
     npm run build
     npm run package
+
+Node.js 22 and 25 are not supported by the complete development toolchain.
+The Node requirement is for building/testing only; the plugin still supports
+WordPress 6.3 and PHP 7.4.
 
 The installable output is `dist/wp-asciiplayer.zip`. Generated assets are never
 loaded from a CDN. `scripts/vendor.mjs` copies the pinned official npm
