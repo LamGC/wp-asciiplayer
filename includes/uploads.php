@@ -19,6 +19,9 @@ const CAST_MAX_EVENTS = 100000;
 const CAST_MAX_DIMENSION = 1000;
 const CAST_MAX_CELLS = 40000;
 const CAST_MAX_MARKERS = 1000;
+// Browser timers use signed 32-bit millisecond delays (~24.85 days). Keep the
+// raw timeline in this range; playback additionally checks the selected speed.
+const CAST_MAX_TIME_MS = 2147483647;
 const CAST_MAX_JSON_TOKENS = 400000;
 const CAST_MAX_JSON_LINE_TOKENS = 20000;
 const CAST_MAX_JSON_CONTAINERS = 100016;
@@ -181,9 +184,9 @@ function is_cast_filename( $filename ) {
 	return is_string( $filename ) && 1 === preg_match( '/\.cast\z/i', $filename );
 }
 
-/** Finite, nonnegative seconds that remain finite in the player's milliseconds. */
+/** Nonnegative seconds within the supported browser timer/precision horizon. */
 function is_cast_time( $value ) {
-	return ( is_int( $value ) || is_float( $value ) ) && $value >= 0 && is_finite( $value * 1000 );
+	return ( is_int( $value ) || is_float( $value ) ) && $value >= 0 && $value * 1000 <= CAST_MAX_TIME_MS;
 }
 
 /** Bound both initial and resize dimensions before they reach the terminal. */
@@ -232,13 +235,14 @@ function is_cast_v1( $text ) {
 	if ( JSON_ERROR_NONE !== json_last_error() || ! is_cast_header( $recording ) || 1 !== $recording->version || ! isset( $recording->stdout ) || ! is_array( $recording->stdout ) || count( $recording->stdout ) > CAST_MAX_EVENTS ) {
 		return false;
 	}
-	$time = 0;
+	$time_ms = 0;
 	foreach ( $recording->stdout as $frame ) {
 		if ( ! is_array( $frame ) || 2 !== count( $frame ) || ! is_cast_time( $frame[0] ) || ! is_string( $frame[1] ) ) {
 			return false;
 		}
-		$time += $frame[0];
-		if ( ! is_cast_time( $time ) ) {
+		// Match upstream's arithmetic order, including floating-point rounding.
+		$time_ms += $frame[0] * 1000;
+		if ( ! is_finite( $time_ms ) || $time_ms > CAST_MAX_TIME_MS ) {
 			return false;
 		}
 	}
@@ -246,15 +250,17 @@ function is_cast_v1( $text ) {
 }
 
 /** Validate one JSONL event, with absolute v2 time or relative v3 intervals. */
-function is_cast_event( $event, $version, &$time ) {
+function is_cast_event( $event, $version, &$time_ms, &$previous_time ) {
 	if ( ! is_array( $event ) || 3 !== count( $event ) || ! is_cast_time( $event[0] ) || ! is_string( $event[1] ) || '' === $event[1] || ! is_string( $event[2] ) ) {
 		return false;
 	}
-	if ( 2 === $version && $event[0] < $time ) {
+	$event_ms = $event[0] * 1000;
+	if ( 2 === $version && $event[0] < $previous_time ) {
 		return false;
 	}
-	$time = 2 === $version ? $event[0] : $time + $event[0];
-	if ( ! is_cast_time( $time ) ) {
+	$previous_time = $event[0];
+	$time_ms = 2 === $version ? $event_ms : $time_ms + $event_ms;
+	if ( ! is_finite( $time_ms ) || $time_ms > CAST_MAX_TIME_MS ) {
 		return false;
 	}
 	if ( 'r' === $event[1] ) {
@@ -312,7 +318,8 @@ function is_valid_cast_file( $path ) {
 		$bytes = strlen( $line );
 		$count = 0;
 		$markers = 0;
-		$time = 0;
+		$time_ms = 0;
+		$previous_time = 0;
 		while ( false !== ( $line = fgets( $handle, CAST_MAX_LINE_BYTES + 2 ) ) ) {
 			$bytes += strlen( $line );
 			if ( $bytes > CAST_MAX_BYTES || strlen( $line ) > CAST_MAX_LINE_BYTES || ++$count > CAST_MAX_EVENTS ) {
@@ -329,7 +336,7 @@ function is_valid_cast_file( $path ) {
 				return false;
 			}
 			$event = json_decode( $line, false, CAST_JSON_DEPTH );
-			if ( JSON_ERROR_NONE !== json_last_error() || ! is_cast_event( $event, $header->version, $time ) ) {
+			if ( JSON_ERROR_NONE !== json_last_error() || ! is_cast_event( $event, $header->version, $time_ms, $previous_time ) ) {
 				return false;
 			}
 			if ( 'm' === $event[1] && ++$markers > CAST_MAX_MARKERS ) {

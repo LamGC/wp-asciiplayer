@@ -128,6 +128,7 @@ foreach ( array(
 	'CAST_MAX_JSON_LINE_TOKENS' => 20000,
 	'CAST_MAX_JSON_CONTAINERS' => 100016,
 	'CAST_JSON_DEPTH' => 16,
+	'CAST_MAX_TIME_MS' => 2147483647,
 ) as $constant => $limit ) {
 	same( $limit, constant( 'LamGC\\Asciiplayer\\' . $constant ), $constant . ': the documented production limit is unchanged.' );
 }
@@ -145,10 +146,12 @@ $GLOBALS['ap_test']['capabilities'] = array( 'upload_files' => true, 'unfiltered
 $GLOBALS['ap_test']['multisite'] = false;
 unset( $GLOBALS['ap_test']['allowed_mimes'] );
 $security_fixture_ids = array();
+$security_fixture_records = array();
 try {
 	foreach ( $security_fixture_manifest['cases'] as $fixture ) {
 		same( false, isset( $security_fixture_ids[ $fixture['id'] ] ), 'Each security fixture has a unique ID.' );
 		$security_fixture_ids[ $fixture['id'] ] = $fixture['expected'];
+		$security_fixture_records[ $fixture['id'] ] = $fixture;
 		same( true, isset( $fixture['source']['file'] ) !== isset( $fixture['source']['segments'] ), $fixture['id'] . ': exactly one fixture source is defined.' );
 		same( true, is_bool( $fixture['expected']['accepted'] ), $fixture['id'] . ': the expected upload result is explicit.' );
 		$path = tempnam( sys_get_temp_dir(), 'ap-security-' );
@@ -178,6 +181,40 @@ try {
 			unlink( $path );
 		}
 	}
+	// Required numeric witnesses cannot disappear while the remaining generic
+	// manifest loop still passes. These expectations do not import guard limits.
+	same( 2147483647, $security_fixture_manifest['policy']['timelineMs'] ?? null, 'The corpus independently pins the signed 32-bit millisecond horizon.' );
+	foreach ( array( 1, 2, 3 ) as $version ) {
+		foreach ( array( 'timeline', 'duration', 'idle-limit' ) as $purpose ) {
+			foreach ( array( 'at' => 2147483647, 'over' => 2147483648 ) as $suffix => $milliseconds ) {
+				$id = $purpose . '-v' . $version . '-' . $suffix;
+				$fixture = $security_fixture_records[ $id ] ?? array();
+				same( array( 'metric' => 'timelineMs', 'limit' => 2147483647, 'value' => $milliseconds ), $fixture['boundary'] ?? null, $id . ': the exact timing boundary remains in the shared corpus.' );
+				same( 'at' === $suffix, $fixture['expected']['accepted'] ?? null, $id . ': both sides retain their independently pinned acceptance result.' );
+				same( 'over' === $suffix ? 'time' : null, $fixture['expected']['jsError'] ?? null, $id . ': timing rejection reason is explicit.' );
+			}
+		}
+		foreach ( array( 'duration', 'idle-limit' ) as $purpose ) {
+			$id = $purpose . '-v' . $version . '-zero';
+			same( true, $security_fixture_ids[ $id ]['accepted'] ?? null, $id . ': zero timing metadata remains supported.' );
+		}
+	}
+	foreach ( array( 1, 3 ) as $version ) {
+		foreach ( array( 'at', 'over' ) as $suffix ) {
+			$id = 'interval-timeline-v' . $version . '-' . $suffix;
+			same( 'at' === $suffix, $security_fixture_ids[ $id ]['accepted'] ?? null, $id . ': interval cumulative boundary remains covered.' );
+		}
+	}
+	foreach ( array(
+		'time-v2-output-nonprogress',
+		'time-v1-ms-sum-overflow', 'time-v3-ms-sum-overflow',
+		'time-v1-ms-rounding-over', 'time-v3-ms-rounding-over',
+	) as $id ) {
+		same( false, $security_fixture_ids[ $id ]['accepted'] ?? null, $id . ': the required actual-player arithmetic witness remains rejected.' );
+		same( 'time', $security_fixture_ids[ $id ]['jsError'] ?? null, $id . ': both languages retain the same explicit timestamp expectation.' );
+		same( true, ( $security_fixture_records[ $id ]['bytes'] ?? 256 ) < 256, $id . ': the numerical regression payload remains tiny.' );
+	}
+
 	foreach ( array( 'bytes-v2-over', 'bytes-v3-over' ) as $id ) {
 		same( 1, $security_fixture_ids[ $id ]['phpNoDecodeAtOrAboveBytes'] ?? null, $id . ': the PHP file-stat gate must reject before any native decode.' );
 	}

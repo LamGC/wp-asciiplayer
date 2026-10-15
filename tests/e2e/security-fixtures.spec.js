@@ -4,6 +4,7 @@ import { getSecurityCase, securityFixtureBuffer } from '../fixtures/security/gen
 const blockName = 'lamgc/asciiplayer';
 const fixtureRoot = '/wp-content/uploads/asciiplayer-fixtures/security';
 const messages = {
+    time: 'This recording contains an invalid or unsupported timestamp.',
     markers: 'This recording contains too many markers.',
     dimensions: 'This recording requests terminal dimensions that exceed the supported limits.',
     cells: 'This recording requests too many terminal cells.',
@@ -222,6 +223,7 @@ const rejectionIds = [
     'dimensions-v1-over', 'dimensions-v2-over', 'dimensions-v3-over',
     'markers-v2-over', 'markers-v3-over',
     'late-resize-v2-over', 'late-resize-v3-over',
+    'time-v1-ms-rounding-over', 'time-v2-output-nonprogress', 'time-v3-ms-sum-overflow',
 ];
 for (const id of rejectionIds) {
     test(`shared ${id} is rejected before unsafe DOM allocation on both playback paths`, async ({ page, context }) => {
@@ -284,7 +286,7 @@ test('real WordPress uploads reject shared marker/cell fixtures and accept a see
     const { id, block } = await insertPlayer(page, '');
     const unique = `${Date.now()}-${testInfo.retry}`;
     const validationMessage = 'Upload a valid Asciicast v2/v3 JSONL or v1 .cast recording (up to 32 MiB; v1 up to 2 MiB, 100,000 events, 256 KiB per JSONL line, 1,000 markers, 1,000 columns or rows, 40,000 terminal cells, and bounded JSON structure).';
-    for (const fixtureId of ['markers-v2-over', 'cells-v1-over']) {
+    for (const fixtureId of ['markers-v2-over', 'cells-v1-over', 'time-v1-ms-rounding-over', 'time-v2-output-nonprogress', 'time-v3-ms-sum-overflow']) {
         const dialog = await openMedia(page, block);
         const result = await uploadCorpusFixture(page, dialog, fixtureId, unique);
         expect(result.success, JSON.stringify(result)).toBe(false);

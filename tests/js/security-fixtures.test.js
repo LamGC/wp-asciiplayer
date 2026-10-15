@@ -31,7 +31,7 @@ function measure( entry, bytes ) {
 	const text = bytes.toString( 'utf8' );
 	let header;
 	let frames;
-	const metrics = { bytes: bytes.length, v1Bytes: bytes.length, lineBytes: 0, events: 0, lines: 0, markers: 0, dimension: 0, cells: 0, depth: 0, tokens: 0, containers: 0, lineTokens: 0 };
+	const metrics = { bytes: bytes.length, v1Bytes: bytes.length, lineBytes: 0, events: 0, lines: 0, markers: 0, dimension: 0, cells: 0, depth: 0, tokens: 0, containers: 0, lineTokens: 0, timelineMs: 0 };
 	if ( entry.format === 1 ) {
 		header = JSON.parse( text );
 		assert.ok( Array.isArray( header.stdout ) );
@@ -71,6 +71,10 @@ function measure( entry, bytes ) {
 	}
 	size( ...dimensions );
 	let time = 0;
+	let milliseconds = 0;
+	for ( const key of [ 'duration', 'idle_time_limit' ] ) {
+		if ( Object.hasOwn( header, key ) ) metrics.timelineMs = Math.max( metrics.timelineMs, header[ key ] * 1000 );
+	}
 	for ( const frame of frames ) {
 		assert.ok( Array.isArray( frame ) );
 		assert.equal( frame.length, 3 );
@@ -81,6 +85,8 @@ function measure( entry, bytes ) {
 		if ( entry.format === 2 ) assert.ok( frame[ 0 ] >= time );
 		time = entry.format === 2 ? frame[ 0 ] : time + frame[ 0 ];
 		assert.ok( Number.isFinite( time ) );
+		milliseconds = entry.format === 2 ? frame[ 0 ] * 1000 : milliseconds + frame[ 0 ] * 1000;
+		metrics.timelineMs = Math.max( metrics.timelineMs, milliseconds );
 		if ( frame[ 1 ] === 'm' ) metrics.markers++;
 		if ( frame[ 1 ] === 'r' ) {
 			assert.match( frame[ 2 ], /^[1-9][0-9]*x[1-9][0-9]*$/ );
@@ -107,7 +113,7 @@ test( 'golden recipes are deterministic, genuinely seeded, and bounded to known 
 
 test( 'every shared resource purpose retains its exact at/over pair', () => {
 	for ( const version of [ 1, 2, 3 ] ) {
-		for ( const purpose of [ 'dimensions', 'cells', 'depth', 'events' ] ) {
+		for ( const purpose of [ 'dimensions', 'cells', 'depth', 'events', 'timeline', 'duration', 'idle-limit' ] ) {
 			for ( const side of [ 'at', 'over' ] ) {
 				const entry = getSecurityCase( `${ purpose }-v${ version }-${ side }` );
 				assert.equal( entry.expected.accepted, side === 'at' );
@@ -124,6 +130,51 @@ test( 'every shared resource purpose retains its exact at/over pair', () => {
 		assert.equal( getSecurityCase( `late-resize-v${ version }-dimensions-at` ).expected.accepted, true );
 		assert.equal( getSecurityCase( `late-resize-v${ version }-dimensions-over` ).expected.accepted, false );
 	}
+} );
+
+test( 'timestamp regressions retain independently pinned witnesses and arithmetic', () => {
+	assert.equal( POLICY.timelineMs, 2147483647 );
+	assert.equal( securityManifest.policy.timelineMs, 2147483647 );
+	for ( const version of [ 1, 2, 3 ] ) {
+		for ( const purpose of [ 'timeline', 'duration', 'idle-limit' ] ) {
+			for ( const [ suffix, value ] of [ [ 'at', 2147483647 ], [ 'over', 2147483648 ] ] ) {
+				const entry = getSecurityCase( `${ purpose }-v${ version }-${ suffix }` );
+				assert.deepEqual( entry.boundary, { metric: 'timelineMs', limit: 2147483647, value } );
+				assert.equal( entry.expected.jsError, suffix === 'over' ? 'time' : null );
+			}
+		}
+		for ( const purpose of [ 'duration', 'idle-limit' ] ) assert.equal( getSecurityCase( `${ purpose }-v${ version }-zero` ).expected.accepted, true );
+	}
+	for ( const version of [ 1, 3 ] ) {
+		for ( const suffix of [ 'at', 'over' ] ) {
+			const entry = getSecurityCase( `interval-timeline-v${ version }-${ suffix }` );
+			assert.equal( entry.expected.jsError, suffix === 'over' ? 'time' : null );
+			const text = securityFixtureBuffer( entry.id ).toString( 'utf8' );
+			const frames = version === 1 ? JSON.parse( text ).stdout : text.trimEnd().split( '\n' ).slice( 1 ).map( JSON.parse );
+			assert.ok( frames.every( ( frame ) => frame[ 0 ] * 1000 < 2147483647 ), 'no individual interval may mask the cumulative boundary' );
+		}
+		for ( const [ id, a, b ] of [
+			[ 'ms-rounding-over', 307699.2378567164, 1839784.4091432837 ],
+			[ 'ms-sum-overflow', 2.996155224770526e303, 1.7677315826146105e305 ],
+		] ) {
+			const entry = getSecurityCase( `time-v${ version }-${ id }` );
+			assert.equal( entry.expected.jsError, 'time' );
+			assert.equal( entry.expected.accepted, false );
+			assert.ok( entry.bytes < 256, 'arithmetic witnesses must stay tiny' );
+			const text = securityFixtureBuffer( entry.id ).toString( 'utf8' );
+			const frames = version === 1 ? JSON.parse( text ).stdout : text.trimEnd().split( '\n' ).slice( 1 ).map( JSON.parse );
+			assert.deepEqual( frames.map( ( frame ) => frame[ 0 ] ), [ a, b ], 'the exact floating-point witness cannot silently change' );
+			assert.ok( Number.isFinite( a * 1000 ) && Number.isFinite( b * 1000 ) && Number.isFinite( ( a + b ) * 1000 ) );
+			assert.equal( ( a + b ) * 1000, id === 'ms-rounding-over' ? 2147483647 : 1.7976931348623155e308 );
+			assert.equal( a * 1000 + b * 1000, id === 'ms-rounding-over' ? 2147483647.0000002 : Infinity );
+		}
+	}
+	const stalled = getSecurityCase( 'time-v2-output-nonprogress' );
+	assert.equal( stalled.expected.jsError, 'time' );
+	assert.equal( stalled.expected.accepted, false );
+	assert.ok( stalled.bytes < 100 );
+	assert.deepEqual( JSON.parse( securityFixtureBuffer( stalled.id ).toString( 'utf8' ).split( '\n' )[ 1 ] ), [ 1e20, 'o', 'x' ] );
+	assert.equal( 1e20 * 1000 + 1000 / 60, 1e20 * 1000, 'the real 3.17 batch deadline cannot advance at this magnitude' );
 } );
 
 test( 'official native captures retain independently pinned provenance and identical output', () => {

@@ -9,4 +9,3 @@ namespace LamGC\Asciiplayer {
 		return \json_decode( $json, $associative, $depth, $flags );
 	}
 }
-

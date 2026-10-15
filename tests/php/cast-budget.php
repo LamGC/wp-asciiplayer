@@ -5,14 +5,59 @@
 namespace {
 	use function LamGC\Asciiplayer\is_cast_json_within_budget;
 	use function LamGC\Asciiplayer\is_cast_v1;
+	use function LamGC\Asciiplayer\is_cast_time;
 	use const LamGC\Asciiplayer\CAST_MAX_JSON_CONTAINERS;
 	use const LamGC\Asciiplayer\CAST_MAX_JSON_TOKENS;
+	use const LamGC\Asciiplayer\CAST_MAX_TIME_MS;
 
 	function cast_budget_accepts( $text ) {
 		$containers = 0;
 		$tokens = 0;
 		return is_cast_json_within_budget( $text, $containers, $tokens );
 	}
+
+	function cast_time_contents( $version, $intervals, $metadata = array() ) {
+		$header = 3 === $version ? array( 'version' => 3, 'term' => array( 'cols' => 80, 'rows' => 24 ) ) : array( 'version' => $version, 'width' => 80, 'height' => 24 );
+		$header = array_merge( $header, $metadata );
+		$frames = array();
+		foreach ( $intervals as $time ) {
+			$frames[] = 1 === $version ? array( $time, 'x' ) : array( $time, 'o', 'x' );
+		}
+		if ( 1 === $version ) {
+			$header['stdout'] = $frames;
+			return json_encode( $header );
+		}
+		return json_encode( $header ) . "\n" . implode( "\n", array_map( 'json_encode', $frames ) );
+	}
+
+	same( 2147483647, CAST_MAX_TIME_MS, 'The timeline ceiling matches the signed browser timer range.' );
+	$max_seconds = CAST_MAX_TIME_MS / 1000;
+	foreach ( array( 1, 2, 3 ) as $version ) {
+		same( true, cast_contents_are_valid( cast_time_contents( $version, array( $max_seconds ) ) ), 'Accept the exact v' . $version . ' timer horizon.' );
+		same( false, cast_contents_are_valid( cast_time_contents( $version, array( $max_seconds + 0.001 ) ) ), 'Reject v' . $version . ' one millisecond beyond the horizon.' );
+		same( false, cast_contents_are_valid( cast_time_contents( $version, array( -0.001 ) ) ), 'Reject negative v' . $version . ' time.' );
+		foreach ( array( 'duration', 'idle_time_limit' ) as $key ) {
+			same( true, cast_contents_are_valid( cast_time_contents( $version, array( 0 ), array( $key => $max_seconds ) ) ), 'Accept exact v' . $version . ' ' . $key . ' horizon.' );
+			foreach ( array( $max_seconds + 0.001, -0.001, '1', null ) as $value ) {
+				same( false, cast_contents_are_valid( cast_time_contents( $version, array( 0 ), array( $key => $value ) ) ), 'Reject invalid v' . $version . ' ' . $key . '.' );
+			}
+		}
+	}
+	foreach ( array( INF, -INF, NAN, -1, '1', null ) as $value ) {
+		same( false, is_cast_time( $value ), 'Time validation rejects nonfinite, negative, and nonnumeric values.' );
+	}
+	$rounding_intervals = array( 307699.2378567164, 1839784.4091432837 );
+	same( (float) CAST_MAX_TIME_MS, ( $rounding_intervals[0] + $rounding_intervals[1] ) * 1000, 'Seconds-first rounding hides the over-limit result.' );
+	same( true, $rounding_intervals[0] * 1000 + $rounding_intervals[1] * 1000 > CAST_MAX_TIME_MS, 'The actual player millisecond sum is over the horizon.' );
+	foreach ( array( 1, 3 ) as $version ) {
+		same( true, cast_contents_are_valid( cast_time_contents( $version, array( 1, $max_seconds - 1 ) ) ), 'Accept cumulative v' . $version . ' at the horizon.' );
+		foreach ( array( array( 1, $max_seconds ), $rounding_intervals, array( 2.996155224770526e303, 1.7677315826146105e305 ) ) as $intervals ) {
+			same( false, cast_contents_are_valid( cast_time_contents( $version, $intervals ) ), 'Reject v' . $version . ' cumulative upstream millisecond overflow.' );
+		}
+	}
+	same( false, cast_contents_are_valid( cast_time_contents( 2, array( 1e20 ) ) ), 'Reject a tiny v2 cast whose output batching cannot make progress.' );
+	same( false, cast_contents_are_valid( cast_time_contents( 2, array( 10004.674, 10004.673999999999 ) ) ), 'Reject backward v2 seconds even when conversion rounds to equal milliseconds.' );
+	same( true, cast_contents_are_valid( cast_time_contents( 2, array( 1, 1 ) ) ), 'Equal v2 timestamps remain accepted.' );
 
 	foreach ( array(
 		'zero v2 dimensions' => '{"version":2,"width":0,"height":0}',

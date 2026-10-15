@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { loadRecording, DEFAULT_LIMITS, RecordingLoadError, validateInitialDimensions } from '../../src/recording-loader.js';
+import { normalizePlayerOptions } from '../../src/options.js';
 
 const encode = ( text ) => new TextEncoder().encode( text );
 const h2 = { version: 2, width: 80, height: 24 };
@@ -127,6 +128,79 @@ test( 'non-finite timestamps and cumulative time overflow are rejected', async (
 	await rejectCode( JSON.stringify( { version: 1, width: 80, height: 24, stdout: [ [ 1e305, 'x' ], [ 1e305, 'x' ] ] } ), 'time' );
 } );
 
+test( 'supported timeline boundary is inclusive across all formats and timing metadata', async () => {
+	const maxSeconds = DEFAULT_LIMITS.timelineMs / 1000;
+	assert.equal( DEFAULT_LIMITS.timelineMs, 2147483647 );
+	for ( const version of [ 1, 2, 3 ] ) {
+		const header = version === 3 ? h3 : { ...h2, version };
+		const content = ( seconds, extra = {} ) => version === 1
+			? JSON.stringify( { ...header, ...extra, stdout: [ [ seconds, 'x' ] ] } )
+			: cast( { ...header, ...extra }, [ [ seconds, 'o', 'x' ] ] );
+		assert.ok( await loadRecording( '/cast', { fetchImpl: fixture( content( maxSeconds ) ).fetchImpl } ) );
+		await rejectCode( content( maxSeconds + 0.001 ), 'time' );
+		await rejectCode( content( -0.001 ), 'time' );
+		for ( const key of [ 'duration', 'idle_time_limit' ] ) {
+			assert.ok( await loadRecording( '/cast', { fetchImpl: fixture( content( 0, { [ key ]: maxSeconds } ) ).fetchImpl } ) );
+			for ( const value of [ maxSeconds + 0.001, -0.001, '1', null ] ) await rejectCode( content( 0, { [ key ]: value } ), 'time' );
+		}
+	}
+} );
+
+test( 'relative formats accumulate individually converted milliseconds in upstream order', async () => {
+	const maxSeconds = DEFAULT_LIMITS.timelineMs / 1000;
+	const rounding = [ 307699.2378567164, 1839784.4091432837 ];
+	assert.equal( ( rounding[ 0 ] + rounding[ 1 ] ) * 1000, DEFAULT_LIMITS.timelineMs );
+	assert.ok( rounding[ 0 ] * 1000 + rounding[ 1 ] * 1000 > DEFAULT_LIMITS.timelineMs );
+	for ( const version of [ 1, 3 ] ) {
+		const content = ( intervals ) => version === 1
+			? JSON.stringify( { version: 1, width: 80, height: 24, stdout: intervals.map( ( time ) => [ time, 'x' ] ) } )
+			: cast( h3, intervals.map( ( time ) => [ time, 'o', 'x' ] ) );
+		assert.ok( await loadRecording( '/cast', { fetchImpl: fixture( content( [ 1, maxSeconds - 1 ] ) ).fetchImpl } ) );
+		for ( const intervals of [ [ 1, maxSeconds ], rounding, [ 2.996155224770526e303, 1.7677315826146105e305 ] ] ) {
+			await rejectCode( content( intervals ), 'time' );
+		}
+	}
+	await rejectCode( cast( h2, [ [ 1e20, 'o', 'x' ] ] ), 'time' );
+} );
+
+test( 'slow playback stays within native timer range without expanding the base horizon at higher speeds', async () => {
+	const maxSeconds = DEFAULT_LIMITS.timelineMs / 1000;
+	for ( const version of [ 1, 2, 3 ] ) {
+		const content = ( seconds ) => version === 1
+			? JSON.stringify( { version: 1, width: 80, height: 24, stdout: [ [ seconds, 'x' ] ] } )
+			: cast( version === 3 ? h3 : h2, [ [ seconds, 'o', 'x' ] ] );
+		for ( const speed of [ 0.01, 0.5, 1, 100 ] ) {
+			const seconds = maxSeconds * Math.min( speed, 1 );
+			const options = { speed };
+			assert.ok( await loadRecording( '/cast', { fetchImpl: fixture( content( seconds ) ).fetchImpl, options } ) );
+			await rejectCode( content( seconds + 0.001 ), 'time', { options } );
+		}
+	}
+	// An idle limiter or late start does not waive validation of the raw horizon.
+	await rejectCode( cast( h2, [ [ maxSeconds, 'o', 'x' ] ] ), 'time', { options: { speed: 0.01, idleTimeLimit: 0.001, startAt: maxSeconds } } );
+} );
+
+test( 'normalized timing options are checked before any recording request', async () => {
+	const maxSeconds = DEFAULT_LIMITS.timelineMs / 1000;
+	for ( const options of [
+		...[ 0, -1, NaN, Infinity, 0.009, 101, '1' ].map( ( speed ) => ( { speed } ) ),
+		...[ 'startAt', 'idleTimeLimit' ].flatMap( ( key ) => [ maxSeconds + 0.001, -1, Infinity, NaN ].map( ( value ) => ( { [ key ]: value } ) ) ),
+		{ poster: 'npt:596:31:23.648' },
+		normalizePlayerOptions( { startAt: `${ '9'.repeat( 400 ) }:00:00` } ),
+		normalizePlayerOptions( { poster: `npt:${ '9'.repeat( 400 ) }:00:00` } ),
+	] ) {
+		const input = fixture( cast() );
+		await assert.rejects( loadRecording( '/cast', { fetchImpl: input.fetchImpl, options } ), { code: 'time' } );
+		assert.equal( input.calls.length, 0 );
+	}
+	for ( const options of [ { startAt: maxSeconds, idleTimeLimit: maxSeconds }, { poster: 'npt:596:31:23.647' }, { poster: 'data:text/plain,2147483648' } ] ) {
+		assert.ok( await loadRecording( '/cast', { fetchImpl: fixture( cast() ).fetchImpl, options } ) );
+	}
+	await assert.rejects( loadRecording( '/cast', { limits: { timelineMs: DEFAULT_LIMITS.timelineMs + 1 } } ), { code: 'policy' } );
+	assert.ok( await loadRecording( '/cast', { fetchImpl: fixture( cast( h2, [ [ 1, 'o', 'x' ] ] ) ).fetchImpl, limits: { timelineMs: 1000 } } ) );
+	await rejectCode( cast( h2, [ [ 1.001, 'o', 'x' ] ] ), 'time', { limits: { timelineMs: 1000 } } );
+} );
+
 test( 'invalid records do not report metadata', async () => {
 	for ( const content of [ '', '{}', cast( h2, [ [ 0, 'o', {} ] ] ), cast( h2, [ [ 0, '', 'x' ] ] ), `${ JSON.stringify( h2 ) }\n[invalid` ] ) {
 		let notified = false;
@@ -222,6 +296,8 @@ test( 'initial BOM is removed but later BOM-prefixed lines remain ignored', asyn
 
 test( 'v2 absolute timestamps cannot move backward; equal timestamps remain valid', async () => {
 	await rejectCode( cast( h2, [ [ 2, 'o', 'x' ], [ 1, 'o', 'y' ] ] ), 'time' );
+	assert.equal( 10004.674 * 1000, 10004.673999999999 * 1000 );
+	await rejectCode( cast( h2, [ [ 10004.674, 'o', 'x' ], [ 10004.673999999999, 'o', 'y' ] ] ), 'time' );
 	assert.equal( ( await loadRecording( '/cast', { fetchImpl: fixture( cast( h2, [ [ 1, 'o', 'x' ], [ 1, 'o', 'y' ] ] ) ).fetchImpl } ) ).length, 3 );
 } );
 

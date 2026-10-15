@@ -127,6 +127,10 @@ can or should be avoided.
 | v1 container allocation | `containers-v1-{at,over}` | 100,016 / 100,017 containers |
 | JSONL scalar/key allocation | `line-tokens-v{2,3}-{at,over}` | 20,000 / 20,001 tokens |
 | Nesting | `depth-v{1,2,3}-{at,over}` | 15 / 16 container levels |
+| Recording timeline | `timeline-v{1,2,3}-{at,over}` | 2,147,483,647 / 2,147,483,648 milliseconds |
+| Relative timeline sum | `interval-timeline-v{1,3}-{at,over}` | Millisecond-order accumulation at / over the horizon |
+| Time metadata | `duration-v*-{zero,at,over}`, `idle-limit-v*-{zero,at,over}` | Zero remains valid; inclusive horizon applies |
+| Floating-point regressions | `time-v{1,3}-ms-rounding-over`, `time-v{1,3}-ms-sum-overflow`, `time-v2-output-nonprogress` | Valid JSON with unsafe upstream millisecond arithmetic |
 | Intentional bad syntax | `malformed-v1-json`, `malformed-v{2,3}-event` | Stable invalid-result controls |
 
 The cells-over value is 40,200, not an assertion that every integer cell count
@@ -139,8 +143,18 @@ equivalence.
 The corpus invariant suite independently parses tightly bounded test data to
 measure structure, verify valid/malformed labels, pin exact boundary values,
 and prove an unrelated limit is not masking the intended one. Only the six
-`safePlayback` controls reach the real pinned player Core. Hostile/boundary
-recordings first exercise the production loader guard or PHP upload validator.
+`safePlayback` controls use ordinary real pinned player Core playback. Separate
+tiny timestamp regressions use captured timers and bounded callbacks to verify
+upstream numeric behavior without scheduling long waits or an unbounded loop.
+Hostile/boundary recordings first exercise the production loader guard or PHP
+upload validator.
+
+The supported raw timeline is about 24.85 days. Browser playback conservatively
+requires cumulative time divided by speed to fit the same signed timer ceiling;
+at 0.01×, this permits about 5.97 hours of source time. Per-event gap checks alone
+are insufficient because the player batches future output ahead of wall time.
+The v1/v3 rounding witness specifically distinguishes summing milliseconds from
+summing seconds before conversion; these two operations are not interchangeable.
 Browser tests use the existing isolated WordPress setup and check visible errors
 and recovery. Passing Node/PHP checks does not imply that a browser run occurred.
 

@@ -14,7 +14,8 @@
     "depth": 15,
     "containers": 100016,
     "tokens": 400000,
-    "lineTokens": 20000
+    "lineTokens": 20000,
+    "timelineMs": 2147483647
   },
   "cases": [
     {
@@ -839,6 +840,720 @@
       "metrics": {
         "events": 100001
       }
+    },
+    {
+      "id": "timeline-v1-at",
+      "format": 1,
+      "description": "One event isolates the inclusive 2^31 - 1 millisecond timeline horizon.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "timeline-v1-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 66,
+      "sha256": "5622319d9372013c48101ef2944cd5d079084b0df144a1fcc69140cd5b66d9f5",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647
+      }
+    },
+    {
+      "id": "duration-v1-at",
+      "format": 1,
+      "description": "Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "duration-v1-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 79,
+      "sha256": "02b5c0e111adb26dfb6dd5c792ea48ebb853d0618cf1860fd2857d2d06f4980c",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647
+      }
+    },
+    {
+      "id": "idle-limit-v1-at",
+      "format": 1,
+      "description": "Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "idle-limit-v1-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 86,
+      "sha256": "76038e9c90775dc12c299c3c2dd4f265bf4ee3b6e4cd2b66c95688b859becd43",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647
+      }
+    },
+    {
+      "id": "timeline-v1-over",
+      "format": 1,
+      "description": "One event isolates the inclusive 2^31 - 1 millisecond timeline horizon.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "timeline-v1-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 66,
+      "sha256": "177d6d8d97d72f2a5416b7eb1b9e32c2cc2b620a20ae1c70d5494406befc17f9",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483648
+      }
+    },
+    {
+      "id": "duration-v1-over",
+      "format": 1,
+      "description": "Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "duration-v1-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 79,
+      "sha256": "32da9450dc0f53f8d044006c967296ac50d9311a7e8a86f4730aebff191d03f3",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483648
+      }
+    },
+    {
+      "id": "idle-limit-v1-over",
+      "format": 1,
+      "description": "Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "idle-limit-v1-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 86,
+      "sha256": "7ad90f6743ea0f90c4ed00a9c1dc361d5640b8abeaaf0c7cfd5dd9e190209398",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483648
+      }
+    },
+    {
+      "id": "duration-v1-zero",
+      "format": 1,
+      "description": "Zero remains valid for optional timing metadata.",
+      "category": "valid-control",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "duration-v1-zero.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 69,
+      "sha256": "14f1b40e1d57c7b00a6024c1e4e5a4d68723207eb447c91f721a6cfce0674d4e"
+    },
+    {
+      "id": "idle-limit-v1-zero",
+      "format": 1,
+      "description": "Zero remains valid for optional timing metadata.",
+      "category": "valid-control",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "idle-limit-v1-zero.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 76,
+      "sha256": "ba707de0f768ed2fe89ebd7d8751c4febc6c7eb4be4ac21b4be6e69324353c98"
+    },
+    {
+      "id": "timeline-v2-at",
+      "format": 2,
+      "description": "One event isolates the inclusive 2^31 - 1 millisecond timeline horizon.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "timeline-v2-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 59,
+      "sha256": "5dcb182b6e3ccf2573e58408f7ac44599fcc6ac92b3951f8fd3c2bb3138d1e4f",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647
+      }
+    },
+    {
+      "id": "duration-v2-at",
+      "format": 2,
+      "description": "Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "duration-v2-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 72,
+      "sha256": "257b671345d8f515afa242242f313125fecbe58a92f7e690861d6b38e0b1ec36",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647
+      }
+    },
+    {
+      "id": "idle-limit-v2-at",
+      "format": 2,
+      "description": "Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "idle-limit-v2-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 79,
+      "sha256": "e5f12262b1b1a76970785cbbe98126f0d8061dffce1b623aeaa150dac0f4ffea",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647
+      }
+    },
+    {
+      "id": "timeline-v2-over",
+      "format": 2,
+      "description": "One event isolates the inclusive 2^31 - 1 millisecond timeline horizon.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "timeline-v2-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 59,
+      "sha256": "7717e9978f2767db79388c597a683e216445146c0f7fe2e639401cdafad94267",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483648
+      }
+    },
+    {
+      "id": "duration-v2-over",
+      "format": 2,
+      "description": "Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "duration-v2-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 72,
+      "sha256": "a7eaae002cebeec39c2c1ea0832a261ec66a8bab76dafaeaaa252e1e6ab641dd",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483648
+      }
+    },
+    {
+      "id": "idle-limit-v2-over",
+      "format": 2,
+      "description": "Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "idle-limit-v2-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 79,
+      "sha256": "c10e47c6405d2f2087ff4348584722bc5e89c9c7bb8d69648d446189d268ce01",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483648
+      }
+    },
+    {
+      "id": "duration-v2-zero",
+      "format": 2,
+      "description": "Zero remains valid for optional timing metadata.",
+      "category": "valid-control",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "duration-v2-zero.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 62,
+      "sha256": "f8ccb56b4dc1b3b8535af7ea4eaad3c6f0d6475563aa9c593ca0e4a4821943dd"
+    },
+    {
+      "id": "idle-limit-v2-zero",
+      "format": 2,
+      "description": "Zero remains valid for optional timing metadata.",
+      "category": "valid-control",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "idle-limit-v2-zero.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 69,
+      "sha256": "b34ea66b9bd4c165b55ca39523a5874f29d68cc9277eb3cca4de589691732d1a"
+    },
+    {
+      "id": "timeline-v3-at",
+      "format": 3,
+      "description": "One event isolates the inclusive 2^31 - 1 millisecond timeline horizon.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "timeline-v3-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 65,
+      "sha256": "1e234fb56af6cc042a6daf77a6b833db2f5ecab6aae35a1c7e3821051dce2ec5",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647
+      }
+    },
+    {
+      "id": "duration-v3-at",
+      "format": 3,
+      "description": "Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "duration-v3-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 78,
+      "sha256": "b363b4bc5077858e30fa0e188cb49d5b50c9d40fe5f0f14ced04bf835b2e2d21",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647
+      }
+    },
+    {
+      "id": "idle-limit-v3-at",
+      "format": 3,
+      "description": "Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "idle-limit-v3-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 85,
+      "sha256": "b787da8e6ba022bc3a2ac8780aa8073ea4ca82b92d018cccbf22655846122dd0",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647
+      }
+    },
+    {
+      "id": "timeline-v3-over",
+      "format": 3,
+      "description": "One event isolates the inclusive 2^31 - 1 millisecond timeline horizon.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "timeline-v3-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 65,
+      "sha256": "aafb1fabc891df6843942f69ac945e13ea77865a2542cca1d02db6bb1c8080bf",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483648
+      }
+    },
+    {
+      "id": "duration-v3-over",
+      "format": 3,
+      "description": "Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "duration-v3-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 78,
+      "sha256": "5fcf1f75486d94f71463e6320886d0a51721f8fdbe1063593b5a1d14c14978d1",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483648
+      }
+    },
+    {
+      "id": "idle-limit-v3-over",
+      "format": 3,
+      "description": "Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "idle-limit-v3-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 85,
+      "sha256": "a3624e3fc0bd3c420dbfe91018b47b840b7fb09e10fba7365fee079e2615bef6",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483648
+      }
+    },
+    {
+      "id": "duration-v3-zero",
+      "format": 3,
+      "description": "Zero remains valid for optional timing metadata.",
+      "category": "valid-control",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "duration-v3-zero.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 68,
+      "sha256": "2d40499454b3b7a1589b91004115e2a9d53a18e7167ccefe9352eda66bbfb2d8"
+    },
+    {
+      "id": "idle-limit-v3-zero",
+      "format": 3,
+      "description": "Zero remains valid for optional timing metadata.",
+      "category": "valid-control",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "idle-limit-v3-zero.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 75,
+      "sha256": "bdc71879c2d7f3d8338d31038133d070b2d9dc6e398f6b133c45e90750509016"
+    },
+    {
+      "id": "interval-timeline-v1-at",
+      "format": 1,
+      "description": "Each interval is inside the horizon; only their upstream-order millisecond sum selects the boundary.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "interval-timeline-v1-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 86,
+      "sha256": "8e9c5b96b20566f12fe9a15e1c8269461d0dbc6ba6d1a06a83aff581f872d0fc",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647
+      }
+    },
+    {
+      "id": "interval-timeline-v1-over",
+      "format": 1,
+      "description": "Each interval is inside the horizon; only their upstream-order millisecond sum selects the boundary.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "interval-timeline-v1-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 86,
+      "sha256": "7fec7732286f679ef8f0e71f4f3fae0f9078dab6684eda81f517bd1d5b39d3bf",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483648
+      }
+    },
+    {
+      "id": "time-v1-ms-rounding-over",
+      "format": 1,
+      "description": "Adding seconds before conversion rounds to the allowed cap, but summing each interval in milliseconds exceeds it.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "time-v1-ms-rounding-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 99,
+      "sha256": "06283761ce7b12acdc6352ebaa71b7691e723aa3be6592bd6b9eb3c4ad3a547c",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647.0000002
+      }
+    },
+    {
+      "id": "time-v1-ms-sum-overflow",
+      "format": 1,
+      "description": "Both converted intervals and the converted seconds sum are finite, but upstream interval-by-interval millisecond addition overflows.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "time-v1-ms-sum-overflow.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 109,
+      "sha256": "7ac8311d1533b23a5115195bd004804d7b0b1f1540a5782ff865af22dec295d7"
+    },
+    {
+      "id": "interval-timeline-v3-at",
+      "format": 3,
+      "description": "Each interval is inside the horizon; only their upstream-order millisecond sum selects the boundary.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "interval-timeline-v3-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 89,
+      "sha256": "3f76fc28485f0670f5b62210fd580950c404a1809ede166e53ad75c0960cb8bc",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647
+      }
+    },
+    {
+      "id": "interval-timeline-v3-over",
+      "format": 3,
+      "description": "Each interval is inside the horizon; only their upstream-order millisecond sum selects the boundary.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "interval-timeline-v3-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 89,
+      "sha256": "9f311bc12ed12e6208d8821a593ab6e1ec17cf4c7d926ff00f83ca06741e1758",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483648
+      }
+    },
+    {
+      "id": "time-v3-ms-rounding-over",
+      "format": 3,
+      "description": "Adding seconds before conversion rounds to the allowed cap, but summing each interval in milliseconds exceeds it.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "time-v3-ms-rounding-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 102,
+      "sha256": "21bdf134dee3e29fce0166b4c71c2657d47796b3e7cb33667b82de08df3bcadf",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647.0000002
+      }
+    },
+    {
+      "id": "time-v3-ms-sum-overflow",
+      "format": 3,
+      "description": "Both converted intervals and the converted seconds sum are finite, but upstream interval-by-interval millisecond addition overflows.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "time-v3-ms-sum-overflow.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 112,
+      "sha256": "4ce89449651ac5435e81a8635dda115b2022d325217871177079d41cd143be5a"
+    },
+    {
+      "id": "time-v2-output-nonprogress",
+      "format": 2,
+      "description": "A tiny finite timestamp makes the upstream output batching deadline equal its start, so callbacks repeat without consuming output.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "time-v2-output-nonprogress.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 69,
+      "sha256": "92abcf13adcfc3f65e61c7ab7d367f9e7cd41bb7bd38b4b11bef280b51fee536"
     },
     {
       "id": "valid-v1-multiline-late-version",

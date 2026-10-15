@@ -1,11 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import { readFile } from 'node:fs/promises';
 import { loadRecording, RecordingLoadError, DEFAULT_LIMITS } from '../../src/recording-loader.js';
 import { securityManifest, securityCases, getSecurityCase, securityFixtureBuffer } from '../fixtures/security/generate.mjs';
 
 test('shared security corpus pins the production policy and all six safe controls', () => {
+    assert.equal(DEFAULT_LIMITS.timelineMs, 2147483647, 'the test horizon is independently pinned');
     assert.equal(securityManifest.schemaVersion, 1);
     for (const [name, value] of Object.entries(securityManifest.policy)) {
         assert.equal(DEFAULT_LIMITS[name], value, `the ${name} fixture boundary must match production`);
@@ -162,7 +164,11 @@ async function inspectPlayer(data) {
         core.terminalReady();
         await core.init();
         const duration = core.getDuration();
+        assert.ok(Number.isFinite(duration));
+        assert.ok(Number.isFinite(core.getCurrentTime()));
         await core.seek('100%');
+        assert.ok(Number.isFinite(core.getCurrentTime()), 'the actual seek destination remains finite');
+        assert.ok(Number.isFinite(core.getProgress()), 'the actual progress calculation remains finite');
         const output = events.output.flat().join('');
         await core.seek('0%');
         assert.equal(core.getCurrentTime(), 0, 'the real driver can seek back to the start');
@@ -174,8 +180,9 @@ async function inspectPlayer(data) {
     }
 }
 
-// Only known-small, accepted controls reach the real upstream parser/driver.
-// Oversized/hostile corpus members are tested exclusively through our guard.
+// Only known-small, accepted controls reach the real upstream parser/driver here.
+// The tiny numeric witnesses below run separately with captured timers and a hard
+// child-process deadline; no oversized payload reaches the real player.
 const playableCases = securityCases.filter((entry) => entry.safePlayback === true);
 for (const entry of playableCases) {
     test(`pinned player 3.17 parses and seeks validated ${entry.id}`, async () => {
@@ -218,4 +225,173 @@ test('official outputs and seeded playback timelines are equivalent across all t
     assert.deepEqual(controls.seeded[0], controls.seeded[2]);
     assert.deepEqual(controls.seeded[0].events.map((event) => event[0]), [0, 1, 8, 12]);
     assert.ok(controls.seeded[0].output.includes(controls.official[0].output), 'seeded mutations retain the official captured output');
+});
+
+
+/**
+ * Actual upstream Core witness, isolated from the main runner. All timers are
+ * captured, never scheduled; at most three callbacks are invoked per witness.
+ * The parent also kills this child after 10 seconds if an upstream change causes
+ * an unexpected synchronous loop. No browser, terminal, real playback delay, or
+ * large payload is involved. The arithmetic checks above are not a Core double.
+ */
+async function timestampCoreRegression() {
+    const Core = await playerCore();
+    const realSetTimeout = globalThis.setTimeout;
+    const realClearTimeout = globalThis.clearTimeout;
+    const timers = new Map();
+    let timerId = 0;
+    globalThis.setTimeout = (callback, delay) => {
+        const id = ++timerId;
+        timers.set(id, { callback, delay });
+        return id;
+    };
+    globalThis.clearTimeout = (id) => { timers.delete(id); };
+    const parseFixture = (id) => {
+        const entry = getSecurityCase(id);
+        assert.ok(entry.bytes < 256, 'only pinned tiny witnesses may enter this child');
+        const text = securityFixtureBuffer(id).toString('utf8');
+        return entry.format === 1 ? JSON.parse(text) : text.trimEnd().split('\n').map(JSON.parse);
+    };
+    const createCore = (data) => {
+        const core = new Core({ data }, {
+            preload: true, speed: 1,
+            logger: { debug() {}, info() {}, warn() {}, error() {} },
+        });
+        const events = { output: [], error: [], ended: [] };
+        for (const [name, values] of Object.entries(events)) core.addEventListener(name, (value) => values.push(value));
+        core.terminalReady();
+        return { core, events };
+    };
+    const takeTimer = () => {
+        assert.equal(timers.size, 1, 'exactly one recording callback is pending');
+        const [id, timer] = timers.entries().next().value;
+        timers.delete(id);
+        return timer;
+    };
+    try {
+        // Deliberately bypass the guard ONLY for this fixed tiny upstream bug
+        // witness. A premature timer call safely exposes non-progress without
+        // waiting for 1e23 ms or advancing the clock into a synchronous loop.
+        const stalled = createCore(parseFixture('time-v2-output-nonprogress'));
+        try {
+            await stalled.core.init();
+            assert.ok(Number.isFinite(stalled.core.getDuration()));
+            assert.equal(timers.size, 0, 'initial loading timeout was cleared');
+            await stalled.core.play();
+            let previousCallback;
+            for (let n = 0; n < 3; n++) {
+                const timer = takeTimer();
+                assert.equal(timer.delay, 1e23, 'the unsafe upstream delay exceeds signed 32-bit timer range');
+                if (previousCallback) assert.equal(timer.callback, previousCallback, 'the same unconsumed event is rescheduled');
+                previousCallback = timer.callback;
+                timer.callback();
+                await Promise.resolve();
+                assert.deepEqual(stalled.events.output, Array.from({ length: n + 1 }, () => []), 'batching emits empty output without consuming x');
+                assert.deepEqual(stalled.events.ended, []);
+            }
+            assert.deepEqual(stalled.events.error, []);
+            process.stdout.write('v2 non-progress reproduced with three captured callbacks\n');
+        } finally {
+            await stalled.core.stop();
+            assert.equal(timers.size, 0, 'stopping removes the captured non-progress callback');
+        }
+        for (const version of [1, 3]) {
+            const overflow = createCore(parseFixture(`time-v${version}-ms-sum-overflow`));
+            try {
+                await overflow.core.init();
+                assert.equal(overflow.core.getDuration(), Infinity, 'real upstream interval arithmetic overflows although converted seconds sum is finite');
+                await overflow.core.seek('100%');
+                assert.equal(overflow.core.getCurrentTime(), Infinity);
+                assert.ok(Number.isNaN(overflow.core.getProgress()), 'real upstream progress is corrupted');
+                assert.deepEqual(overflow.events.error, []);
+                process.stdout.write(`v${version} infinite duration/seek reproduced\n`);
+            } finally {
+                await overflow.core.stop();
+                assert.equal(timers.size, 0);
+            }
+        }
+        // The production loader must reject all five pinned numerical attacks
+        // before their data can be handed to Core, including rounding-order bugs.
+        let coreHandoffs = 0;
+        for (const id of [
+            'time-v2-output-nonprogress',
+            'time-v1-ms-sum-overflow', 'time-v3-ms-sum-overflow',
+            'time-v1-ms-rounding-over', 'time-v3-ms-rounding-over',
+        ]) {
+            assert.equal(getSecurityCase(id).expected.jsError, 'time');
+            const stream = streamedFixture(securityFixtureBuffer(id));
+            const handoff = async () => {
+                const data = await loadRecording('/security-fixture.cast', { fetchImpl: stream.fetchImpl });
+                coreHandoffs++;
+                return createCore(data);
+            };
+            await assert.rejects(handoff(), (error) => error instanceof RecordingLoadError && error.code === 'time');
+            assert.equal(coreHandoffs, 0, 'rejected data never reaches the actual Core constructor');
+            assert.equal(stream.state.cancels, 1);
+            assert.equal(stream.state.signal.aborted, true);
+            assert.equal(timers.size, 0, 'rejected loader leaves no captured timeouts');
+            process.stdout.write(`${id} rejected before Core handoff\n`);
+        }
+        // Accepted exact-boundary fixtures survive actual parser preparation,
+        // duration/progress arithmetic, end/start seeking and output batching.
+        for (const id of [
+            'timeline-v1-at', 'timeline-v2-at', 'timeline-v3-at',
+            'interval-timeline-v1-at', 'interval-timeline-v3-at',
+        ]) {
+            const bytes = securityFixtureBuffer(id);
+            const data = await loadRecording('/security-fixture.cast', { fetchImpl: streamedFixture(bytes).fetchImpl });
+            assert.deepEqual(data, parseFixture(id), 'near-bound timestamps are preserved without clamping');
+            const expectedOutput = id.startsWith('interval-') ? 'xend' : 'x';
+            const inspected = await inspectPlayer(data);
+            assert.equal(inspected.duration, 2147483.647);
+            assert.equal(inspected.output, expectedOutput);
+            assert.equal(timers.size, 0);
+            const playback = createCore(data);
+            try {
+                await playback.core.init();
+                await playback.core.play();
+                for (let n = 0; n < (id.startsWith('interval-') ? 2 : 1); n++) {
+                    const timer = takeTimer();
+                    assert.ok(Number.isFinite(timer.delay) && timer.delay >= 0 && timer.delay <= 2147483647);
+                    timer.callback();
+                    await Promise.resolve();
+                }
+                assert.equal(playback.events.output.flat().join(''), expectedOutput, 'accepted boundary output always advances');
+                assert.equal(playback.events.ended.length, 1);
+                assert.ok(Number.isFinite(playback.core.getDuration()));
+                assert.ok(Number.isFinite(playback.core.getCurrentTime()));
+                assert.ok(Number.isFinite(playback.core.getProgress()));
+                assert.deepEqual(playback.events.error, []);
+                assert.equal(timers.size, 0, 'accepted output does not reschedule a consumed event');
+                process.stdout.write(`${id} actual Core init/seek/playback is finite and advances\n`);
+            } finally { await playback.core.stop(); }
+        }
+    } finally {
+        globalThis.setTimeout = realSetTimeout;
+        globalThis.clearTimeout = realClearTimeout;
+    }
+}
+
+test('actual 3.17 Core timestamp regressions are bounded and blocked before handoff', () => {
+    const script = `
+        import assert from 'node:assert/strict';
+        import { readFile } from 'node:fs/promises';
+        import { loadRecording, RecordingLoadError } from ${JSON.stringify(new URL('../../src/recording-loader.js', import.meta.url).href)};
+        import { getSecurityCase, securityFixtureBuffer } from ${JSON.stringify(new URL('../fixtures/security/generate.mjs', import.meta.url).href)};
+        ${playerCore.toString()}
+        ${streamedFixture.toString()}
+        ${inspectPlayer.toString()}
+        await (${timestampCoreRegression.toString()})();
+        process.stdout.write('bounded actual-Core timestamp witnesses passed\\n');
+    `;
+    const child = spawnSync(process.execPath, ['--input-type=module', '--eval', script], {
+        cwd: new URL('../../', import.meta.url), timeout: 10000, maxBuffer: 64 * 1024,
+        encoding: 'utf8', env: { ...process.env, NODE_OPTIONS: '' },
+    });
+    const diagnostics = `stdout:\n${child.stdout}\nstderr:\n${child.stderr}`;
+    assert.equal(child.error, undefined, `the bounded Core witness must finish: ${child.error?.message}\n${diagnostics}`);
+    assert.equal(child.signal, null, `the bounded Core witness was killed\n${diagnostics}`);
+    assert.equal(child.status, 0, diagnostics);
+    assert.match(child.stdout, /bounded actual-Core timestamp witnesses passed/);
 });

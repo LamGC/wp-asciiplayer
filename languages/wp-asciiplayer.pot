@@ -327,7 +327,7 @@ msgid ""
 "invalid, or blocked by the source server’s CORS policy."
 msgstr ""
 
-#: includes/uploads.php:354
+#: includes/uploads.php:361
 msgid ""
 "Upload a valid Asciicast v2/v3 JSONL or v1 .cast recording (up to 32 MiB; "
 "v1 up to 2 MiB, 100,000 events, 256 KiB per JSONL line, 1,000 markers, "
@@ -358,7 +358,7 @@ msgstr ""
 msgid "Width and height (legacy)"
 msgstr ""
 
-#: includes/uploads.php:352
+#: includes/uploads.php:359
 msgid "You are not allowed to upload Asciicast files."
 msgstr ""
 

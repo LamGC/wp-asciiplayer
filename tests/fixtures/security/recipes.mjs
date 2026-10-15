@@ -8,6 +8,7 @@ export const POLICY = Object.freeze( {
 	bytes: 33554432, v1Bytes: 2097152, lineBytes: 262144, events: 100000,
 	lines: 100000, markers: 1000, dimension: 1000, cells: 40000,
 	depth: 15, containers: 100016, tokens: 400000, lineTokens: 20000,
+	timelineMs: 2147483647,
 } );
 
 // This PRNG is part of the reproducibility contract, not a security primitive.
@@ -114,6 +115,36 @@ export function createRecipes( seed = FIXTURE_SEED ) {
 			add( `events-v${ version }-${ suffix }`, version, version === 1 ? 'Full default v1 event boundary without first exhausting scalar/container budgets.' : 'Event and physical-line caps coincide for output-only JSONL.', parts, { error: over ? 'events' : null, boundary: pair( 'events', POLICY.events, count ), metrics: { events: count, ...( version === 1 ? { containers: count + 2 } : {} ) } } );
 		}
 	}
+
+	// Tiny time witnesses use a pinned policy independent of production constants.
+	// Keep official captures untouched and never mark these as browser-playable.
+	const timedCast = ( version, timestamps, metadata = {} ) => {
+		const meta = { ...header( version ), ...metadata };
+		const frames = timestamps.map( ( time, index ) => [ time, ...( version === 1 ? [] : [ 'o' ] ), index ? 'end' : 'x' ] );
+		return ( version === 1 ? json( { ...meta, stdout: frames } ) : [ meta, ...frames ].map( json ).join( '\n' ) ) + '\n';
+	};
+	for ( const version of [ 1, 2, 3 ] ) {
+		for ( const over of [ false, true ] ) {
+			const suffix = over ? 'over' : 'at';
+			const seconds = over ? 2147483.648 : 2147483.647;
+			const options = { small: true, error: over ? 'time' : null, boundary: pair( 'timelineMs', 2147483647, over ? 2147483648 : 2147483647 ) };
+			add( `timeline-v${ version }-${ suffix }`, version, 'One event isolates the inclusive 2^31 - 1 millisecond timeline horizon.', [ segment( timedCast( version, [ seconds ] ) ) ], options );
+			for ( const [ id, key ] of [ [ 'duration', 'duration' ], [ 'idle-limit', 'idle_time_limit' ] ] ) {
+				add( `${ id }-v${ version }-${ suffix }`, version, 'Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.', [ segment( timedCast( version, [ 0 ], { [ key ]: seconds } ) ) ], options );
+			}
+		}
+		for ( const [ id, key ] of [ [ 'duration', 'duration' ], [ 'idle-limit', 'idle_time_limit' ] ] ) {
+			add( `${ id }-v${ version }-zero`, version, 'Zero remains valid for optional timing metadata.', [ segment( timedCast( version, [ 0 ], { [ key ]: 0 } ) ) ], { small: true, category: 'valid-control' } );
+		}
+	}
+	for ( const version of [ 1, 3 ] ) {
+		for ( const over of [ false, true ] ) {
+			add( `interval-timeline-v${ version }-${ over ? 'over' : 'at' }`, version, 'Each interval is inside the horizon; only their upstream-order millisecond sum selects the boundary.', [ segment( timedCast( version, [ 1073741.823, over ? 1073741.825 : 1073741.824 ] ) ) ], { small: true, error: over ? 'time' : null, boundary: pair( 'timelineMs', 2147483647, over ? 2147483648 : 2147483647 ) } );
+		}
+		add( `time-v${ version }-ms-rounding-over`, version, 'Adding seconds before conversion rounds to the allowed cap, but summing each interval in milliseconds exceeds it.', [ segment( timedCast( version, [ 307699.2378567164, 1839784.4091432837 ] ) ) ], { small: true, error: 'time', boundary: pair( 'timelineMs', 2147483647, 2147483647.0000002 ) } );
+		add( `time-v${ version }-ms-sum-overflow`, version, 'Both converted intervals and the converted seconds sum are finite, but upstream interval-by-interval millisecond addition overflows.', [ segment( timedCast( version, [ 2.996155224770526e303, 1.7677315826146105e305 ] ) ) ], { small: true, error: 'time' } );
+	}
+	add( 'time-v2-output-nonprogress', 2, 'A tiny finite timestamp makes the upstream output batching deadline equal its start, so callbacks repeat without consuming output.', [ segment( timedCast( 2, [ 1e20 ] ) ) ], { small: true, error: 'time' } );
 
 	add( 'valid-v1-multiline-late-version', 1, 'Pretty v1 document places its version after stdout and nested metadata.', [ segment( '{\n  "stdout": [[0,"multiline v1\\r\\n"]],\n  "metadata": {"version": 3},\n  "width": 80,\n  "height": 24,\n  "version": 1\n}\n' ) ], { small: true, category: 'valid-control' } );
 	add( 'valid-v1-escaped-version', 1, 'Escaped top-level version key is still v1.', [ segment( '{"ver\\u0073ion":1,"width":80,"height":24,"stdout":[]}\n' ) ], { small: true, category: 'valid-control' } );

@@ -3,6 +3,9 @@ export const DEFAULT_LIMITS = Object.freeze( {
 	bytes: 32 * 1024 * 1024, v1Bytes: 2 * 1024 * 1024, lineBytes: 256 * 1024,
 	depth: 15, containers: 100016, tokens: 400000, lineTokens: 20000,
 	events: 100000, lines: 100000, markers: 1000, dimension: 1000, cells: 40000,
+	// Web timers take a signed 32-bit millisecond delay (~24.85 days). This
+	// horizon also keeps upstream's 16.67 ms output batches numerically distinct.
+	timelineMs: 2147483647,
 	totalTimeoutMs: 30000, idleTimeoutMs: 10000,
 } );
 
@@ -14,7 +17,7 @@ export class RecordingLoadError extends Error {
 	}
 }
 const fail = ( code ) => { throw new RecordingLoadError( code ); };
-const finiteTime = ( value ) => typeof value === 'number' && value >= 0 && Number.isFinite( value * 1000 );
+const boundedTime = ( value, maxMs ) => typeof value === 'number' && value >= 0 && value * 1000 <= maxMs;
 const object = ( value ) => value !== null && typeof value === 'object' && ! Array.isArray( value );
 
 /** Guard the terminal allocated by api.create before its data loader runs. */
@@ -134,6 +137,25 @@ export async function loadRecording( source, { fetchImpl = globalThis.fetch, sig
 			policy[ key ] = limits[ key ];
 		}
 	}
+	// Policy overrides may lower this safety ceiling, but cannot expand the
+	// platform timer range. Callers supply already-normalized player options.
+	if ( policy.timelineMs > DEFAULT_LIMITS.timelineMs ) fail( 'policy' );
+	const speed = options.speed ?? 1;
+	if ( typeof speed !== 'number' || ! Number.isFinite( speed ) || speed < 0.01 || speed > 100 ) fail( 'time' );
+	for ( const key of [ 'startAt', 'idleTimeLimit' ] ) {
+		if ( options[ key ] !== undefined && ! boundedTime( options[ key ], policy.timelineMs ) ) fail( 'time' );
+	}
+	if ( typeof options.poster === 'string' && options.poster.startsWith( 'npt:' ) ) {
+		// Match upstream parseNpt's order of arithmetic for normalized timecodes.
+		const posterTime = options.poster.slice( 4 ).split( ':' ).reverse().map( parseFloat ).reduce( ( sum, part, index ) => sum + part * 60 ** index, 0 );
+		if ( ! boundedTime( posterTime, policy.timelineMs ) ) fail( 'time' );
+	}
+	function checkTimeline( milliseconds ) {
+		// Core passes (target - elapsed) / speed directly to setTimeout. Bound
+		// the whole horizon conservatively: adjacent gaps alone are insufficient
+		// because output batching can consume future events ahead of wall time.
+		if ( ! Number.isFinite( milliseconds ) || milliseconds > policy.timelineMs || milliseconds / speed > DEFAULT_LIMITS.timelineMs ) fail( 'time' );
+	}
 	const controller = new AbortController();
 	let reader;
 	let totalTimer;
@@ -176,7 +198,7 @@ export async function loadRecording( source, { fetchImpl = globalThis.fetch, sig
 	let bytes = 0;
 	let mode = 'first';
 	let header;
-	let time = 0;
+	let timeMs = 0;
 	let lines = 0;
 	let markerCount = Array.isArray( options.markers ) ? options.markers.length : 0;
 	const events = [];
@@ -191,7 +213,7 @@ export async function loadRecording( source, { fetchImpl = globalThis.fetch, sig
 			checkSize( value.term.cols, value.term.rows, true );
 		} else checkSize( value.width, value.height, true );
 		for ( const key of [ 'duration', 'idle_time_limit' ] ) {
-			if ( Object.hasOwn( value, key ) && ! finiteTime( value[ key ] ) ) fail( 'time' );
+			if ( Object.hasOwn( value, key ) && ! boundedTime( value[ key ], policy.timelineMs ) ) fail( 'time' );
 		}
 	}
 	function acceptLine( text, size, newline ) {
@@ -234,10 +256,13 @@ export async function loadRecording( source, { fetchImpl = globalThis.fetch, sig
 		if ( events.length >= policy.events ) fail( 'events' );
 		const event = parseBounded( text, policy );
 		if ( ! Array.isArray( event ) || event.length !== 3 || typeof event[ 1 ] !== 'string' || ! event[ 1 ] || typeof event[ 2 ] !== 'string' ) fail( 'invalid' );
-		if ( ! finiteTime( event[ 0 ] ) ) fail( 'time' );
-		if ( header.version === 2 && event[ 0 ] < time ) fail( 'time' );
-		time = header.version === 3 ? time + event[ 0 ] : event[ 0 ];
-		if ( ! finiteTime( time ) ) fail( 'time' );
+		if ( ! boundedTime( event[ 0 ], policy.timelineMs ) ) fail( 'time' );
+		const eventMs = event[ 0 ] * 1000;
+		if ( header.version === 2 && events.length && event[ 0 ] < events[ events.length - 1 ][ 0 ] ) fail( 'time' );
+		// v1/v3 upstream converts each interval before adding, which can round
+		// differently from summing seconds and multiplying the result by 1000.
+		timeMs = header.version === 3 ? timeMs + eventMs : eventMs;
+		checkTimeline( timeMs );
 		if ( event[ 1 ] === 'r' ) {
 			const match = /^([1-9][0-9]{0,3})x([1-9][0-9]{0,3})$/.exec( event[ 2 ] );
 			if ( ! match ) fail( 'dimensions' );
@@ -300,7 +325,9 @@ export async function loadRecording( source, { fetchImpl = globalThis.fetch, sig
 			if ( header.stdout.length > policy.events ) fail( 'events' );
 			for ( const event of header.stdout ) {
 				if ( ! Array.isArray( event ) || event.length !== 2 || typeof event[ 1 ] !== 'string' ) fail( 'invalid' );
-				if ( ! finiteTime( event[ 0 ] ) || ! finiteTime( time += event[ 0 ] ) ) fail( 'time' );
+				if ( ! boundedTime( event[ 0 ], policy.timelineMs ) ) fail( 'time' );
+				timeMs += event[ 0 ] * 1000;
+				checkTimeline( timeMs );
 			}
 			result = header;
 		} else result = [ header, ...events ];

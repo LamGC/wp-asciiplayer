@@ -85,12 +85,13 @@ permission. Multisite networks must also allow the `cast` extension. The plugin
 does not grant extra upload permissions or add a separate recording-management
 post type.
 
-Uploads and browser playback (including remote recordings) use the same resource limits:
+Uploads and browser playback (including remote recordings) enforce these resource limits:
 
 - **32 MiB** of received recording data; **2 MiB** for legacy v1.
 - **100,000** events or stream lines, including ignored lines.
 - **256 KiB** per JSONL line and **1,000** marker events.
 - **1,000** columns or rows per axis, and **40,000** terminal cells (columns × rows).
+- **2,147,483,647 milliseconds** (about **24.85 days**) for recording timelines and supported time values. Relative v1/v3 intervals are accumulated in milliseconds, matching the player. Browser playback also requires cumulative recording time divided by playback speed to fit this ceiling; at **0.01×**, this permits about **5.97 hours** of source time. This conservative bound keeps native timer delays and output batching within their supported numeric range. Playback start, idle-time and timestamp-poster options are checked too.
 - At most **15** nested JSON containers, **400,000** scalar/key tokens and **100,016** containers in v1, or **20,000** scalar/key tokens per JSONL line, checked before decoding. Unknown metadata and duplicate keys count too.
 - Browser requests stop after **30 seconds** total or **10 seconds** without the next response/chunk; the editor also allows 30 seconds for player assets and loading together.
 
