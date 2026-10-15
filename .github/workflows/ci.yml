@@ -23,7 +23,7 @@ jobs:
       matrix:
         php: ['7.4', '8.3']
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
       - name: Check syntax and execute PHP regression tests
         run: |
           docker run --rm -v "$PWD:/app" -w /app "php:${{ matrix.php }}-cli" sh -ec '
@@ -31,7 +31,37 @@ jobs:
             php tests/php/run.php
           '
 
+  # Only this job publishes the installable package. No WordPress containers or
+  # downloaded plugins run here, and the artifact is immutable once uploaded.
+  build:
+    name: Build and publish pristine package
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      package-artifact-id: ${{ steps.package.outputs.artifact-id }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: '24.18.0'
+          cache: npm
+      - name: Use the documented npm toolchain
+        run: npm install --global npm@11.19.0
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+      - run: npm run package
+      - name: Upload pristine installable ZIP
+        id: package
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: wp-asciiplayer-package-${{ github.run_id }}-${{ github.run_attempt }}
+          path: dist/wp-asciiplayer.zip
+          if-no-files-found: error
+          retention-days: 14
+
   wordpress:
+    needs: build
     name: WordPress ${{ matrix.wordpress }} / PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -44,17 +74,20 @@ jobs:
           - wordpress: '6.3'
             php: '7.4'
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: '24.18.0'
           cache: npm
       - name: Use the documented npm toolchain
         run: npm install --global npm@11.19.0
       - run: npm ci
-      - run: npm run build
-      - run: npm test
-      - run: npm run package
+      - name: Download the pristine package from this run
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          artifact-ids: ${{ needs.build.outputs.package-artifact-id }}
+          path: dist
+          merge-multiple: true
       - name: Configure clean WordPress version
         env:
           WP_TEST_VERSION: ${{ matrix.wordpress }}
@@ -88,21 +121,14 @@ jobs:
         env:
           PLAYWRIGHT_HTML_OUTPUT_DIR: playwright-report/i18n
         run: npm run test:e2e -- --grep @i18n --output=test-results/i18n
-      - name: Run Plugin Check (advisory until directory review)
-        if: always() && matrix.wordpress == 'latest'
-        continue-on-error: true
-        run: |
-          npx --no-install wp-env run cli wp plugin install plugin-check --activate
-          npx --no-install wp-env run cli wp plugin get plugin-check --field=version | tee plugin-check-version.txt
-          npx --no-install wp-env run cli wp plugin check wp-asciiplayer --require=/var/www/html/wp-content/plugins/plugin-check/cli.php --format=json | tee plugin-check-report.txt
       - name: Record WordPress and PHP logs
         if: always()
         run: |
           npx --no-install wp-env logs --watch=false > wordpress-logs.txt 2>&1 || true
           npx --no-install wp-env run cli sh -c 'test ! -f wp-content/debug.log || cat wp-content/debug.log' > wordpress-debug.txt 2>&1 || true
-      - name: Upload integration evidence and installable ZIP
+      - name: Upload integration evidence
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
         with:
           name: wordpress-${{ matrix.wordpress }}-php-${{ matrix.php }}
           if-no-files-found: warn
@@ -110,12 +136,56 @@ jobs:
           path: |
             playwright-report/
             test-results/
-            plugin-check-version.txt
-            plugin-check-report.txt
             wordpress-version.txt
             wordpress-logs.txt
             wordpress-debug.txt
-            dist/wp-asciiplayer.zip
+      - name: Stop WordPress
+        if: always()
+        run: npx --no-install wp-env stop
+
+  # Plugin Check receives its own disposable copy. It cannot replace the package
+  # uploaded by build, and this job never republishes files from dist.
+  plugin-check:
+    name: Plugin Check (advisory)
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: '24.18.0'
+          cache: npm
+      - name: Use the documented npm toolchain
+        run: npm install --global npm@11.19.0
+      - run: npm ci
+      - name: Download the pristine package from this run
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          artifact-ids: ${{ needs.build.outputs.package-artifact-id }}
+          path: dist
+          merge-multiple: true
+      - name: Start WordPress and install the packaged plugin
+        run: |
+          mkdir -p .wp-env-uploads
+          npx --no-install wp-env start
+          npx --no-install wp-env run cli wp plugin install /var/www/html/wp-content/asciiplayer-packages/wp-asciiplayer.zip --activate --force
+      - name: Run Plugin Check (advisory until directory review)
+        continue-on-error: true
+        run: |
+          npx --no-install wp-env run cli wp plugin install plugin-check --activate
+          npx --no-install wp-env run cli wp plugin get plugin-check --field=version | tee plugin-check-version.txt
+          npx --no-install wp-env run cli wp plugin check wp-asciiplayer --require=/var/www/html/wp-content/plugins/plugin-check/cli.php --format=json | tee plugin-check-report.txt
+      - name: Upload Plugin Check evidence only
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        with:
+          name: plugin-check-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: warn
+          retention-days: 14
+          path: |
+            plugin-check-version.txt
+            plugin-check-report.txt
       - name: Stop WordPress
         if: always()
         run: npx --no-install wp-env stop
