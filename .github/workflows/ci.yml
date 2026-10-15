@@ -4,6 +4,8 @@ on:
   pull_request:
   push:
     branches: ['main', 'codex/**']
+    # GitHub tag filters are globs, not SemVer validators. Validate before building.
+    tags: ['**']
   workflow_dispatch:
 
 permissions:
@@ -11,10 +13,42 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref_type != 'tag' }}
 
 jobs:
+  release-validation:
+    name: Validate release tag and version metadata
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        if: github.ref_type == 'tag'
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        if: github.ref_type == 'tag'
+        with:
+          node-version: '24.18.0'
+          package-manager-cache: false
+      - name: Require a tag commit already included in main
+        if: github.ref_type == 'tag'
+        run: |
+          if ! git merge-base --is-ancestor HEAD origin/main; then
+            echo '::error::Release tags must point to a commit already merged into main.'
+            exit 1
+          fi
+      - name: Validate strict SemVer and matching plugin metadata
+        id: version
+        if: github.ref_type == 'tag'
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: node scripts/release-version.mjs
+
   php-compatibility:
+    needs: release-validation
     name: PHP ${{ matrix.php }} syntax and regression tests
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -34,6 +68,7 @@ jobs:
   # Only this job publishes the installable package. No WordPress containers or
   # downloaded plugins run here, and the artifact is immutable once uploaded.
   build:
+    needs: release-validation
     name: Build and publish pristine package
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -189,3 +224,33 @@ jobs:
       - name: Stop WordPress
         if: always()
         run: npx --no-install wp-env stop
+
+  release-draft:
+    name: Create release draft from the pristine package
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs: [release-validation, build, php-compatibility, wordpress, plugin-check]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: '24.18.0'
+          package-manager-cache: false
+      - name: Download only the original build artifact
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          artifact-ids: ${{ needs.build.outputs.package-artifact-id }}
+          path: dist
+          merge-multiple: true
+      - name: Generate notes and prepare an unpublished release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+          RELEASE_VERSION: ${{ needs.release-validation.outputs.version }}
+        run: |
+          node scripts/release-draft.mjs --tag "$RELEASE_TAG" --version "$RELEASE_VERSION" --commit "$(git rev-parse HEAD)" --zip dist/wp-asciiplayer.zip
