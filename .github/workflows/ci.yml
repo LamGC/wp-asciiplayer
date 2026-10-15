@@ -16,7 +16,7 @@ concurrency:
 jobs:
   php-compatibility:
     name: PHP ${{ matrix.php }} syntax and regression tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     strategy:
       fail-fast: false
@@ -35,7 +35,7 @@ jobs:
   # downloaded plugins run here, and the artifact is immutable once uploaded.
   build:
     name: Build and publish pristine package
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     outputs:
       package-artifact-id: ${{ steps.package.outputs.artifact-id }}
@@ -63,7 +63,7 @@ jobs:
   wordpress:
     needs: build
     name: WordPress ${{ matrix.wordpress }} / PHP ${{ matrix.php }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -148,7 +148,7 @@ jobs:
   plugin-check:
     name: Plugin Check (advisory)
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
