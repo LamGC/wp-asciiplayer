@@ -45,6 +45,10 @@ No. The [asciiplayer] shortcode remains available. You can explicitly convert su
 
 Use a recording-file URL rather than a share-page URL. The remote server must permit cross-origin (CORS) requests. HTTPS sites may block HTTP recordings. Network errors, invalid formats or missing files can also prevent playback. The plugin does not work around these restrictions through a server proxy.
 
+= What recording limits apply? =
+
+Uploads and browser playback, including remote files, are bounded to 32 MiB (v1: 2 MiB), 100,000 events or stream lines, 256 KiB per JSONL line, 1,000 markers, 1,000 columns/rows per axis and 40,000 terminal cells. Recording timelines and supported time values are capped at 2,147,483,647 milliseconds (about 24.85 days). Browser playback additionally bounds cumulative time divided by speed; at 0.01x, source time is limited to about 5.97 hours. Relative intervals are accumulated in the player's millisecond order, and start/idle/poster times are checked. Initial dimensions, resize events and effective overrides are checked. JSON nesting and structure are checked before decoding. Existing files/posts are not rewritten; unusually large recordings may need splitting or simplification. The browser validates one request before playback, without an extra metadata request or a server proxy.
+
 = Are player resources loaded from a CDN? =
 
 No. The JavaScript, CSS and WebAssembly ship with the plugin. The previous ap_use_local_resources setting is no longer used.

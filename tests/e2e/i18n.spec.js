@@ -10,7 +10,7 @@ const copy = {
         help: 'Help', retry: 'Retry preview', captionLabel: 'Recording caption',
         previewError: 'Unable to load the recording. Check the URL, file format, and the source server’s CORS permissions.',
         frontendError: 'Unable to load this terminal recording. The file may be unavailable, invalid, or blocked by the source server’s CORS policy.',
-        uploadError: 'Upload a valid Asciicast v2/v3 JSONL or pretty-printed v1 .cast recording (up to 32 MiB; v1 up to 2 MiB, 100,000 events, 256 KiB per JSONL line, and 1,000 columns or rows).',
+        uploadError: 'Upload a valid Asciicast v2/v3 JSONL or v1 .cast recording (up to 32 MiB; v1 up to 2 MiB, 100,000 events, 256 KiB per JSONL line, 1,000 markers, 1,000 columns or rows, 40,000 terminal cells, and bounded JSON structure).',
     },
     zh_CN: {
         title: 'Asciicast 播放器', source: '录制文件 URL', apply: '应用 URL',
@@ -18,7 +18,7 @@ const copy = {
         help: '帮助', retry: '重试预览', captionLabel: '录屏说明文字',
         previewError: '无法加载录制文件。请检查 URL、文件格式及来源服务器的跨域请求（CORS）权限。',
         frontendError: '无法加载此终端录屏。文件可能无法访问、格式无效，或被来源服务器的跨域请求（CORS）策略阻止。',
-        uploadError: '请上传有效的 Asciicast v2/v3 JSONL 或格式化的 v1 .cast 录制文件（最大 32 MiB；v1 最大 2 MiB；最多 100,000 个事件；每行 JSONL最大 256 KiB；列数和行数均不超过 1,000）。',
+        uploadError: '请上传有效的 Asciicast v2/v3 JSONL 或 v1 .cast 录屏（最大 32 MiB；v1 最大 2 MiB、100,000 个事件、每行 JSONL 最大 256 KiB、1,000 个时间标记、1,000 列或行、40,000 个终端单元格，且 JSON 结构复杂度受限）。',
     },
 };
 

@@ -159,7 +159,7 @@ msgstr "隐藏"
 msgid "Idle time limit (seconds)"
 msgstr "最长空闲时间（秒）"
 
-#: src/preview.js:85
+#: src/preview.js:92
 msgid "Interactive terminal recording preview"
 msgstr "可交互的终端录屏预览"
 
@@ -167,7 +167,7 @@ msgstr "可交互的终端录屏预览"
 msgid "Left"
 msgstr "左对齐"
 
-#: src/preview.js:83
+#: src/preview.js:90
 msgid "Loading recording…"
 msgstr "正在加载录制文件…"
 
@@ -225,7 +225,7 @@ msgstr "录制文件主题（自动）"
 msgid "Recording URL"
 msgstr "录制文件 URL"
 
-#: src/preview.js:84
+#: src/preview.js:91
 msgid "Retry preview"
 msgstr "重试预览"
 
@@ -269,13 +269,13 @@ msgstr "发布后的页面会保留简码中的自定义容器样式。"
 msgid "The editor preview always waits for you to press play."
 msgstr "编辑器预览始终需要点击播放后才会开始。"
 
-#: src/preview.js:70
+#: src/preview.js:77
 msgid ""
 "The local player could not start. Try again, or check that the plugin’s "
 "built assets are installed."
 msgstr "本地播放器无法启动。请重试，或检查插件的构建资源是否已安装。"
 
-#: src/preview.js:68
+#: src/recording-errors.js:14
 msgid ""
 "The recording is taking too long to load. Check your connection and try "
 "again."
@@ -285,26 +285,61 @@ msgstr "录制文件加载超时。请检查网络连接后重试。"
 msgid "Theme"
 msgstr "主题"
 
-#: src/preview.js:59
+#: src/recording-errors.js:8
+msgid "This recording contains a line that exceeds the size limit."
+msgstr "该录屏包含超出大小限制的行。"
+
+#: src/recording-errors.js:15
+msgid "This recording contains an invalid or unsupported timestamp."
+msgstr "该录屏包含无效或不支持的时间戳。"
+
+#: src/recording-errors.js:9
+msgid "This recording contains too many events."
+msgstr "该录屏包含过多事件。"
+
+#: src/recording-errors.js:10
+msgid "This recording contains too many markers."
+msgstr "该录屏包含过多时间标记。"
+
+#: src/recording-errors.js:7
+msgid "This recording exceeds the file size limit."
+msgstr "该录屏超过文件大小限制。"
+
+#: src/recording-errors.js:13
+msgid "This recording is too complex to load safely."
+msgstr "该录屏结构过于复杂，无法安全加载。"
+
+#: src/recording-errors.js:11
+msgid ""
+"This recording requests terminal dimensions that exceed the supported "
+"limits."
+msgstr "该录屏请求的终端尺寸超出支持范围。"
+
+#: src/recording-errors.js:12
+msgid "This recording requests too many terminal cells."
+msgstr "该录屏请求的终端单元格过多。"
+
+#: src/preview.js:67
+#: src/recording-errors.js:20
 msgid ""
 "Unable to load the recording. Check the URL, file format, and the source "
 "server’s CORS permissions."
 msgstr "无法加载录制文件。请检查 URL、文件格式及来源服务器的跨域请求（CORS）权限。"
 
-#: src/view.js:12
+#: src/recording-errors.js:19
 msgid ""
 "Unable to load this terminal recording. The file may be unavailable, "
 "invalid, or blocked by the source server’s CORS policy."
 msgstr "无法加载此终端录屏。文件可能无法访问、格式无效，或被来源服务器的跨域请求（CORS）策略阻止。"
 
-#: includes/uploads.php:197
+#: includes/uploads.php:354
 msgid ""
-"Upload a valid Asciicast v2/v3 JSONL or pretty-printed v1 .cast recording "
-"(up to 32 MiB; v1 up to 2 MiB, 100,000 events, 256 KiB per JSONL line, and "
-"1,000 columns or rows)."
+"Upload a valid Asciicast v2/v3 JSONL or v1 .cast recording (up to 32 MiB; "
+"v1 up to 2 MiB, 100,000 events, 256 KiB per JSONL line, 1,000 markers, "
+"1,000 columns or rows, 40,000 terminal cells, and bounded JSON structure)."
 msgstr ""
-"请上传有效的 Asciicast v2/v3 JSONL 或格式化的 v1 .cast 录制文件（最大 32 MiB；v1 最大 2 MiB；最多 "
-"100,000 个事件；每行 JSONL最大 256 KiB；列数和行数均不超过 1,000）。"
+"请上传有效的 Asciicast v2/v3 JSONL 或 v1 .cast 录屏（最大 32 MiB；v1 最大 2 MiB、100,000 "
+"个事件、每行 JSONL 最大 256 KiB、1,000 个时间标记、1,000 列或行、40,000 个终端单元格，且 JSON 结构复杂度受限）。"
 
 #: src/edit.js:115
 msgid ""
@@ -330,7 +365,7 @@ msgstr "按宽度缩放"
 msgid "Width and height (legacy)"
 msgstr "按宽高缩放（旧版）"
 
-#: includes/uploads.php:195
+#: includes/uploads.php:352
 msgid "You are not allowed to upload Asciicast files."
 msgstr "你没有上传 Asciicast 文件的权限。"
 

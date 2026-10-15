@@ -1,0 +1,6 @@
+{"version":3,"term":{"cols":80,"rows":24}}
+
+# compatibility comment
+ignored text
+ [999,"o","ignored"]
+[0,"o","accepted output\r\n"]

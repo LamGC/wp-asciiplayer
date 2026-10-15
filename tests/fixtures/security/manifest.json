@@ -1,0 +1,2925 @@
+{
+  "schemaVersion": 1,
+  "seed": "0x41c0ffee",
+  "generator": "xorshift32-v1; fixed case IDs and fixed resource policies",
+  "policy": {
+    "bytes": 33554432,
+    "v1Bytes": 2097152,
+    "lineBytes": 262144,
+    "events": 100000,
+    "lines": 100000,
+    "markers": 1000,
+    "dimension": 1000,
+    "cells": 40000,
+    "depth": 15,
+    "containers": 100016,
+    "tokens": 400000,
+    "lineTokens": 20000,
+    "timelineMs": 2147483647
+  },
+  "cases": [
+    {
+      "id": "official-v1",
+      "format": 1,
+      "description": "Unmodified native capture from the pinned official asciinema recorder; original PTY timings are intentionally retained.",
+      "category": "valid-control",
+      "provenance": "official-raw-capture",
+      "safePlayback": true,
+      "validity": "format-valid",
+      "source": {
+        "file": "official-v1.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 669,
+      "sha256": "5570c9cdec60a779585db195ecd8dee4756d84706d6b27d3ccd87cf3ba311c97"
+    },
+    {
+      "id": "seeded-v1-valid",
+      "format": 1,
+      "description": "Official captured output plus fixed-seed text; normalized equivalent absolute times across all formats.",
+      "category": "valid-control",
+      "provenance": "normalized-mutation",
+      "safePlayback": true,
+      "validity": "format-valid",
+      "source": {
+        "file": "seeded-v1-valid.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 567,
+      "sha256": "05387dceb975f6f8ea5364071517a51a31aeb68337429ae943b07ad2c1da1a67",
+      "playback": {
+        "startText": "PR41 START seed 41c0ffee",
+        "seekText": "PR41 SEEK seed 41c0ffee",
+        "seekPercent": 80,
+        "cols": 80,
+        "rows": 24,
+        "duration": 12
+      }
+    },
+    {
+      "id": "valid-v1-zero",
+      "format": 1,
+      "description": "Zero header dimensions retain upstream 80 by 24 defaults.",
+      "category": "upstream-compatibility",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "upstream-compatible",
+      "source": {
+        "file": "valid-v1-zero.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 77,
+      "sha256": "04c504e1dbcbf547e86e6bd270d71e9c8b42264f2a3100865f3385a5c7db9199"
+    },
+    {
+      "id": "dimensions-v1-at",
+      "format": 1,
+      "description": "The inclusive per-axis cap still fits within the independent cell budget.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "dimensions-v1-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 81,
+      "sha256": "7bc9633d4dfdd9044979a1cb6cea2f5a2bb4adc06e4a27a66385ec9c00d66b68",
+      "boundary": {
+        "metric": "dimension",
+        "limit": 1000,
+        "value": 1000
+      }
+    },
+    {
+      "id": "dimensions-v1-over",
+      "format": 1,
+      "description": "Syntactically valid header requests an axis one beyond the dimension cap.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "dimensions-v1-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "dimensions"
+      },
+      "bytes": 81,
+      "sha256": "f79a1f77a45b62ab7968c8264855af9597254001cf26f4d821c85e8802423a57",
+      "boundary": {
+        "metric": "dimension",
+        "limit": 1000,
+        "value": 1001
+      }
+    },
+    {
+      "id": "cells-v1-at",
+      "format": 1,
+      "description": "Each axis is valid; their product alone selects the cell boundary.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "cells-v1-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 81,
+      "sha256": "26ecff895ea0a4e099e873b3f513bcd3230572094890519ea238929dc98574cc",
+      "boundary": {
+        "metric": "cells",
+        "limit": 40000,
+        "value": 40000
+      }
+    },
+    {
+      "id": "depth-v1-at",
+      "format": 1,
+      "description": "Unknown metadata reaches the lexical container-depth boundary before JSON allocation.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "depth-v1-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 90,
+      "sha256": "2cd6cb52a9ed80fa48f794dccb146a50680f8674767d0c484e14b0f5b13e93a5",
+      "boundary": {
+        "metric": "depth",
+        "limit": 15,
+        "value": 15
+      }
+    },
+    {
+      "id": "events-v1-at",
+      "format": 1,
+      "description": "Full default v1 event boundary without first exhausting scalar/container budgets.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":1,\"width\":80,\"height\":24,\"stdout\":[",
+            "repeat": 1
+          },
+          {
+            "text": "[0,\"\"],",
+            "repeat": 99999
+          },
+          {
+            "text": "[0,\"\"]]}\n",
+            "repeat": 1
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 700048,
+      "sha256": "c71c76ef080410c006fed3b52c51c5eb65394930e8a9e5ebaec098338facf96e",
+      "boundary": {
+        "metric": "events",
+        "limit": 100000,
+        "value": 100000
+      },
+      "metrics": {
+        "events": 100000,
+        "containers": 100002
+      }
+    },
+    {
+      "id": "cells-v1-over",
+      "format": 1,
+      "description": "Each axis is valid; their product alone selects the cell boundary.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "cells-v1-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "cells"
+      },
+      "bytes": 81,
+      "sha256": "9f1d8560e94e24a113b53cdc97d095ed4d4807756e92ff8464bf7a33f5ba7771",
+      "boundary": {
+        "metric": "cells",
+        "limit": 40000,
+        "value": 40200
+      }
+    },
+    {
+      "id": "depth-v1-over",
+      "format": 1,
+      "description": "Unknown metadata reaches the lexical container-depth boundary before JSON allocation.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "depth-v1-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "complexity",
+        "noDecodeAtOrAboveBytes": 91
+      },
+      "bytes": 92,
+      "sha256": "3b2252fefdbfba79c360cd472ba03238d47f787319fb4b1fc7623a7f03abd57e",
+      "boundary": {
+        "metric": "depth",
+        "limit": 15,
+        "value": 16
+      }
+    },
+    {
+      "id": "events-v1-over",
+      "format": 1,
+      "description": "Full default v1 event boundary without first exhausting scalar/container budgets.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":1,\"width\":80,\"height\":24,\"stdout\":[",
+            "repeat": 1
+          },
+          {
+            "text": "[0,\"\"],",
+            "repeat": 100000
+          },
+          {
+            "text": "[0,\"\"]]}\n",
+            "repeat": 1
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "events"
+      },
+      "bytes": 700055,
+      "sha256": "25e6ee13936ea8804b8bd7c501ca767e89ac9d8274eb02af5e6ee6750d4103bd",
+      "boundary": {
+        "metric": "events",
+        "limit": 100000,
+        "value": 100001
+      },
+      "metrics": {
+        "events": 100001,
+        "containers": 100003
+      }
+    },
+    {
+      "id": "official-v2",
+      "format": 2,
+      "description": "Unmodified native capture from the pinned official asciinema recorder; original PTY timings are intentionally retained.",
+      "category": "valid-control",
+      "provenance": "official-raw-capture",
+      "safePlayback": true,
+      "validity": "format-valid",
+      "source": {
+        "file": "official-v2.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 498,
+      "sha256": "6be6f5cd70d4a428692fc7807549b9c1437c1c8b60902220ad5e7e01a201f3ee"
+    },
+    {
+      "id": "seeded-v2-valid",
+      "format": 2,
+      "description": "Official captured output plus fixed-seed text; normalized equivalent absolute times across all formats.",
+      "category": "valid-control",
+      "provenance": "normalized-mutation",
+      "safePlayback": true,
+      "validity": "format-valid",
+      "source": {
+        "file": "seeded-v2-valid.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 449,
+      "sha256": "85d9dcb646d6f308d5f46804fb2adccf4f4b930b758a0d0b892383611464c539",
+      "playback": {
+        "startText": "PR41 START seed 41c0ffee",
+        "seekText": "PR41 SEEK seed 41c0ffee",
+        "seekPercent": 80,
+        "cols": 80,
+        "rows": 24,
+        "duration": 12
+      }
+    },
+    {
+      "id": "valid-v2-zero",
+      "format": 2,
+      "description": "Zero header dimensions retain upstream 80 by 24 defaults.",
+      "category": "upstream-compatibility",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "upstream-compatible",
+      "source": {
+        "file": "valid-v2-zero.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 70,
+      "sha256": "ec1527865e0a55285f085006343a5deb943c209bb7081a9ad4c660a272511bea"
+    },
+    {
+      "id": "dimensions-v2-at",
+      "format": 2,
+      "description": "The inclusive per-axis cap still fits within the independent cell budget.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "dimensions-v2-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 74,
+      "sha256": "255875d5c33c50f26f126a9e7a25929ebeceaeefc56a3a6367ef8ab84df2edac",
+      "boundary": {
+        "metric": "dimension",
+        "limit": 1000,
+        "value": 1000
+      }
+    },
+    {
+      "id": "dimensions-v2-over",
+      "format": 2,
+      "description": "Syntactically valid header requests an axis one beyond the dimension cap.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "dimensions-v2-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "dimensions"
+      },
+      "bytes": 74,
+      "sha256": "0f2176efd6907d3c66d2d4c6ad11bd9551ab07e96f80d4a9c02d3e5ad686ac47",
+      "boundary": {
+        "metric": "dimension",
+        "limit": 1000,
+        "value": 1001
+      }
+    },
+    {
+      "id": "cells-v2-at",
+      "format": 2,
+      "description": "Each axis is valid; their product alone selects the cell boundary.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "cells-v2-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 74,
+      "sha256": "df554764f21861bd394bb27cc249996a8f32285d4f4ce0f1e48280a142d1377a",
+      "boundary": {
+        "metric": "cells",
+        "limit": 40000,
+        "value": 40000
+      }
+    },
+    {
+      "id": "depth-v2-at",
+      "format": 2,
+      "description": "Unknown metadata reaches the lexical container-depth boundary before JSON allocation.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "depth-v2-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 78,
+      "sha256": "f7fd7b690ef5d53bbd5c585a4043a82c2dc78924724dad1f98d01fc314a74a88",
+      "boundary": {
+        "metric": "depth",
+        "limit": 15,
+        "value": 15
+      }
+    },
+    {
+      "id": "events-v2-at",
+      "format": 2,
+      "description": "Event and physical-line caps coincide for output-only JSONL.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":2,\"width\":80,\"height\":24}\n",
+            "repeat": 1
+          },
+          {
+            "text": "[0,\"o\",\"\"]\n",
+            "repeat": 100000
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 1100037,
+      "sha256": "57fc86b48ccad1660dec8ae1d77ea6c4374e177e966ff34797e971150aaa0145",
+      "boundary": {
+        "metric": "events",
+        "limit": 100000,
+        "value": 100000
+      },
+      "metrics": {
+        "events": 100000
+      }
+    },
+    {
+      "id": "cells-v2-over",
+      "format": 2,
+      "description": "Each axis is valid; their product alone selects the cell boundary.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "cells-v2-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "cells"
+      },
+      "bytes": 74,
+      "sha256": "af1d48e1597d1e51c856defb7abeb1eabcc4db4d420ea65ee78c5de6dedac5f8",
+      "boundary": {
+        "metric": "cells",
+        "limit": 40000,
+        "value": 40200
+      }
+    },
+    {
+      "id": "depth-v2-over",
+      "format": 2,
+      "description": "Unknown metadata reaches the lexical container-depth boundary before JSON allocation.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "depth-v2-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "complexity",
+        "noDecodeAtOrAboveBytes": 79
+      },
+      "bytes": 80,
+      "sha256": "51e078ee1319a808671b350b10fe262ec0df75d0636a29c5cf5a3dcda8aca333",
+      "boundary": {
+        "metric": "depth",
+        "limit": 15,
+        "value": 16
+      }
+    },
+    {
+      "id": "events-v2-over",
+      "format": 2,
+      "description": "Event and physical-line caps coincide for output-only JSONL.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":2,\"width\":80,\"height\":24}\n",
+            "repeat": 1
+          },
+          {
+            "text": "[0,\"o\",\"\"]\n",
+            "repeat": 100001
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "events"
+      },
+      "bytes": 1100048,
+      "sha256": "6af91a929e95c14806735cbf669b3f9a7d05a9be8b3468653e5bbd585441d3ad",
+      "boundary": {
+        "metric": "events",
+        "limit": 100000,
+        "value": 100001
+      },
+      "metrics": {
+        "events": 100001
+      }
+    },
+    {
+      "id": "official-v3",
+      "format": 3,
+      "description": "Unmodified native capture from the pinned official asciinema recorder; original PTY timings are intentionally retained.",
+      "category": "valid-control",
+      "provenance": "official-raw-capture",
+      "safePlayback": true,
+      "validity": "format-valid",
+      "source": {
+        "file": "official-v3.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 509,
+      "sha256": "8c07c04edf86605558a9795152fcba32337d72aeaa073bc89adb1c285f06763e"
+    },
+    {
+      "id": "seeded-v3-valid",
+      "format": 3,
+      "description": "Official captured output plus fixed-seed text; normalized equivalent absolute times across all formats.",
+      "category": "valid-control",
+      "provenance": "normalized-mutation",
+      "safePlayback": true,
+      "validity": "format-valid",
+      "source": {
+        "file": "seeded-v3-valid.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 454,
+      "sha256": "6de8e2475abdcd517381e8ce74b62e665c8e841c4d792dae54a3f8c7ff9a1a69",
+      "playback": {
+        "startText": "PR41 START seed 41c0ffee",
+        "seekText": "PR41 SEEK seed 41c0ffee",
+        "seekPercent": 80,
+        "cols": 80,
+        "rows": 24,
+        "duration": 12
+      }
+    },
+    {
+      "id": "valid-v3-zero",
+      "format": 3,
+      "description": "Zero header dimensions retain upstream 80 by 24 defaults.",
+      "category": "upstream-compatibility",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "upstream-compatible",
+      "source": {
+        "file": "valid-v3-zero.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 76,
+      "sha256": "35bdaac124b7062a9bd5ed6789c4bdae51abcd3e763a227e71830e388ae6d297"
+    },
+    {
+      "id": "dimensions-v3-at",
+      "format": 3,
+      "description": "The inclusive per-axis cap still fits within the independent cell budget.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "dimensions-v3-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 80,
+      "sha256": "1278fec4786bc368ab96e9b9e338f48d3e14f877953387f725690ba9bc643afb",
+      "boundary": {
+        "metric": "dimension",
+        "limit": 1000,
+        "value": 1000
+      }
+    },
+    {
+      "id": "dimensions-v3-over",
+      "format": 3,
+      "description": "Syntactically valid header requests an axis one beyond the dimension cap.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "dimensions-v3-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "dimensions"
+      },
+      "bytes": 80,
+      "sha256": "3c5ced3045d1c010de16b8d0cd282a79bb17551d0c0c1fc53b189a82425169ba",
+      "boundary": {
+        "metric": "dimension",
+        "limit": 1000,
+        "value": 1001
+      }
+    },
+    {
+      "id": "cells-v3-at",
+      "format": 3,
+      "description": "Each axis is valid; their product alone selects the cell boundary.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "cells-v3-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 80,
+      "sha256": "61231dbb565ec0cdd7c89d3f4d8688c5d6bf2d17b3294c7f0ef98deaaea16c0e",
+      "boundary": {
+        "metric": "cells",
+        "limit": 40000,
+        "value": 40000
+      }
+    },
+    {
+      "id": "depth-v3-at",
+      "format": 3,
+      "description": "Unknown metadata reaches the lexical container-depth boundary before JSON allocation.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "depth-v3-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 84,
+      "sha256": "a6cfe309d36ae639275b67a1a2c00bc03ce3235974ca7294fde8ff60f8208cf2",
+      "boundary": {
+        "metric": "depth",
+        "limit": 15,
+        "value": 15
+      }
+    },
+    {
+      "id": "events-v3-at",
+      "format": 3,
+      "description": "Event and physical-line caps coincide for output-only JSONL.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":3,\"term\":{\"cols\":80,\"rows\":24}}\n",
+            "repeat": 1
+          },
+          {
+            "text": "[0,\"o\",\"\"]\n",
+            "repeat": 100000
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 1100043,
+      "sha256": "965c22bbad2905fdcd25d82b5aa002abb8f34a57c18c4f3c4668cf90bbcb2468",
+      "boundary": {
+        "metric": "events",
+        "limit": 100000,
+        "value": 100000
+      },
+      "metrics": {
+        "events": 100000
+      }
+    },
+    {
+      "id": "cells-v3-over",
+      "format": 3,
+      "description": "Each axis is valid; their product alone selects the cell boundary.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "cells-v3-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "cells"
+      },
+      "bytes": 80,
+      "sha256": "60edabd87f7cc6015e1a67b316fa6f32fa586017fce48fcd3893fd3898371e82",
+      "boundary": {
+        "metric": "cells",
+        "limit": 40000,
+        "value": 40200
+      }
+    },
+    {
+      "id": "depth-v3-over",
+      "format": 3,
+      "description": "Unknown metadata reaches the lexical container-depth boundary before JSON allocation.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "depth-v3-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "complexity",
+        "noDecodeAtOrAboveBytes": 85
+      },
+      "bytes": 86,
+      "sha256": "eecde03b2cc45a188375df173650c54d0eea47887c65385d6ccdb49e602f7ad5",
+      "boundary": {
+        "metric": "depth",
+        "limit": 15,
+        "value": 16
+      }
+    },
+    {
+      "id": "events-v3-over",
+      "format": 3,
+      "description": "Event and physical-line caps coincide for output-only JSONL.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":3,\"term\":{\"cols\":80,\"rows\":24}}\n",
+            "repeat": 1
+          },
+          {
+            "text": "[0,\"o\",\"\"]\n",
+            "repeat": 100001
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "events"
+      },
+      "bytes": 1100054,
+      "sha256": "9c3fd37d34b5949bd88d501cd27ac03915169296c55c2e32c271986f43fb519e",
+      "boundary": {
+        "metric": "events",
+        "limit": 100000,
+        "value": 100001
+      },
+      "metrics": {
+        "events": 100001
+      }
+    },
+    {
+      "id": "timeline-v1-at",
+      "format": 1,
+      "description": "One event isolates the inclusive 2^31 - 1 millisecond timeline horizon.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "timeline-v1-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 66,
+      "sha256": "5622319d9372013c48101ef2944cd5d079084b0df144a1fcc69140cd5b66d9f5",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647
+      }
+    },
+    {
+      "id": "duration-v1-at",
+      "format": 1,
+      "description": "Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "duration-v1-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 79,
+      "sha256": "02b5c0e111adb26dfb6dd5c792ea48ebb853d0618cf1860fd2857d2d06f4980c",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647
+      }
+    },
+    {
+      "id": "idle-limit-v1-at",
+      "format": 1,
+      "description": "Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "idle-limit-v1-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 86,
+      "sha256": "76038e9c90775dc12c299c3c2dd4f265bf4ee3b6e4cd2b66c95688b859becd43",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647
+      }
+    },
+    {
+      "id": "timeline-v1-over",
+      "format": 1,
+      "description": "One event isolates the inclusive 2^31 - 1 millisecond timeline horizon.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "timeline-v1-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 66,
+      "sha256": "177d6d8d97d72f2a5416b7eb1b9e32c2cc2b620a20ae1c70d5494406befc17f9",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483648
+      }
+    },
+    {
+      "id": "duration-v1-over",
+      "format": 1,
+      "description": "Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "duration-v1-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 79,
+      "sha256": "32da9450dc0f53f8d044006c967296ac50d9311a7e8a86f4730aebff191d03f3",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483648
+      }
+    },
+    {
+      "id": "idle-limit-v1-over",
+      "format": 1,
+      "description": "Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "idle-limit-v1-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 86,
+      "sha256": "7ad90f6743ea0f90c4ed00a9c1dc361d5640b8abeaaf0c7cfd5dd9e190209398",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483648
+      }
+    },
+    {
+      "id": "duration-v1-zero",
+      "format": 1,
+      "description": "Zero remains valid for optional timing metadata.",
+      "category": "valid-control",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "duration-v1-zero.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 69,
+      "sha256": "14f1b40e1d57c7b00a6024c1e4e5a4d68723207eb447c91f721a6cfce0674d4e"
+    },
+    {
+      "id": "idle-limit-v1-zero",
+      "format": 1,
+      "description": "Zero remains valid for optional timing metadata.",
+      "category": "valid-control",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "idle-limit-v1-zero.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 76,
+      "sha256": "ba707de0f768ed2fe89ebd7d8751c4febc6c7eb4be4ac21b4be6e69324353c98"
+    },
+    {
+      "id": "timeline-v2-at",
+      "format": 2,
+      "description": "One event isolates the inclusive 2^31 - 1 millisecond timeline horizon.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "timeline-v2-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 59,
+      "sha256": "5dcb182b6e3ccf2573e58408f7ac44599fcc6ac92b3951f8fd3c2bb3138d1e4f",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647
+      }
+    },
+    {
+      "id": "duration-v2-at",
+      "format": 2,
+      "description": "Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "duration-v2-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 72,
+      "sha256": "257b671345d8f515afa242242f313125fecbe58a92f7e690861d6b38e0b1ec36",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647
+      }
+    },
+    {
+      "id": "idle-limit-v2-at",
+      "format": 2,
+      "description": "Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "idle-limit-v2-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 79,
+      "sha256": "e5f12262b1b1a76970785cbbe98126f0d8061dffce1b623aeaa150dac0f4ffea",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647
+      }
+    },
+    {
+      "id": "timeline-v2-over",
+      "format": 2,
+      "description": "One event isolates the inclusive 2^31 - 1 millisecond timeline horizon.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "timeline-v2-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 59,
+      "sha256": "7717e9978f2767db79388c597a683e216445146c0f7fe2e639401cdafad94267",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483648
+      }
+    },
+    {
+      "id": "duration-v2-over",
+      "format": 2,
+      "description": "Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "duration-v2-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 72,
+      "sha256": "a7eaae002cebeec39c2c1ea0832a261ec66a8bab76dafaeaaa252e1e6ab641dd",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483648
+      }
+    },
+    {
+      "id": "idle-limit-v2-over",
+      "format": 2,
+      "description": "Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "idle-limit-v2-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 79,
+      "sha256": "c10e47c6405d2f2087ff4348584722bc5e89c9c7bb8d69648d446189d268ce01",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483648
+      }
+    },
+    {
+      "id": "duration-v2-zero",
+      "format": 2,
+      "description": "Zero remains valid for optional timing metadata.",
+      "category": "valid-control",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "duration-v2-zero.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 62,
+      "sha256": "f8ccb56b4dc1b3b8535af7ea4eaad3c6f0d6475563aa9c593ca0e4a4821943dd"
+    },
+    {
+      "id": "idle-limit-v2-zero",
+      "format": 2,
+      "description": "Zero remains valid for optional timing metadata.",
+      "category": "valid-control",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "idle-limit-v2-zero.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 69,
+      "sha256": "b34ea66b9bd4c165b55ca39523a5874f29d68cc9277eb3cca4de589691732d1a"
+    },
+    {
+      "id": "timeline-v3-at",
+      "format": 3,
+      "description": "One event isolates the inclusive 2^31 - 1 millisecond timeline horizon.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "timeline-v3-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 65,
+      "sha256": "1e234fb56af6cc042a6daf77a6b833db2f5ecab6aae35a1c7e3821051dce2ec5",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647
+      }
+    },
+    {
+      "id": "duration-v3-at",
+      "format": 3,
+      "description": "Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "duration-v3-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 78,
+      "sha256": "b363b4bc5077858e30fa0e188cb49d5b50c9d40fe5f0f14ced04bf835b2e2d21",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647
+      }
+    },
+    {
+      "id": "idle-limit-v3-at",
+      "format": 3,
+      "description": "Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "idle-limit-v3-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 85,
+      "sha256": "b787da8e6ba022bc3a2ac8780aa8073ea4ca82b92d018cccbf22655846122dd0",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647
+      }
+    },
+    {
+      "id": "timeline-v3-over",
+      "format": 3,
+      "description": "One event isolates the inclusive 2^31 - 1 millisecond timeline horizon.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "timeline-v3-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 65,
+      "sha256": "aafb1fabc891df6843942f69ac945e13ea77865a2542cca1d02db6bb1c8080bf",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483648
+      }
+    },
+    {
+      "id": "duration-v3-over",
+      "format": 3,
+      "description": "Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "duration-v3-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 78,
+      "sha256": "5fcf1f75486d94f71463e6320886d0a51721f8fdbe1063593b5a1d14c14978d1",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483648
+      }
+    },
+    {
+      "id": "idle-limit-v3-over",
+      "format": 3,
+      "description": "Timing metadata uses the same finite nonnegative millisecond horizon even when upstream ignores that field.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "idle-limit-v3-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 85,
+      "sha256": "a3624e3fc0bd3c420dbfe91018b47b840b7fb09e10fba7365fee079e2615bef6",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483648
+      }
+    },
+    {
+      "id": "duration-v3-zero",
+      "format": 3,
+      "description": "Zero remains valid for optional timing metadata.",
+      "category": "valid-control",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "duration-v3-zero.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 68,
+      "sha256": "2d40499454b3b7a1589b91004115e2a9d53a18e7167ccefe9352eda66bbfb2d8"
+    },
+    {
+      "id": "idle-limit-v3-zero",
+      "format": 3,
+      "description": "Zero remains valid for optional timing metadata.",
+      "category": "valid-control",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "idle-limit-v3-zero.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 75,
+      "sha256": "bdc71879c2d7f3d8338d31038133d070b2d9dc6e398f6b133c45e90750509016"
+    },
+    {
+      "id": "interval-timeline-v1-at",
+      "format": 1,
+      "description": "Each interval is inside the horizon; only their upstream-order millisecond sum selects the boundary.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "interval-timeline-v1-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 86,
+      "sha256": "8e9c5b96b20566f12fe9a15e1c8269461d0dbc6ba6d1a06a83aff581f872d0fc",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647
+      }
+    },
+    {
+      "id": "interval-timeline-v1-over",
+      "format": 1,
+      "description": "Each interval is inside the horizon; only their upstream-order millisecond sum selects the boundary.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "interval-timeline-v1-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 86,
+      "sha256": "7fec7732286f679ef8f0e71f4f3fae0f9078dab6684eda81f517bd1d5b39d3bf",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483648
+      }
+    },
+    {
+      "id": "time-v1-ms-rounding-over",
+      "format": 1,
+      "description": "Adding seconds before conversion rounds to the allowed cap, but summing each interval in milliseconds exceeds it.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "time-v1-ms-rounding-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 99,
+      "sha256": "06283761ce7b12acdc6352ebaa71b7691e723aa3be6592bd6b9eb3c4ad3a547c",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647.0000002
+      }
+    },
+    {
+      "id": "time-v1-ms-sum-overflow",
+      "format": 1,
+      "description": "Both converted intervals and the converted seconds sum are finite, but upstream interval-by-interval millisecond addition overflows.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "time-v1-ms-sum-overflow.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 109,
+      "sha256": "7ac8311d1533b23a5115195bd004804d7b0b1f1540a5782ff865af22dec295d7"
+    },
+    {
+      "id": "interval-timeline-v3-at",
+      "format": 3,
+      "description": "Each interval is inside the horizon; only their upstream-order millisecond sum selects the boundary.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "interval-timeline-v3-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 89,
+      "sha256": "3f76fc28485f0670f5b62210fd580950c404a1809ede166e53ad75c0960cb8bc",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647
+      }
+    },
+    {
+      "id": "interval-timeline-v3-over",
+      "format": 3,
+      "description": "Each interval is inside the horizon; only their upstream-order millisecond sum selects the boundary.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "interval-timeline-v3-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 89,
+      "sha256": "9f311bc12ed12e6208d8821a593ab6e1ec17cf4c7d926ff00f83ca06741e1758",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483648
+      }
+    },
+    {
+      "id": "time-v3-ms-rounding-over",
+      "format": 3,
+      "description": "Adding seconds before conversion rounds to the allowed cap, but summing each interval in milliseconds exceeds it.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "time-v3-ms-rounding-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 102,
+      "sha256": "21bdf134dee3e29fce0166b4c71c2657d47796b3e7cb33667b82de08df3bcadf",
+      "boundary": {
+        "metric": "timelineMs",
+        "limit": 2147483647,
+        "value": 2147483647.0000002
+      }
+    },
+    {
+      "id": "time-v3-ms-sum-overflow",
+      "format": 3,
+      "description": "Both converted intervals and the converted seconds sum are finite, but upstream interval-by-interval millisecond addition overflows.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "time-v3-ms-sum-overflow.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 112,
+      "sha256": "4ce89449651ac5435e81a8635dda115b2022d325217871177079d41cd143be5a"
+    },
+    {
+      "id": "time-v2-output-nonprogress",
+      "format": 2,
+      "description": "A tiny finite timestamp makes the upstream output batching deadline equal its start, so callbacks repeat without consuming output.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "time-v2-output-nonprogress.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "time"
+      },
+      "bytes": 69,
+      "sha256": "92abcf13adcfc3f65e61c7ab7d367f9e7cd41bb7bd38b4b11bef280b51fee536"
+    },
+    {
+      "id": "valid-v1-multiline-late-version",
+      "format": 1,
+      "description": "Pretty v1 document places its version after stdout and nested metadata.",
+      "category": "valid-control",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "valid-v1-multiline-late-version.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 118,
+      "sha256": "b880e78e1eda1c7af9f4314c3a8616b6b0f59d5b303da32b42c12666d8f9631f"
+    },
+    {
+      "id": "valid-v1-escaped-version",
+      "format": 1,
+      "description": "Escaped top-level version key is still v1.",
+      "category": "valid-control",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "valid-v1-escaped-version.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 54,
+      "sha256": "1751cc02e9b68aaba282bec2ec342284e34156ce14c4ba14e19c7c1e50b450fd"
+    },
+    {
+      "id": "valid-v1-duplicate-version",
+      "format": 1,
+      "description": "Last duplicate version wins under the bundled JSON parsers.",
+      "category": "upstream-compatibility",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "upstream-compatible",
+      "source": {
+        "file": "valid-v1-duplicate-version.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 61,
+      "sha256": "b5fab04e377aff641d356ce60df56d32500e9b5d2ba6e708c954098071570d77"
+    },
+    {
+      "id": "malformed-v1-json",
+      "format": 1,
+      "description": "Deliberately missing the stdout array closer.",
+      "category": "malformed",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "intentionally-malformed",
+      "source": {
+        "file": "malformed-v1-json.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "invalid"
+      },
+      "bytes": 48,
+      "sha256": "5f45f691f06d91df269bc770f33238421b30d49b97133dafef165448559bd2d8"
+    },
+    {
+      "id": "valid-v2-filtered-lines",
+      "format": 2,
+      "description": "Blank/comment/indented non-event lines follow upstream filtering, not strict canonical JSONL.",
+      "category": "upstream-compatibility",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "upstream-compatible",
+      "source": {
+        "file": "valid-v2-filtered-lines.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 126,
+      "sha256": "221d89e55f0649959be5eb8394571e3f83aa05176ac65dcc1c52d3d91b809100"
+    },
+    {
+      "id": "late-resize-v2-at",
+      "format": 2,
+      "description": "Ordinary output precedes an inclusive 40,000-cell late resize.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "late-resize-v2-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 82,
+      "sha256": "ffb49928a780aea6067e634de60511f9aebbbd6ee0eb2582f93886ab94a5ad11",
+      "boundary": {
+        "metric": "cells",
+        "limit": 40000,
+        "value": 40000
+      }
+    },
+    {
+      "id": "late-resize-v2-over",
+      "format": 2,
+      "description": "Ordinary output precedes a late resize with valid axes but excessive cells.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "late-resize-v2-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "cells"
+      },
+      "bytes": 82,
+      "sha256": "96565fabf9cb3ded67ee202a01aaccb76d1544023d2fac3378e41e4648c598df",
+      "boundary": {
+        "metric": "cells",
+        "limit": 40000,
+        "value": 40200
+      }
+    },
+    {
+      "id": "late-resize-v2-dimensions-at",
+      "format": 2,
+      "description": "Ordinary output precedes an inclusive 1,000-column late resize.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "late-resize-v2-dimensions-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 82,
+      "sha256": "bce032adcfd8c9d2e3f113de9ee0a5260830a385fb1dfdc2fbd000f322bed6b6",
+      "boundary": {
+        "metric": "dimension",
+        "limit": 1000,
+        "value": 1000
+      }
+    },
+    {
+      "id": "late-resize-v2-dimensions-over",
+      "format": 2,
+      "description": "Ordinary output precedes a late resize exceeding the per-axis dimension cap.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "late-resize-v2-dimensions-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "dimensions"
+      },
+      "bytes": 82,
+      "sha256": "0b570ba590d999147de1cf0943aa3e750402d96a63d9982a6601ee0fc3f813e4",
+      "boundary": {
+        "metric": "dimension",
+        "limit": 1000,
+        "value": 1001
+      }
+    },
+    {
+      "id": "malformed-v2-event",
+      "format": 2,
+      "description": "Deliberately invalid JSON event after a valid header.",
+      "category": "malformed",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "intentionally-malformed",
+      "source": {
+        "file": "malformed-v2-event.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "invalid"
+      },
+      "bytes": 52,
+      "sha256": "7286d745ff6874798d4f79fbbf8584f9a7f20c3a9a60155ee45fc3e0f494915a"
+    },
+    {
+      "id": "markers-v2-at",
+      "format": 2,
+      "description": "Marker count boundary; bytes, line count and dimensions remain small.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":2,\"width\":80,\"height\":24}\n",
+            "repeat": 1
+          },
+          {
+            "text": "[0,\"m\",\"mark\"]\n",
+            "repeat": 1000
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 15037,
+      "sha256": "75fcbeb7634a6faf4de37303a1444117c0689857fb7ca940017be793a40f5780",
+      "boundary": {
+        "metric": "markers",
+        "limit": 1000,
+        "value": 1000
+      }
+    },
+    {
+      "id": "line-v2-at",
+      "format": 2,
+      "description": "One syntactically valid output event at the UTF-8 line-byte boundary, including LF.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":2,\"width\":80,\"height\":24}\n[0,\"o\",\"",
+            "repeat": 1
+          },
+          {
+            "text": "x",
+            "repeat": 262133
+          },
+          {
+            "text": "\"]\n",
+            "repeat": 1
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 262181,
+      "sha256": "4e748b9d68567d94985c2eb049b274ca7d080908ae1e149ec8d1d2d7e7931568",
+      "boundary": {
+        "metric": "lineBytes",
+        "limit": 262144,
+        "value": 262144
+      }
+    },
+    {
+      "id": "bytes-v2-at",
+      "format": 2,
+      "description": "Full 32 MiB body boundary using valid output events; no padding comments or oversized line.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":2,\"width\":80,\"height\":24}\n",
+            "repeat": 1
+          },
+          {
+            "text": "[0,\"o\",\"6ikeld355ettzbav0edcciasg9oz66x012w65rtw3ws0todkm42n3n3h9gas4fobyg2kip4331i5eplpt53ce8b01eel3h2a19zr4jzpp7lztthp0ab5kzmrbark8skestajv9jh80hwv9mwqacu3i49xw6bfzszeuydlmqhenm8m0e8lwddrf73lquqs2dtj1iepx6ledrkeuh0j3rj0q5d6q70x4bvmxfv8iyz6e0zlbrihyk56h7z43sf0fsx5y53aojl61w1o7n1och9kkx6d7z5f7f1npm76na6t5ai2d17f734g7mfznexz1eujxxbilmrqkorwkkkk6suxkcloklwgj9a6jq77jl4p40decjvb81xf7we6fcv1amd95s6xqe1payaoqon5v8tjxn8sqdlezaagajkug7a80uy2sju546d1h1w9eeznwugvpimmrvkgv5nycpuat4vi7oi4bk7qqm2l40jwr2xkoqo7tbtnsvkda6bz9sk14uob9jwn80q0zm60bnydmhx5mzt8yyul7rwio8v6xww52xgrpyldh7irah2kojd11xr0qnoc09axnzdrr34pfluxq7jzk9nkkg4ovmgo5lmlae0zqmyodqed13v4mhbsfma0828xlhg3wcirghnh46e8dm40brg0scm8ftg30qg6osqwivxx3a6o4psz35nv4ct186929fp7zgui190sbhkfght9kne77sobkt2hllgu91ksdx9ci0fxoudvweonwih1umugmbr9vbeofilryqtx3gown7f59jyv71p14hkc5mt3yrb1e2v1fy8c7ew4wkicsu5wtghwkrr09dhquxouymvmwjmshqqtgavk3j7452uo4pkgq6394ncfoh2csc8a8lxd506xly05jwy1zcv1whuqgcz7y09yq9wk4r1dbzibvs5o6xeg2b7uzhmxojcmlqhmi4echac5x4azrn3pfhnz7jxy3vo65zw63ewry7oqtt6vzrqs\"]\n",
+            "repeat": 32767
+          },
+          {
+            "text": "[0,\"o\",\"",
+            "repeat": 1
+          },
+          {
+            "text": "x",
+            "repeat": 976
+          },
+          {
+            "text": "\"]\n",
+            "repeat": 1
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 33554432,
+      "sha256": "92ed2e090e4b8adcd0df98d8b40a843a9227bee54a63ff77d70dacd2eb365d36",
+      "boundary": {
+        "metric": "bytes",
+        "limit": 33554432,
+        "value": 33554432
+      },
+      "metrics": {
+        "events": 32768,
+        "maximumLineBytes": 1024
+      }
+    },
+    {
+      "id": "line-tokens-v2-at",
+      "format": 2,
+      "description": "Wide metadata uses the strict per-line scalar/key token cap, never the legacy v1 cap.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":2,\"width\":80,\"height\":24,\"metadata\":[",
+            "repeat": 1
+          },
+          {
+            "text": "0,",
+            "repeat": 19992
+          },
+          {
+            "text": "0]}\n",
+            "repeat": 1
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 40036,
+      "sha256": "f617da5b250cb33ed51fd83247bf7c1b0761b76adfae65fe6f59df2d46b2fb5a",
+      "boundary": {
+        "metric": "lineTokens",
+        "limit": 20000,
+        "value": 20000
+      }
+    },
+    {
+      "id": "ignored-lines-v2-at",
+      "format": 2,
+      "description": "One valid output event plus ignored blank lines isolates the physical JSONL processing budget.",
+      "category": "upstream-compatibility",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "upstream-compatible",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":2,\"width\":80,\"height\":24}\n[0,\"o\",\"line budget control\\r\\n\"]\n",
+            "repeat": 1
+          },
+          {
+            "text": "\n",
+            "repeat": 99999
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 100070,
+      "sha256": "3db79cec2faca5bdfe56fce05bdddf59de7a8acb96339b2473287e12377edb65",
+      "boundary": {
+        "metric": "lines",
+        "limit": 100000,
+        "value": 100000
+      },
+      "metrics": {
+        "events": 1
+      }
+    },
+    {
+      "id": "markers-v2-over",
+      "format": 2,
+      "description": "Marker count boundary; bytes, line count and dimensions remain small.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":2,\"width\":80,\"height\":24}\n",
+            "repeat": 1
+          },
+          {
+            "text": "[0,\"m\",\"mark\"]\n",
+            "repeat": 1001
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "markers"
+      },
+      "bytes": 15052,
+      "sha256": "90783145cf467368dff8925a73857f908436523c0ce19d2778cab6c62bed3f15",
+      "boundary": {
+        "metric": "markers",
+        "limit": 1000,
+        "value": 1001
+      }
+    },
+    {
+      "id": "line-v2-over",
+      "format": 2,
+      "description": "One syntactically valid output event at the UTF-8 line-byte boundary, including LF.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":2,\"width\":80,\"height\":24}\n[0,\"o\",\"",
+            "repeat": 1
+          },
+          {
+            "text": "x",
+            "repeat": 262134
+          },
+          {
+            "text": "\"]\n",
+            "repeat": 1
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "line",
+        "noDecodeAtOrAboveBytes": 262144
+      },
+      "bytes": 262182,
+      "sha256": "d0535f1b60bd84f891bbd4d4b0e2287bf3563c60d03d2ff5b5bef783dcb2a339",
+      "boundary": {
+        "metric": "lineBytes",
+        "limit": 262144,
+        "value": 262145
+      }
+    },
+    {
+      "id": "bytes-v2-over",
+      "format": 2,
+      "description": "Full 32 MiB body boundary using valid output events; no padding comments or oversized line.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":2,\"width\":80,\"height\":24}\n",
+            "repeat": 1
+          },
+          {
+            "text": "[0,\"o\",\"6ikeld355ettzbav0edcciasg9oz66x012w65rtw3ws0todkm42n3n3h9gas4fobyg2kip4331i5eplpt53ce8b01eel3h2a19zr4jzpp7lztthp0ab5kzmrbark8skestajv9jh80hwv9mwqacu3i49xw6bfzszeuydlmqhenm8m0e8lwddrf73lquqs2dtj1iepx6ledrkeuh0j3rj0q5d6q70x4bvmxfv8iyz6e0zlbrihyk56h7z43sf0fsx5y53aojl61w1o7n1och9kkx6d7z5f7f1npm76na6t5ai2d17f734g7mfznexz1eujxxbilmrqkorwkkkk6suxkcloklwgj9a6jq77jl4p40decjvb81xf7we6fcv1amd95s6xqe1payaoqon5v8tjxn8sqdlezaagajkug7a80uy2sju546d1h1w9eeznwugvpimmrvkgv5nycpuat4vi7oi4bk7qqm2l40jwr2xkoqo7tbtnsvkda6bz9sk14uob9jwn80q0zm60bnydmhx5mzt8yyul7rwio8v6xww52xgrpyldh7irah2kojd11xr0qnoc09axnzdrr34pfluxq7jzk9nkkg4ovmgo5lmlae0zqmyodqed13v4mhbsfma0828xlhg3wcirghnh46e8dm40brg0scm8ftg30qg6osqwivxx3a6o4psz35nv4ct186929fp7zgui190sbhkfght9kne77sobkt2hllgu91ksdx9ci0fxoudvweonwih1umugmbr9vbeofilryqtx3gown7f59jyv71p14hkc5mt3yrb1e2v1fy8c7ew4wkicsu5wtghwkrr09dhquxouymvmwjmshqqtgavk3j7452uo4pkgq6394ncfoh2csc8a8lxd506xly05jwy1zcv1whuqgcz7y09yq9wk4r1dbzibvs5o6xeg2b7uzhmxojcmlqhmi4echac5x4azrn3pfhnz7jxy3vo65zw63ewry7oqtt6vzrqs\"]\n",
+            "repeat": 32767
+          },
+          {
+            "text": "[0,\"o\",\"",
+            "repeat": 1
+          },
+          {
+            "text": "x",
+            "repeat": 977
+          },
+          {
+            "text": "\"]\n",
+            "repeat": 1
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "bytes",
+        "noDecodeAtOrAboveBytes": 33554432,
+        "phpNoDecodeAtOrAboveBytes": 1
+      },
+      "bytes": 33554433,
+      "sha256": "b78f14b8c2d6e84c4d05cc63f95aa2a4862df2554b9ada53e8ef44f72828866a",
+      "boundary": {
+        "metric": "bytes",
+        "limit": 33554432,
+        "value": 33554433
+      },
+      "metrics": {
+        "events": 32768,
+        "maximumLineBytes": 1024
+      }
+    },
+    {
+      "id": "line-tokens-v2-over",
+      "format": 2,
+      "description": "Wide metadata uses the strict per-line scalar/key token cap, never the legacy v1 cap.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":2,\"width\":80,\"height\":24,\"metadata\":[",
+            "repeat": 1
+          },
+          {
+            "text": "0,",
+            "repeat": 19993
+          },
+          {
+            "text": "0]}\n",
+            "repeat": 1
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "complexity",
+        "noDecodeAtOrAboveBytes": 40037
+      },
+      "bytes": 40038,
+      "sha256": "3b5bf2ed376decdd3374631712e422d87b44d3c2521f7b1a66c9b0f40a864a22",
+      "boundary": {
+        "metric": "lineTokens",
+        "limit": 20000,
+        "value": 20001
+      }
+    },
+    {
+      "id": "ignored-lines-v2-over",
+      "format": 2,
+      "description": "One valid output event plus ignored blank lines isolates the physical JSONL processing budget.",
+      "category": "upstream-compatibility",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "upstream-compatible",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":2,\"width\":80,\"height\":24}\n[0,\"o\",\"line budget control\\r\\n\"]\n",
+            "repeat": 1
+          },
+          {
+            "text": "\n",
+            "repeat": 100000
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "events"
+      },
+      "bytes": 100071,
+      "sha256": "649a236f1e63afb4ea6c1c00be4c84b5a416de4302779b5e29286e67484366b8",
+      "boundary": {
+        "metric": "lines",
+        "limit": 100000,
+        "value": 100001
+      },
+      "metrics": {
+        "events": 1
+      }
+    },
+    {
+      "id": "valid-v3-filtered-lines",
+      "format": 3,
+      "description": "Blank/comment/indented non-event lines follow upstream filtering, not strict canonical JSONL.",
+      "category": "upstream-compatibility",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "upstream-compatible",
+      "source": {
+        "file": "valid-v3-filtered-lines.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 132,
+      "sha256": "c64e6e629557c6ea131afdfe8f63ba75bb55dd0cee711370448f0c8f5649dac5"
+    },
+    {
+      "id": "late-resize-v3-at",
+      "format": 3,
+      "description": "Ordinary output precedes an inclusive 40,000-cell late resize.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "late-resize-v3-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 88,
+      "sha256": "8bafb2d2c880b6075c3943acdeb9e44aead6d1c6b4903813fd3468915bcc4b82",
+      "boundary": {
+        "metric": "cells",
+        "limit": 40000,
+        "value": 40000
+      }
+    },
+    {
+      "id": "late-resize-v3-over",
+      "format": 3,
+      "description": "Ordinary output precedes a late resize with valid axes but excessive cells.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "late-resize-v3-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "cells"
+      },
+      "bytes": 88,
+      "sha256": "73b4615865b143e7e47106cf3bff0a0a289c432d6d279455b81971676c834519",
+      "boundary": {
+        "metric": "cells",
+        "limit": 40000,
+        "value": 40200
+      }
+    },
+    {
+      "id": "late-resize-v3-dimensions-at",
+      "format": 3,
+      "description": "Ordinary output precedes an inclusive 1,000-column late resize.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "late-resize-v3-dimensions-at.cast"
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 88,
+      "sha256": "2ac50b0476d348fd3701c8ff124a8d541c5aa0527e7b2576162c62405db8c816",
+      "boundary": {
+        "metric": "dimension",
+        "limit": 1000,
+        "value": 1000
+      }
+    },
+    {
+      "id": "late-resize-v3-dimensions-over",
+      "format": 3,
+      "description": "Ordinary output precedes a late resize exceeding the per-axis dimension cap.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "file": "late-resize-v3-dimensions-over.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "dimensions"
+      },
+      "bytes": 88,
+      "sha256": "4cf8e961c853e43d1e47f36b08857bc11c687665fa6926974eefbf69fcdfd67a",
+      "boundary": {
+        "metric": "dimension",
+        "limit": 1000,
+        "value": 1001
+      }
+    },
+    {
+      "id": "malformed-v3-event",
+      "format": 3,
+      "description": "Deliberately invalid JSON event after a valid header.",
+      "category": "malformed",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "intentionally-malformed",
+      "source": {
+        "file": "malformed-v3-event.cast"
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "invalid"
+      },
+      "bytes": 58,
+      "sha256": "b82e19503846316be4778dca8088fed0855fdd94bc6d90ebd19f076df33737ce"
+    },
+    {
+      "id": "markers-v3-at",
+      "format": 3,
+      "description": "Marker count boundary; bytes, line count and dimensions remain small.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":3,\"term\":{\"cols\":80,\"rows\":24}}\n",
+            "repeat": 1
+          },
+          {
+            "text": "[0,\"m\",\"mark\"]\n",
+            "repeat": 1000
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 15043,
+      "sha256": "30bd77ed6c1795eb0549028be8d427bdb38f395e25ab6c52f0b8c41f5672cc21",
+      "boundary": {
+        "metric": "markers",
+        "limit": 1000,
+        "value": 1000
+      }
+    },
+    {
+      "id": "line-v3-at",
+      "format": 3,
+      "description": "One syntactically valid output event at the UTF-8 line-byte boundary, including LF.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":3,\"term\":{\"cols\":80,\"rows\":24}}\n[0,\"o\",\"",
+            "repeat": 1
+          },
+          {
+            "text": "x",
+            "repeat": 262133
+          },
+          {
+            "text": "\"]\n",
+            "repeat": 1
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 262187,
+      "sha256": "79fb2e9d2352332a849f5d61a932cf774be3a23544f98ab30ee6a1eb5e14e764",
+      "boundary": {
+        "metric": "lineBytes",
+        "limit": 262144,
+        "value": 262144
+      }
+    },
+    {
+      "id": "bytes-v3-at",
+      "format": 3,
+      "description": "Full 32 MiB body boundary using valid output events; no padding comments or oversized line.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":3,\"term\":{\"cols\":80,\"rows\":24}}\n",
+            "repeat": 1
+          },
+          {
+            "text": "[0,\"o\",\"6ikeld355ettzbav0edcciasg9oz66x012w65rtw3ws0todkm42n3n3h9gas4fobyg2kip4331i5eplpt53ce8b01eel3h2a19zr4jzpp7lztthp0ab5kzmrbark8skestajv9jh80hwv9mwqacu3i49xw6bfzszeuydlmqhenm8m0e8lwddrf73lquqs2dtj1iepx6ledrkeuh0j3rj0q5d6q70x4bvmxfv8iyz6e0zlbrihyk56h7z43sf0fsx5y53aojl61w1o7n1och9kkx6d7z5f7f1npm76na6t5ai2d17f734g7mfznexz1eujxxbilmrqkorwkkkk6suxkcloklwgj9a6jq77jl4p40decjvb81xf7we6fcv1amd95s6xqe1payaoqon5v8tjxn8sqdlezaagajkug7a80uy2sju546d1h1w9eeznwugvpimmrvkgv5nycpuat4vi7oi4bk7qqm2l40jwr2xkoqo7tbtnsvkda6bz9sk14uob9jwn80q0zm60bnydmhx5mzt8yyul7rwio8v6xww52xgrpyldh7irah2kojd11xr0qnoc09axnzdrr34pfluxq7jzk9nkkg4ovmgo5lmlae0zqmyodqed13v4mhbsfma0828xlhg3wcirghnh46e8dm40brg0scm8ftg30qg6osqwivxx3a6o4psz35nv4ct186929fp7zgui190sbhkfght9kne77sobkt2hllgu91ksdx9ci0fxoudvweonwih1umugmbr9vbeofilryqtx3gown7f59jyv71p14hkc5mt3yrb1e2v1fy8c7ew4wkicsu5wtghwkrr09dhquxouymvmwjmshqqtgavk3j7452uo4pkgq6394ncfoh2csc8a8lxd506xly05jwy1zcv1whuqgcz7y09yq9wk4r1dbzibvs5o6xeg2b7uzhmxojcmlqhmi4echac5x4azrn3pfhnz7jxy3vo65zw63ewry7oqtt6vzrqs\"]\n",
+            "repeat": 32767
+          },
+          {
+            "text": "[0,\"o\",\"",
+            "repeat": 1
+          },
+          {
+            "text": "x",
+            "repeat": 970
+          },
+          {
+            "text": "\"]\n",
+            "repeat": 1
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 33554432,
+      "sha256": "af99e69453aad5a30de993d441befb6fe4b190d8f45494f329dd859723abdfa7",
+      "boundary": {
+        "metric": "bytes",
+        "limit": 33554432,
+        "value": 33554432
+      },
+      "metrics": {
+        "events": 32768,
+        "maximumLineBytes": 1024
+      }
+    },
+    {
+      "id": "line-tokens-v3-at",
+      "format": 3,
+      "description": "Wide metadata uses the strict per-line scalar/key token cap, never the legacy v1 cap.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":3,\"term\":{\"cols\":80,\"rows\":24},\"metadata\":[",
+            "repeat": 1
+          },
+          {
+            "text": "0,",
+            "repeat": 19991
+          },
+          {
+            "text": "0]}\n",
+            "repeat": 1
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 40040,
+      "sha256": "93a7bde3000ae893b4e580d4667267447c85e66077798abf0ccd3318048395c4",
+      "boundary": {
+        "metric": "lineTokens",
+        "limit": 20000,
+        "value": 20000
+      }
+    },
+    {
+      "id": "ignored-lines-v3-at",
+      "format": 3,
+      "description": "One valid output event plus ignored blank lines isolates the physical JSONL processing budget.",
+      "category": "upstream-compatibility",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "upstream-compatible",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":3,\"term\":{\"cols\":80,\"rows\":24}}\n[0,\"o\",\"line budget control\\r\\n\"]\n",
+            "repeat": 1
+          },
+          {
+            "text": "\n",
+            "repeat": 99999
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 100076,
+      "sha256": "f6f475649caa909fa9f48b2e77053169f956769e6f97483af44d8de56d3073b8",
+      "boundary": {
+        "metric": "lines",
+        "limit": 100000,
+        "value": 100000
+      },
+      "metrics": {
+        "events": 1
+      }
+    },
+    {
+      "id": "markers-v3-over",
+      "format": 3,
+      "description": "Marker count boundary; bytes, line count and dimensions remain small.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":3,\"term\":{\"cols\":80,\"rows\":24}}\n",
+            "repeat": 1
+          },
+          {
+            "text": "[0,\"m\",\"mark\"]\n",
+            "repeat": 1001
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "markers"
+      },
+      "bytes": 15058,
+      "sha256": "d62809367a2f725465ff68c267e851cdc7eebc8f6738bc3462a759c0893e1962",
+      "boundary": {
+        "metric": "markers",
+        "limit": 1000,
+        "value": 1001
+      }
+    },
+    {
+      "id": "line-v3-over",
+      "format": 3,
+      "description": "One syntactically valid output event at the UTF-8 line-byte boundary, including LF.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":3,\"term\":{\"cols\":80,\"rows\":24}}\n[0,\"o\",\"",
+            "repeat": 1
+          },
+          {
+            "text": "x",
+            "repeat": 262134
+          },
+          {
+            "text": "\"]\n",
+            "repeat": 1
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "line",
+        "noDecodeAtOrAboveBytes": 262144
+      },
+      "bytes": 262188,
+      "sha256": "998cbd9183de4004285d3975c4bd23606f77bb06359fdfbb1b8d81449e61f763",
+      "boundary": {
+        "metric": "lineBytes",
+        "limit": 262144,
+        "value": 262145
+      }
+    },
+    {
+      "id": "bytes-v3-over",
+      "format": 3,
+      "description": "Full 32 MiB body boundary using valid output events; no padding comments or oversized line.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":3,\"term\":{\"cols\":80,\"rows\":24}}\n",
+            "repeat": 1
+          },
+          {
+            "text": "[0,\"o\",\"6ikeld355ettzbav0edcciasg9oz66x012w65rtw3ws0todkm42n3n3h9gas4fobyg2kip4331i5eplpt53ce8b01eel3h2a19zr4jzpp7lztthp0ab5kzmrbark8skestajv9jh80hwv9mwqacu3i49xw6bfzszeuydlmqhenm8m0e8lwddrf73lquqs2dtj1iepx6ledrkeuh0j3rj0q5d6q70x4bvmxfv8iyz6e0zlbrihyk56h7z43sf0fsx5y53aojl61w1o7n1och9kkx6d7z5f7f1npm76na6t5ai2d17f734g7mfznexz1eujxxbilmrqkorwkkkk6suxkcloklwgj9a6jq77jl4p40decjvb81xf7we6fcv1amd95s6xqe1payaoqon5v8tjxn8sqdlezaagajkug7a80uy2sju546d1h1w9eeznwugvpimmrvkgv5nycpuat4vi7oi4bk7qqm2l40jwr2xkoqo7tbtnsvkda6bz9sk14uob9jwn80q0zm60bnydmhx5mzt8yyul7rwio8v6xww52xgrpyldh7irah2kojd11xr0qnoc09axnzdrr34pfluxq7jzk9nkkg4ovmgo5lmlae0zqmyodqed13v4mhbsfma0828xlhg3wcirghnh46e8dm40brg0scm8ftg30qg6osqwivxx3a6o4psz35nv4ct186929fp7zgui190sbhkfght9kne77sobkt2hllgu91ksdx9ci0fxoudvweonwih1umugmbr9vbeofilryqtx3gown7f59jyv71p14hkc5mt3yrb1e2v1fy8c7ew4wkicsu5wtghwkrr09dhquxouymvmwjmshqqtgavk3j7452uo4pkgq6394ncfoh2csc8a8lxd506xly05jwy1zcv1whuqgcz7y09yq9wk4r1dbzibvs5o6xeg2b7uzhmxojcmlqhmi4echac5x4azrn3pfhnz7jxy3vo65zw63ewry7oqtt6vzrqs\"]\n",
+            "repeat": 32767
+          },
+          {
+            "text": "[0,\"o\",\"",
+            "repeat": 1
+          },
+          {
+            "text": "x",
+            "repeat": 971
+          },
+          {
+            "text": "\"]\n",
+            "repeat": 1
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "bytes",
+        "noDecodeAtOrAboveBytes": 33554432,
+        "phpNoDecodeAtOrAboveBytes": 1
+      },
+      "bytes": 33554433,
+      "sha256": "57ae49e6a4db50a55f13138e0ce063c0cc97aaece22cad3a4be8a7aaf7d826ba",
+      "boundary": {
+        "metric": "bytes",
+        "limit": 33554432,
+        "value": 33554433
+      },
+      "metrics": {
+        "events": 32768,
+        "maximumLineBytes": 1024
+      }
+    },
+    {
+      "id": "line-tokens-v3-over",
+      "format": 3,
+      "description": "Wide metadata uses the strict per-line scalar/key token cap, never the legacy v1 cap.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":3,\"term\":{\"cols\":80,\"rows\":24},\"metadata\":[",
+            "repeat": 1
+          },
+          {
+            "text": "0,",
+            "repeat": 19992
+          },
+          {
+            "text": "0]}\n",
+            "repeat": 1
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "complexity",
+        "noDecodeAtOrAboveBytes": 40041
+      },
+      "bytes": 40042,
+      "sha256": "9bf3a9a2a3febb1c7c66930f0099aedf51043c60fe111aed0fad73f39da520e6",
+      "boundary": {
+        "metric": "lineTokens",
+        "limit": 20000,
+        "value": 20001
+      }
+    },
+    {
+      "id": "ignored-lines-v3-over",
+      "format": 3,
+      "description": "One valid output event plus ignored blank lines isolates the physical JSONL processing budget.",
+      "category": "upstream-compatibility",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "upstream-compatible",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":3,\"term\":{\"cols\":80,\"rows\":24}}\n[0,\"o\",\"line budget control\\r\\n\"]\n",
+            "repeat": 1
+          },
+          {
+            "text": "\n",
+            "repeat": 100000
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "events"
+      },
+      "bytes": 100077,
+      "sha256": "172d9e554ba1cef284e2bca3dafe44887fc736fedea5d445e2063f5f0c9c4de0",
+      "boundary": {
+        "metric": "lines",
+        "limit": 100000,
+        "value": 100001
+      },
+      "metrics": {
+        "events": 1
+      }
+    },
+    {
+      "id": "v1-bytes-at",
+      "format": 1,
+      "description": "Legacy multiline document has its own 2 MiB budget, distinct from JSONL limits.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\n\"version\":1,\"width\":80,\"height\":24,\"stdout\":[[0,\"",
+            "repeat": 1
+          },
+          {
+            "text": "x",
+            "repeat": 2097096
+          },
+          {
+            "text": "\"]]}\n",
+            "repeat": 1
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 2097152,
+      "sha256": "004c6039b7e8149864e1a9dd5179384920efb4c7405dcb1f15e17f200ed9be7e",
+      "boundary": {
+        "metric": "v1Bytes",
+        "limit": 2097152,
+        "value": 2097152
+      }
+    },
+    {
+      "id": "tokens-v1-at",
+      "format": 1,
+      "description": "Unknown scalar metadata reaches the complete v1 scalar/key allocation budget.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\n\"version\":1,\"width\":80,\"height\":24,\"stdout\":[],\"metadata\":[",
+            "repeat": 1
+          },
+          {
+            "text": "0,",
+            "repeat": 399991
+          },
+          {
+            "text": "0]}\n",
+            "repeat": 1
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 800047,
+      "sha256": "dcabe9825fcb416f66b71d41739d886931769da001f4c8e88d890547f518be1b",
+      "boundary": {
+        "metric": "tokens",
+        "limit": 400000,
+        "value": 400000
+      }
+    },
+    {
+      "id": "containers-v1-at",
+      "format": 1,
+      "description": "Empty metadata objects isolate the container budget from scalar and event budgets.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\n\"version\":1,\"width\":80,\"height\":24,\"stdout\":[],\"metadata\":[",
+            "repeat": 1
+          },
+          {
+            "text": "{},",
+            "repeat": 100012
+          },
+          {
+            "text": "{}]}\n",
+            "repeat": 1
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 300102,
+      "sha256": "b608e7b8ccb29206d9b835e0c37038dac8fe7dada8ce82deb2c7c8eb91d97f73",
+      "boundary": {
+        "metric": "containers",
+        "limit": 100016,
+        "value": 100016
+      }
+    },
+    {
+      "id": "v1-bytes-over",
+      "format": 1,
+      "description": "Legacy multiline document has its own 2 MiB budget, distinct from JSONL limits.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\n\"version\":1,\"width\":80,\"height\":24,\"stdout\":[[0,\"",
+            "repeat": 1
+          },
+          {
+            "text": "x",
+            "repeat": 2097097
+          },
+          {
+            "text": "\"]]}\n",
+            "repeat": 1
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "bytes",
+        "noDecodeAtOrAboveBytes": 2097152
+      },
+      "bytes": 2097153,
+      "sha256": "6e7230f8e180e009fab853fbb8446b7657d7d2792b9d4ad745a5e25afeb0675c",
+      "boundary": {
+        "metric": "v1Bytes",
+        "limit": 2097152,
+        "value": 2097153
+      }
+    },
+    {
+      "id": "tokens-v1-over",
+      "format": 1,
+      "description": "Unknown scalar metadata reaches the complete v1 scalar/key allocation budget.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\n\"version\":1,\"width\":80,\"height\":24,\"stdout\":[],\"metadata\":[",
+            "repeat": 1
+          },
+          {
+            "text": "0,",
+            "repeat": 399992
+          },
+          {
+            "text": "0]}\n",
+            "repeat": 1
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "complexity",
+        "noDecodeAtOrAboveBytes": 800048
+      },
+      "bytes": 800049,
+      "sha256": "0cea5476465537e8e46f20ab5a597c2d522f1318424189ddba30705bb13300e7",
+      "boundary": {
+        "metric": "tokens",
+        "limit": 400000,
+        "value": 400001
+      }
+    },
+    {
+      "id": "containers-v1-over",
+      "format": 1,
+      "description": "Empty metadata objects isolate the container budget from scalar and event budgets.",
+      "category": "resource-boundary",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\n\"version\":1,\"width\":80,\"height\":24,\"stdout\":[],\"metadata\":[",
+            "repeat": 1
+          },
+          {
+            "text": "{},",
+            "repeat": 100013
+          },
+          {
+            "text": "{}]}\n",
+            "repeat": 1
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "complexity",
+        "noDecodeAtOrAboveBytes": 300104
+      },
+      "bytes": 300105,
+      "sha256": "ae6539bbd33f193dd35dfea6d968068dabe1cb31a644058b394c44f48f5bbd4e",
+      "boundary": {
+        "metric": "containers",
+        "limit": 100016,
+        "value": 100017
+      }
+    },
+    {
+      "id": "valid-v1-long-first-line",
+      "format": 1,
+      "description": "Version appears after a first line larger than the JSONL cap; v1 discrimination must preserve it.",
+      "category": "valid-control",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "format-valid",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"title\":\"",
+            "repeat": 1
+          },
+          {
+            "text": "x",
+            "repeat": 262144
+          },
+          {
+            "text": "\",\n\"version\":1,\"width\":80,\"height\":24,\"stdout\":[[0,\"late version\\r\\n\"]]}\n",
+            "repeat": 1
+          }
+        ]
+      },
+      "expected": {
+        "accepted": true,
+        "jsError": null
+      },
+      "bytes": 262227,
+      "sha256": "5f5c38129ff7b178a9b339a837dfd9cc1e93a8dc3707108f629cc10b07327117"
+    },
+    {
+      "id": "invalid-v2-duplicate-version-wide",
+      "format": 2,
+      "description": "Last duplicate version is v2; wide metadata must not obtain a v1 allocation budget.",
+      "category": "upstream-compatibility",
+      "provenance": "normalized-mutation",
+      "safePlayback": false,
+      "validity": "upstream-compatible",
+      "source": {
+        "segments": [
+          {
+            "text": "{\"version\":1,\"version\":2,\"width\":80,\"height\":24,\"metadata\":[",
+            "repeat": 1
+          },
+          {
+            "text": "0,",
+            "repeat": 20000
+          },
+          {
+            "text": "0]}\n",
+            "repeat": 1
+          }
+        ]
+      },
+      "expected": {
+        "accepted": false,
+        "jsError": "complexity",
+        "noDecodeAtOrAboveBytes": 40063
+      },
+      "bytes": 40064,
+      "sha256": "927c3ab6fd743a7618e3df59836345c40ec98883ac762981b40182099d061a75"
+    }
+  ]
+}
