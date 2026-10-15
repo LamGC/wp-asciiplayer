@@ -181,6 +181,7 @@ try {
 
 	require __DIR__ . '/uploads.php';
 	require __DIR__ . '/cast-budget.php';
+	require __DIR__ . '/security-fixtures.php';
 
 	echo "OK: {$assertions} assertions passed.\n";
 } catch ( Throwable $error ) {

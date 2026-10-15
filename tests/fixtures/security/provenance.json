@@ -1,0 +1,148 @@
+{
+  "schema_version": 1,
+  "purpose": "PR41 format-valid official recorder baselines for deterministic security-test derivatives",
+  "seed_hex": "0x41c0ffee",
+  "seed_decimal": 1103167470,
+  "prng": "xorshift32 (unsigned 32-bit): x ^= x << 13; x ^= x >>> 17; x ^= x << 5",
+  "python_version": "3.12.14",
+  "sources": [
+    {
+      "tool": "asciinema",
+      "version": "3.0.1",
+      "kind": "official release binary",
+      "url": "https://github.com/asciinema/asciinema/releases/download/v3.0.1/asciinema-x86_64-unknown-linux-gnu",
+      "sha256": "eb3a55e8778f6b86575ad58b47f1ee21d934e4baa8f01abaa5151cad490021f8",
+      "digest_reference": "https://api.github.com/repos/asciinema/asciinema/releases/tags/v3.0.1",
+      "digest_verified": true
+    },
+    {
+      "tool": "asciinema",
+      "version": "1.4.0",
+      "kind": "unmodified official PyPI source distribution",
+      "url": "https://files.pythonhosted.org/packages/21/7a/265e78c86b4b4f8c74c0d8321f6f28faa19f80c5c9d7a834a989ed64154a/asciinema-1.4.0.tar.gz",
+      "sha256": "fb31457e7a4689340b872f625658dbaea33bcf6863fb5d696cf3857010432ecb",
+      "digest_reference": "https://pypi.org/project/asciinema/1.4.0/#files",
+      "digest_verified": true
+    }
+  ],
+  "commands": {
+    "v1": "python3 -m asciinema rec --title \"PR41 synthetic baseline\" --command \"python3 synthetic-output.py\" official-v1.cast",
+    "v2": "asciinema-3.0.1 rec --headless --window-size 80x24 --output-format asciicast-v2 --title \"PR41 synthetic baseline\" --command \"python3 synthetic-output.py\" official-v2.cast",
+    "v3": "asciinema-3.0.1 rec --headless --window-size 80x24 --output-format asciicast-v3 --title \"PR41 synthetic baseline\" --command \"python3 synthetic-output.py\" official-v3.cast",
+    "verify_output": "asciinema-3.0.1 convert --output-format raw official-vN.cast official-vN.output"
+  },
+  "reproduction_script": "record-official-baselines.sh",
+  "payload_script": "synthetic-output.py",
+  "payload_script_sha256": "c23fee8e14fcc65ab372ea898c9e0884f53679393810db049e4749c2bfdb416f",
+  "reproduction_script_sha256": "2c2fe44b33b34c707efad515e97828d8f1dc2a545878e8042b43be1f243ff007",
+  "environment": {
+    "cleared_with": "env -i",
+    "fixed": {
+      "LANG": "C.UTF-8",
+      "LC_ALL": "C.UTF-8",
+      "TERM": "xterm-256color",
+      "SHELL": "/bin/sh"
+    },
+    "scoped": "Temporary isolated HOME and ASCIINEMA_CONFIG_HOME; only pinned tool paths in PATH/PYTHONPATH; legacy COLUMNS=80 and LINES=24. No input capture, upload, streaming or auth command."
+  },
+  "artifacts": [
+    {
+      "file": "official-v1.cast",
+      "format": "asciicast-v1",
+      "sha256": "5570c9cdec60a779585db195ecd8dee4756d84706d6b27d3ccd87cf3ba311c97",
+      "bytes": 669,
+      "cli_version": "1.4.0",
+      "native_recorder_output": true,
+      "normalized": false,
+      "header": {
+        "version": 1,
+        "width": 80,
+        "height": 24,
+        "duration": 0.146063,
+        "command": "python3 synthetic-output.py",
+        "title": "PR41 synthetic baseline",
+        "env": {
+          "TERM": "xterm-256color",
+          "SHELL": "/bin/sh"
+        }
+      },
+      "event_count": 6,
+      "output_event_count": 6,
+      "event_types": [
+        "o"
+      ],
+      "duration_seconds": 0.146063,
+      "output_sha256": "390dbc2f2102cc0540c71c6db823622e1869596bd0b71c1d0721125083ca6550"
+    },
+    {
+      "file": "official-v2.cast",
+      "format": "asciicast-v2",
+      "sha256": "6be6f5cd70d4a428692fc7807549b9c1437c1c8b60902220ad5e7e01a201f3ee",
+      "bytes": 498,
+      "cli_version": "3.0.1",
+      "native_recorder_output": true,
+      "normalized": false,
+      "header": {
+        "version": 2,
+        "width": 80,
+        "height": 24,
+        "timestamp": 1792031567,
+        "command": "python3 synthetic-output.py",
+        "title": "PR41 synthetic baseline",
+        "env": {
+          "SHELL": "/bin/sh"
+        }
+      },
+      "event_count": 7,
+      "output_event_count": 6,
+      "event_types": [
+        "o",
+        "x"
+      ],
+      "duration_seconds": 0.167553,
+      "output_sha256": "390dbc2f2102cc0540c71c6db823622e1869596bd0b71c1d0721125083ca6550"
+    },
+    {
+      "file": "official-v3.cast",
+      "format": "asciicast-v3",
+      "sha256": "8c07c04edf86605558a9795152fcba32337d72aeaa073bc89adb1c285f06763e",
+      "bytes": 509,
+      "cli_version": "3.0.1",
+      "native_recorder_output": true,
+      "normalized": false,
+      "header": {
+        "version": 3,
+        "term": {
+          "cols": 80,
+          "rows": 24,
+          "type": "xterm-256color"
+        },
+        "timestamp": 1792031567,
+        "command": "python3 synthetic-output.py",
+        "title": "PR41 synthetic baseline",
+        "env": {
+          "SHELL": "/bin/sh"
+        }
+      },
+      "event_count": 7,
+      "output_event_count": 6,
+      "event_types": [
+        "o",
+        "x"
+      ],
+      "duration_seconds": 0.225,
+      "output_sha256": "390dbc2f2102cc0540c71c6db823622e1869596bd0b71c1d0721125083ca6550"
+    }
+  ],
+  "verified": {
+    "official_cli_raw_conversion_all_three": true,
+    "identical_concatenated_stdout": true,
+    "public_safe_metadata_review": true,
+    "captured_stdout_bytes": 177,
+    "captured_stdout_sha256": "390dbc2f2102cc0540c71c6db823622e1869596bd0b71c1d0721125083ca6550",
+    "official_cli_raw_export_bytes": 187,
+    "official_cli_raw_export_sha256": "c759f03280f9a48ecfafbe7b11d7f2b75a2b418d368bc5fd5d13f1d957ee7d4d",
+    "official_cli_raw_export_prefix": "\u001b[8;24;80t"
+  },
+  "reproducibility": "Synthetic output is fixed-seed reproducible. Raw recorder wall clock, event timing and output read boundaries can vary on recapture. Raw baseline files are retained byte-for-byte under their hashes. Deterministic corpus derivatives must explicitly declare their mutations and normalization; they are not untouched CLI captures."
+}

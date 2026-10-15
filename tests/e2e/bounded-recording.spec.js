@@ -4,7 +4,6 @@ import { DEFAULT_LIMITS } from '../../src/recording-loader.js';
 const blockName = 'lamgc/asciiplayer';
 const fixtureRoot = '/wp-content/uploads/asciiplayer-fixtures';
 const messages = {
-    bytes: 'This recording exceeds the file size limit.',
     markers: 'This recording contains too many markers.',
     dimensions: 'This recording requests terminal dimensions that exceed the supported limits.',
     cells: 'This recording requests too many terminal cells.',
@@ -152,16 +151,6 @@ for (const version of [1, 2, 3]) {
 
 const firstUnsafeRows = Math.floor(DEFAULT_LIMITS.cells / DEFAULT_LIMITS.dimension) + 1;
 const rejectedRecordings = [
-    {
-        name: 'actual received byte limit', code: 'bytes',
-        body: () => {
-            const header = `${JSON.stringify({ version: 2, width: 64, height: 12 })}\n`;
-            // Keep every comment line well below the line limit and use no
-            // events, isolating the total-byte cap without huge terminal output.
-            const comment = `#${'x'.repeat(1022)}\n`;
-            return header + comment.repeat(Math.ceil((DEFAULT_LIMITS.bytes + 1 - header.length) / comment.length));
-        },
-    },
     {
         name: 'marker count limit', code: 'markers',
         body: () => recording(2, { events: Array.from({ length: DEFAULT_LIMITS.markers + 1 }, (_, index) => [index / 1000, 'm', 'marker']) }),

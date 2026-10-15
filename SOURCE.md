@@ -38,6 +38,24 @@ installs the release ZIP into the test site before checking it. Refer to the
 workflow for setup details. Running a unit test is not a substitute for the
 WordPress browser integration suite.
 
+## Security recording regression fixtures
+
+The full repository contains a test-only corpus in
+[`tests/fixtures/security`](tests/fixtures/security/README.md). Small `.cast`
+controls are checked in; fixed-seed, exact-boundary larger recordings are generated
+only when a test requests them. The manifest records expected acceptance, byte
+counts and hashes so PHP upload checks and the browser loader exercise identical
+inputs. The corpus README explains official recorder provenance, format-specific
+coverage, and the distinction between valid-format over-budget and malformed cases.
+
+    node tests/fixtures/security/generate.mjs --list
+    node tests/fixtures/security/generate.mjs --verify
+
+Use these fixtures only in isolated local/CI test environments. Do not upload
+resource-limit probes to a live WordPress site or open unvalidated large recordings
+in a player. The normal test commands above run the regression assertions; the
+browser cases use representative bounded samples rather than stressing the host.
+
 ## Translation maintenance
 
 The English gettext strings are the fallback. Edit `languages/wp-asciiplayer-zh_CN.po`
