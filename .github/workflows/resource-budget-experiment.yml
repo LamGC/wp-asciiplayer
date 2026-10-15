@@ -1,0 +1,61 @@
+name: Isolated recording resource-budget experiment
+on:
+  push:
+    branches: ['experiment/cast-resource-budgets-20261015']
+    paths: ['experiment/**', '.github/workflows/resource-budget-experiment.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: resource-budget-experiment-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38
+        with:
+          node-version: '24.18.0'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npx --no-install playwright install --with-deps chromium
+      - name: Controlled real-browser comparison
+        run: timeout 360s node --max-old-space-size=512 experiment/browser.cjs
+      - name: Retain experiment evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: resource-budget-browser-${{ github.run_id }}-${{ github.run_attempt }}
+          path: experiment/results/browser/
+          if-no-files-found: error
+          retention-days: 7
+  php:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.3']
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+        with:
+          persist-credentials: false
+      - name: Pull official PHP runtime
+        run: docker pull php:${{ matrix.php }}-cli
+      - name: Native PHP controlled comparison
+        run: |
+          mkdir -p experiment/results/php
+          docker image inspect php:${{ matrix.php }}-cli --format '{{json .RepoDigests}}' > experiment/results/php/image-digest.json
+          timeout 240s docker run --rm --network none --memory=512m --cpus=2 --read-only --tmpfs /tmp:rw,size=256m -v "$PWD:/repo:ro" -v "$PWD/experiment/results/php:/results:rw" -w /repo php:${{ matrix.php }}-cli php -d memory_limit=128M experiment/php/run.php /repo /results
+      - name: Retain experiment evidence
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: resource-budget-php-${{ matrix.php }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: experiment/results/php/
+          if-no-files-found: error
+          retention-days: 7
