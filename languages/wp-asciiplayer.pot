@@ -154,7 +154,7 @@ msgstr ""
 msgid "Idle time limit (seconds)"
 msgstr ""
 
-#: src/preview.js:85
+#: src/preview.js:92
 msgid "Interactive terminal recording preview"
 msgstr ""
 
@@ -162,7 +162,7 @@ msgstr ""
 msgid "Left"
 msgstr ""
 
-#: src/preview.js:83
+#: src/preview.js:90
 msgid "Loading recording…"
 msgstr ""
 
@@ -220,7 +220,7 @@ msgstr ""
 msgid "Recording URL"
 msgstr ""
 
-#: src/preview.js:84
+#: src/preview.js:91
 msgid "Retry preview"
 msgstr ""
 
@@ -264,13 +264,13 @@ msgstr ""
 msgid "The editor preview always waits for you to press play."
 msgstr ""
 
-#: src/preview.js:70
+#: src/preview.js:77
 msgid ""
 "The local player could not start. Try again, or check that the plugin’s "
 "built assets are installed."
 msgstr ""
 
-#: src/preview.js:68
+#: src/recording-errors.js:14
 msgid ""
 "The recording is taking too long to load. Check your connection and try "
 "again."
@@ -280,23 +280,58 @@ msgstr ""
 msgid "Theme"
 msgstr ""
 
-#: src/preview.js:59
+#: src/recording-errors.js:8
+msgid "This recording contains a line that exceeds the size limit."
+msgstr ""
+
+#: src/recording-errors.js:15
+msgid "This recording contains an invalid or unsupported timestamp."
+msgstr ""
+
+#: src/recording-errors.js:9
+msgid "This recording contains too many events."
+msgstr ""
+
+#: src/recording-errors.js:10
+msgid "This recording contains too many markers."
+msgstr ""
+
+#: src/recording-errors.js:7
+msgid "This recording exceeds the file size limit."
+msgstr ""
+
+#: src/recording-errors.js:13
+msgid "This recording is too complex to load safely."
+msgstr ""
+
+#: src/recording-errors.js:11
+msgid ""
+"This recording requests terminal dimensions that exceed the supported "
+"limits."
+msgstr ""
+
+#: src/recording-errors.js:12
+msgid "This recording requests too many terminal cells."
+msgstr ""
+
+#: src/preview.js:67
+#: src/recording-errors.js:20
 msgid ""
 "Unable to load the recording. Check the URL, file format, and the source "
 "server’s CORS permissions."
 msgstr ""
 
-#: src/view.js:12
+#: src/recording-errors.js:19
 msgid ""
 "Unable to load this terminal recording. The file may be unavailable, "
 "invalid, or blocked by the source server’s CORS policy."
 msgstr ""
 
-#: includes/uploads.php:197
+#: includes/uploads.php:354
 msgid ""
-"Upload a valid Asciicast v2/v3 JSONL or pretty-printed v1 .cast recording "
-"(up to 32 MiB; v1 up to 2 MiB, 100,000 events, 256 KiB per JSONL line, and "
-"1,000 columns or rows)."
+"Upload a valid Asciicast v2/v3 JSONL or v1 .cast recording (up to 32 MiB; "
+"v1 up to 2 MiB, 100,000 events, 256 KiB per JSONL line, 1,000 markers, "
+"1,000 columns or rows, 40,000 terminal cells, and bounded JSON structure)."
 msgstr ""
 
 #: src/edit.js:115
@@ -323,7 +358,7 @@ msgstr ""
 msgid "Width and height (legacy)"
 msgstr ""
 
-#: includes/uploads.php:195
+#: includes/uploads.php:352
 msgid "You are not allowed to upload Asciicast files."
 msgstr ""
 

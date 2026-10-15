@@ -205,9 +205,6 @@
       "Unable to load the recording. Check the URL, file format, and the source server’s CORS permissions.": [
         "无法加载录制文件。请检查 URL、文件格式及来源服务器的跨域请求（CORS）权限。"
       ],
-      "The recording is taking too long to load. Check your connection and try again.": [
-        "录制文件加载超时。请检查网络连接后重试。"
-      ],
       "The local player could not start. Try again, or check that the plugin’s built assets are installed.": [
         "本地播放器无法启动。请重试，或检查插件的构建资源是否已安装。"
       ],
@@ -220,14 +217,41 @@
       "Interactive terminal recording preview": [
         "可交互的终端录屏预览"
       ],
+      "This recording exceeds the file size limit.": [
+        "该录屏超过文件大小限制。"
+      ],
+      "This recording contains a line that exceeds the size limit.": [
+        "该录屏包含超出大小限制的行。"
+      ],
+      "This recording contains too many events.": [
+        "该录屏包含过多事件。"
+      ],
+      "This recording contains too many markers.": [
+        "该录屏包含过多时间标记。"
+      ],
+      "This recording requests terminal dimensions that exceed the supported limits.": [
+        "该录屏请求的终端尺寸超出支持范围。"
+      ],
+      "This recording requests too many terminal cells.": [
+        "该录屏请求的终端单元格过多。"
+      ],
+      "This recording is too complex to load safely.": [
+        "该录屏结构过于复杂，无法安全加载。"
+      ],
+      "The recording is taking too long to load. Check your connection and try again.": [
+        "录制文件加载超时。请检查网络连接后重试。"
+      ],
+      "This recording contains an invalid or unsupported timestamp.": [
+        "该录屏包含无效或不支持的时间戳。"
+      ],
       "Unable to load this terminal recording. The file may be unavailable, invalid, or blocked by the source server’s CORS policy.": [
         "无法加载此终端录屏。文件可能无法访问、格式无效，或被来源服务器的跨域请求（CORS）策略阻止。"
       ],
       "You are not allowed to upload Asciicast files.": [
         "你没有上传 Asciicast 文件的权限。"
       ],
-      "Upload a valid Asciicast v2/v3 JSONL or pretty-printed v1 .cast recording (up to 32 MiB; v1 up to 2 MiB, 100,000 events, 256 KiB per JSONL line, and 1,000 columns or rows).": [
-        "请上传有效的 Asciicast v2/v3 JSONL 或格式化的 v1 .cast 录制文件（最大 32 MiB；v1 最大 2 MiB；最多 100,000 个事件；每行 JSONL最大 256 KiB；列数和行数均不超过 1,000）。"
+      "Upload a valid Asciicast v2/v3 JSONL or v1 .cast recording (up to 32 MiB; v1 up to 2 MiB, 100,000 events, 256 KiB per JSONL line, 1,000 markers, 1,000 columns or rows, 40,000 terminal cells, and bounded JSON structure).": [
+        "请上传有效的 Asciicast v2/v3 JSONL 或 v1 .cast 录屏（最大 32 MiB；v1 最大 2 MiB、100,000 个事件、每行 JSONL 最大 256 KiB、1,000 个时间标记、1,000 列或行、40,000 个终端单元格，且 JSON 结构复杂度受限）。"
       ],
       "Add interactive terminal recordings to posts and pages with a block or shortcode.": [
         "通过区块或简码在文章和页面中添加可交互的终端录屏。"

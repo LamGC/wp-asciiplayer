@@ -4,7 +4,8 @@ import { useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { normalizePlayerOptions, previewHeight } from './options.js';
 import { playerAssets, playerForDocument } from './player-bridge.js';
-import { readRecordingSize } from './recording-metadata.js';
+import { loadRecording, validateInitialDimensions } from './recording-loader.js';
+import { recordingErrorMessage } from './recording-errors.js';
 
 export default function Preview( { source, attributes, attempt, onRetry, onRecordingSize } ) {
 	const [ status, setStatus ] = useState( 'loading' );
@@ -42,19 +43,26 @@ export default function Preview( { source, attributes, attempt, onRetry, onRecor
 			canvasWindow.clearTimeout( deadline );
 			setStatus( 'ready' );
 		};
+		deadline = canvasWindow.setTimeout( () => fail( recordingErrorMessage( { code: 'timeout' } ) ), 30000 );
 		playerForDocument( container.ownerDocument, playerAssets() ).then( ( api ) => {
-			if ( disposed ) return;
+			if ( disposed || failed ) return;
+			try {
+				validateInitialDimensions( JSON.parse( optionsJSON ) );
+			} catch ( error ) {
+				fail( recordingErrorMessage( error ) );
+				return;
+			}
 			player = api.create( {
-				data: async () => {
-					// The parser checks instanceof Response in the canvas realm.
-					// Reuse this one request for playback and original-size hints.
-					const response = await canvasWindow.fetch( source, { signal: request.signal } );
-					if ( ! response.ok ) throw new Error( `Recording request failed: ${ response.status }` );
-					readRecordingSize( response ).then( ( size ) => {
-						if ( ! failed ) reportSize( size );
-					} );
-					return response;
-				},
+				data: () => loadRecording( source, {
+					fetchImpl: canvasWindow.fetch.bind( canvasWindow ),
+					signal: request.signal,
+					options: JSON.parse( optionsJSON ),
+					onMetadata: ( size ) => { if ( ! failed ) reportSize( size ); },
+				} ).catch( ( error ) => {
+					const message = recordingErrorMessage( error );
+					if ( message ) fail( message );
+					throw error;
+				} ),
 			}, container, JSON.parse( optionsJSON ) );
 			player.addEventListener( 'error', () => fail( __( 'Unable to load the recording. Check the URL, file format, and the source server’s CORS permissions.', 'wp-asciiplayer' ) ) );
 			player.addEventListener( 'playing', ready );
@@ -65,7 +73,6 @@ export default function Preview( { source, attributes, attempt, onRetry, onRecor
 				if ( typeof duration === 'number' && Number.isFinite( duration ) ) ready();
 			};
 			readinessTimer = canvasWindow.setInterval( checkReady, 150 );
-			deadline = canvasWindow.setTimeout( () => fail( __( 'The recording is taking too long to load. Check your connection and try again.', 'wp-asciiplayer' ) ), 30000 );
 			checkReady();
 		} ).catch( () => fail( __( 'The local player could not start. Try again, or check that the plugin’s built assets are installed.', 'wp-asciiplayer' ) ) );
 		return () => {

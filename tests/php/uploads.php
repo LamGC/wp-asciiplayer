@@ -56,6 +56,16 @@ $v2 = '{"version":2,"width":80,"height":24}';
 $v3 = '{"version":3,"term":{"cols":100,"rows":30}}';
 $v1 = array( 'version' => 1, 'width' => 80, 'height' => 24, 'duration' => 1.5, 'stdout' => array( array( 0.1, "Hello\r\n" ), array( 1.4, 'World' ) ) );
 foreach ( array(
+	'zero width' => '{"version":2,"width":0,"height":24}',
+	'event object' => $v2 . "\n{\"0\":0,\"1\":\"o\",\"2\":\"bad\"}\n",
+	'trailing HTML' => $v2 . "\n[0,\"o\",\"ok\"]\n<script>alert(1)</script>\n",
+	'trailing JSON object' => $v2 . "\n[0,\"o\",\"ok\"]\n{\"unrelated\":true}\n",
+	'blank event line' => $v2 . "\n\n",
+	'indented event ignored by bundled player' => $v2 . "\n [0,\"o\",\"invisible\"]\n",
+	'v2 comment' => $v2 . "\n# comment\n",
+	'v3 indented comment' => $v3 . "\n # not a comment\n",
+	'compact v1' => json_encode( $v1 ),
+	'large compact v1' => json_encode( array_merge( $v1, array( 'title' => str_repeat( 'a', CAST_MAX_LINE_BYTES + 1 ) ) ) ),
 	'pretty v1' => json_encode( $v1, JSON_PRETTY_PRINT ),
 	'v2 output' => $v2 . "\n[0.1,\"o\",\"Hello\\r\\n\"]\n",
 	'v3 relative events' => $v3 . "\n[5,\"o\",\"Hello\"]\n[0.1,\"r\",\"120x40\"]\n[0,\"x\",\"0\"]\n",
@@ -80,7 +90,6 @@ foreach ( array(
 	'SVG' => '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>',
 	'unsupported version' => '{"version":4,"width":80,"height":24}',
 	'string version' => '{"version":"2","width":80,"height":24}',
-	'zero width' => '{"version":2,"width":0,"height":24}',
 	'oversized width' => '{"version":2,"width":1001,"height":24}',
 	'negative height' => '{"version":2,"width":80,"height":-1}',
 	'fractional width' => '{"version":2,"width":80.5,"height":24}',
@@ -89,8 +98,6 @@ foreach ( array(
 	'v3 terminal array' => '{"version":3,"term":[100,30]}',
 	'v1 absent stdout' => "{\n\"version\":1,\"width\":80,\"height\":24\n}",
 	'v1 stdout object' => "{\n\"version\":1,\"width\":80,\"height\":24,\"stdout\":{\"0\":[0,\"x\"]}\n}",
-	'compact v1 unsupported by bundled player' => json_encode( $v1 ),
-	'large compact v1 unsupported by bundled player' => json_encode( array_merge( $v1, array( 'title' => str_repeat( 'a', CAST_MAX_LINE_BYTES + 1 ) ) ) ),
 	'v1 negative delay' => json_encode( array_merge( $v1, array( 'stdout' => array( array( -1, 'x' ) ) ) ), JSON_PRETTY_PRINT ),
 	'v1 malformed later frame' => json_encode( array_merge( $v1, array( 'stdout' => array( array( 0, 'ok' ), array( 0, array( 'x' ) ) ) ) ), JSON_PRETTY_PRINT ),
 	'v1 extra frame element' => json_encode( array_merge( $v1, array( 'stdout' => array( array( 0, 'ok', 'extra' ) ) ) ), JSON_PRETTY_PRINT ),
@@ -102,7 +109,6 @@ foreach ( array(
 	'milliseconds overflow' => $v2 . "\n[1e308,\"o\",\"bad\"]\n",
 	'v3 cumulative milliseconds overflow' => $v3 . "\n[1e305,\"o\",\"first\"]\n[1e305,\"o\",\"second\"]\n",
 	'v2 out of order' => $v2 . "\n[2,\"o\",\"first\"]\n[1,\"o\",\"second\"]\n",
-	'event object' => $v2 . "\n{\"0\":0,\"1\":\"o\",\"2\":\"bad\"}\n",
 	'missing event data' => $v2 . "\n[0,\"o\"]\n",
 	'extra event element' => $v2 . "\n[0,\"o\",\"bad\",1]\n",
 	'event data array' => $v2 . "\n[0,\"o\",[\"bad\"]]\n",
@@ -111,12 +117,6 @@ foreach ( array(
 	'oversized resize' => $v2 . "\n[0,\"r\",\"2000x20\"]\n",
 	'malformed resize' => $v2 . "\n[0,\"r\",\"80,24\"]\n",
 	'bad later JSON' => $v2 . "\n[0,\"o\",\"ok\"]\n[1,\"o\",\"truncated\"\n",
-	'trailing HTML' => $v2 . "\n[0,\"o\",\"ok\"]\n<script>alert(1)</script>\n",
-	'trailing JSON object' => $v2 . "\n[0,\"o\",\"ok\"]\n{\"unrelated\":true}\n",
-	'blank event line' => $v2 . "\n\n",
-	'indented event ignored by bundled player' => $v2 . "\n [0,\"o\",\"invisible\"]\n",
-	'v2 comment' => $v2 . "\n# comment\n",
-	'v3 indented comment' => $v3 . "\n # not a comment\n",
 	'UTF-8 BOM' => "\xef\xbb\xbf" . $v2,
 	'invalid UTF-8' => $v2 . "\n[0,\"o\",\"\xff\"]\n",
 	'oversized JSONL line' => $v2 . "\n[0,\"o\",\"" . str_repeat( 'a', CAST_MAX_LINE_BYTES ) . "\"]\n",
@@ -166,7 +166,7 @@ try {
 	same( true, is_string( validate_cast_upload( $upload )['error'] ), 'Upload permissions are enforced for valid content too.' );
 	same( $denied, check_cast_filetype( $approved, $path, 'recording.cast' ), 'MIME override never grants upload capability.' );
 	$GLOBALS['ap_test']['capabilities'] = array( 'upload_files' => true, 'unfiltered_upload' => true );
-	file_put_contents( $path, $v2 . "\n<script>alert(1)</script>\n" );
+	file_put_contents( $path, $v2 . "\n[invalid JSON\n" );
 	clearstatcache( true, $path );
 	same( true, is_string( validate_cast_upload( $upload )['error'] ), 'Malformed content fails even with unfiltered_upload.' );
 	same( $denied, check_cast_filetype( $approved, $path, 'recording.cast' ), 'Invalid content cannot keep a previous MIME approval.' );

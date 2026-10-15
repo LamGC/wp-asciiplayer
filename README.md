@@ -85,18 +85,34 @@ permission. Multisite networks must also allow the `cast` extension. The plugin
 does not grant extra upload permissions or add a separate recording-management
 post type.
 
-Uploads are checked against these limits:
+Uploads and browser playback (including remote recordings) use the same resource limits:
 
-- **32 MiB** per file.
-- **100,000** events or stream lines.
-- **256 KiB** per JSONL line.
-- **1,000** columns or rows in either direction.
+- **32 MiB** of received recording data; **2 MiB** for legacy v1.
+- **100,000** events or stream lines, including ignored lines.
+- **256 KiB** per JSONL line and **1,000** marker events.
+- **1,000** columns or rows per axis, and **40,000** terminal cells (columns × rows).
+- At most **15** nested JSON containers, **400,000** scalar/key tokens and **100,016** containers in v1, or **20,000** scalar/key tokens per JSONL line, checked before decoding. Unknown metadata and duplicate keys count too.
+- Browser requests stop after **30 seconds** total or **10 seconds** without the next response/chunk; the editor also allows 30 seconds for player assets and loading together.
 
-The older asciicast v1 format is limited to **2 MiB**. Its JSON must be
-pretty-printed, with the opening `{` on a line of its own; the bundled player
-cannot read compact, single-line v1 files. Asciicast v2 and v3 use standard JSONL.
+The cell budget covers initial dimensions and every resize, including effective
+Columns/Rows overrides. Overrides are also checked against the player's initial
+80×24 defaults before creating its terminal, so a single-axis override must fit
+both the initial terminal and the recording. A zero header dimension uses the player's default;
+ordinary blank/comment lines and safe unknown event types remain compatible.
+Asciicast v2 and v3 use JSONL; legacy v1 remains supported within its smaller limit.
 Lower site or server upload limits still apply. Invalid recordings are rejected;
 this does not enable general JSON, HTML or SVG uploads.
+
+These limits also apply to older or externally hosted recordings at playback.
+Very large terminals or marker-heavy recordings that previously loaded may now
+show a clear limit error. Split or simplify those recordings rather than relying
+on the browser to handle unlimited data. Existing files and posts are not rewritten.
+
+The browser reads and validates a single recording request before handing it to
+the player. There is no server proxy or additional metadata request. A timed-out
+or canceled load is stopped; switching recordings and leaving a preview cancel
+its old request. Remote hosts must still allow CORS, and browser credentials and
+referrer rules are unchanged.
 
 ## Languages
 

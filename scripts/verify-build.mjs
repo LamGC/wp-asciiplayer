@@ -34,13 +34,15 @@ for (const readyState of ['loading', 'complete']) {
       assert.equal(event, 'DOMContentLoaded');
       onReady = callback;
     },
-    defaultView: { AsciinemaPlayer: { create(source, target) {
-      assert.equal(source, '/recording.cast');
+    defaultView: { AbortController, fetch() { throw new Error('Lazy playback must not fetch during boot.'); }, MutationObserver: class { observe() {} disconnect() {} }, AsciinemaPlayer: { create(source, target) {
+      assert.equal(typeof source.data, 'function');
       assert.equal(target, container);
       mounts++;
       return { addEventListener() {} };
     } } },
   };
+  container.ownerDocument = document;
+  container.isConnected = true;
   runInNewContext(view, { document, window: { wp: { i18n: { __: (text) => text } } }, URL });
   if (readyState === 'loading') {
     assert.equal(mounts, 0);

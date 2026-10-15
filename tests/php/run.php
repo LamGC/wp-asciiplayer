@@ -1,6 +1,7 @@
 <?php
 /** Run with PHP 7.4+: php tests/php/run.php */
 
+require __DIR__ . '/cast-budget-decoder.php';
 require __DIR__ . '/bootstrap.php';
 
 use function LamGC\Asciiplayer\enqueue_content_assets;
@@ -179,6 +180,7 @@ try {
 	same( array( 'lamgc-asciiplayer-style' ), $GLOBALS['ap_test']['style_print_calls'], 'Late/widget styles print once in the footer.' );
 
 	require __DIR__ . '/uploads.php';
+	require __DIR__ . '/cast-budget.php';
 
 	echo "OK: {$assertions} assertions passed.\n";
 } catch ( Throwable $error ) {
